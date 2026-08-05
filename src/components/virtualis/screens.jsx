@@ -50,130 +50,147 @@ export function Login() {
     if (mode === "up" && !data.session) setNote("Check your email to confirm your account.");
   };
 
+  const wide = useMediaQuery("(min-width: 900px)");
+  const align = wide ? "flex-start" : "center";
+
   return (
     <div
       style={{
         flex: 1,
         overflowY: "auto",
         display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        padding: "44px 20px 64px",
+        justifyContent: "center",
+        alignItems: wide ? "center" : "flex-start",
+        padding: wide ? "48px clamp(28px, 5vw, 72px)" : "40px 20px 64px",
       }}
     >
       <div
         style={{
           width: "100%",
-          maxWidth: 480,
-          display: "flex",
-          flexDirection: "column",
+          maxWidth: wide ? 1140 : 480,
+          display: "grid",
+          gridTemplateColumns: wide ? "minmax(0,1.05fr) minmax(360px,420px)" : "minmax(0,1fr)",
           alignItems: "center",
-          textAlign: "center",
+          gap: wide ? "clamp(40px, 6vw, 88px)" : 0,
           animation: "rise .5s ease backwards",
         }}
       >
-        <AnimatedLogo size={124} />
-
         <div
           style={{
-            marginTop: 40,
-            width: "100%",
+            minWidth: 0,
             display: "flex",
-            justifyContent: "center",
-            animation: "rise .55s .1s ease backwards",
+            flexDirection: "column",
+            alignItems: align,
+            textAlign: wide ? "left" : "center",
           }}
         >
-          <Lockup height={62} />
-        </div>
-
-
-        <div
-          style={{
-            display: "inline-flex",
-            alignItems: "center",
-            gap: 8,
-            background: "#fff",
-            border: "1px solid " + T.line,
-            borderRadius: 22,
-            padding: "7px 14px",
-            marginTop: 28,
-            fontFamily: mono,
-            fontSize: 10.5,
-            fontWeight: 600,
-            letterSpacing: 2.2,
-            color: T.ink,
-          }}
-        >
-          <span style={{ width: 6, height: 6, borderRadius: 3, background: T.blue }} /> CLINICAL
-          COMMUNICATION
-        </div>
-
-        <h1
-          style={{
-            fontSize: "clamp(32px, 6vw, 48px)",
-            fontWeight: 780,
-            letterSpacing: -1.4,
-            color: T.ink,
-            margin: "18px 0 0",
-            lineHeight: 1.05,
-          }}
-        >
-          Messaging that
-          <br />
-          triages itself.
-        </h1>
-        <p
-          style={{
-            fontSize: "clamp(17px, 2.4vw, 22px)",
-            fontWeight: 500,
-            color: T.ink,
-            marginTop: 14,
-            lineHeight: 1.45,
-            maxWidth: 440,
-          }}
-        >
-          The right message, to the right clinician, at the right time.
-        </p>
-        <p
-          style={{
-            fontSize: "clamp(13px, 1.8vw, 15px)",
-            color: T.sub,
-            marginTop: 8,
-            lineHeight: 1.5,
-            maxWidth: 440,
-          }}
-        >
-          Powered by patent-allowed AI technology.
-        </p>
-
-        <div
-          style={{
-            display: "flex",
-            flexWrap: "wrap",
-            justifyContent: "center",
-            gap: 10,
-            marginTop: 22,
-          }}
-        >
-          {["critical", "urgent", "routine"].map((k) => (
-            <span
-              key={k}
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: wide ? 28 : 0,
+              flexDirection: wide ? "row" : "column",
+            }}
+          >
+            <AnimatedLogo size={wide ? 132 : 118} />
+            <div
               style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: 8,
-                background: "#fff",
-                border: "1px solid " + T.line,
-                borderRadius: 16,
-                padding: "8px 13px",
-                fontSize: 12.5,
-                fontWeight: 600,
-                color: T.sub,
+                marginTop: wide ? 0 : 36,
+                animation: "rise .55s .1s ease backwards",
               }}
             >
-              <Glyph level={k} size={10} gap={2} w={4} /> {ACUITY[k].label}
-            </span>
-          ))}
+              <Lockup height={wide ? 56 : 54} />
+            </div>
+          </div>
+
+          <div
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 8,
+              background: "#fff",
+              border: "1px solid " + T.line,
+              borderRadius: 22,
+              padding: "7px 14px",
+              marginTop: wide ? 34 : 28,
+              fontFamily: mono,
+              fontSize: 10.5,
+              fontWeight: 600,
+              letterSpacing: 2.2,
+              color: T.ink,
+            }}
+          >
+            <span style={{ width: 6, height: 6, borderRadius: 3, background: T.blue }} /> CLINICAL
+            COMMUNICATION
+          </div>
+
+          <h1
+            style={{
+              fontSize: "clamp(32px, 4.6vw, 52px)",
+              fontWeight: 780,
+              letterSpacing: -1.6,
+              color: T.ink,
+              margin: "18px 0 0",
+              lineHeight: 1.04,
+            }}
+          >
+            Messaging that
+            <br />
+            triages itself.
+          </h1>
+          <p
+            style={{
+              fontSize: "clamp(17px, 1.7vw, 21px)",
+              fontWeight: 500,
+              color: T.ink,
+              marginTop: 14,
+              lineHeight: 1.45,
+              maxWidth: 460,
+            }}
+          >
+            The right message, to the right clinician, at the right time.
+          </p>
+          <p
+            style={{
+              fontSize: "clamp(13px, 1.2vw, 15px)",
+              color: T.sub,
+              marginTop: 8,
+              lineHeight: 1.5,
+              maxWidth: 460,
+            }}
+          >
+            Powered by patent-allowed AI technology.
+          </p>
+
+          <div
+            style={{
+              display: "flex",
+              flexWrap: "wrap",
+              justifyContent: wide ? "flex-start" : "center",
+              gap: 10,
+              marginTop: 22,
+            }}
+          >
+            {["critical", "urgent", "routine"].map((k) => (
+              <span
+                key={k}
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 8,
+                  background: "#fff",
+                  border: "1px solid " + T.line,
+                  borderRadius: 16,
+                  padding: "8px 13px",
+                  fontSize: 12.5,
+                  fontWeight: 600,
+                  color: T.sub,
+                }}
+              >
+                <Glyph level={k} size={10} gap={2} w={4} /> {ACUITY[k].label}
+              </span>
+            ))}
+          </div>
         </div>
 
         <div
@@ -183,13 +200,17 @@ export function Login() {
             border: "1px solid " + T.line,
             boxShadow: "0 12px 32px rgba(27,63,160,.06)",
             padding: 24,
-            marginTop: 32,
+            marginTop: wide ? 0 : 32,
+            marginLeft: wide ? 0 : "auto",
+            marginRight: wide ? 0 : "auto",
             width: "100%",
             maxWidth: 420,
             boxSizing: "border-box",
             textAlign: "left",
+            animation: "rise .55s .15s ease backwards",
           }}
         >
+
           <div style={{ fontSize: 14, fontWeight: 620, color: T.ink, marginBottom: 8 }}>Email</div>
           <input
             value={email}
