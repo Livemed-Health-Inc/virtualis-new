@@ -1,9 +1,18 @@
 import { useEffect, useState } from "react";
 
 export const T = {
-  bg: "#F4F5F7", card: "#FFFFFF", ink: "#0B0F1A", sub: "#667085",
-  faint: "#98A2B3", line: "#EAECF0", blue: "#2E5CFF", blueDeep: "#1B3FA0",
-  blueSoft: "#EFF4FF", red: "#F04438", amber: "#F79009", green: "#12B76A",
+  bg: "#F4F5F7",
+  card: "#FFFFFF",
+  ink: "#0B0F1A",
+  sub: "#667085",
+  faint: "#98A2B3",
+  line: "#EAECF0",
+  blue: "#2E5CFF",
+  blueDeep: "#1B3FA0",
+  blueSoft: "#EFF4FF",
+  red: "#F04438",
+  amber: "#F79009",
+  green: "#12B76A",
   ghost: "#EDF0F4",
 };
 
@@ -21,14 +30,34 @@ export const ACUITY = {
    hospitals can scan the inbox by colour. */
 export const FACILITIES = {
   saint: { id: "saint", name: "Saint Anthony", short: "SAH", hue: "#2E5CFF", emr: "Epic" },
-  edgerton: { id: "edgerton", name: "Edgerton Regional", short: "EDG", hue: "#7B5BF2", emr: "Cerner" },
+  edgerton: {
+    id: "edgerton",
+    name: "Edgerton Regional",
+    short: "EDG",
+    hue: "#7B5BF2",
+    emr: "Cerner",
+  },
   mercy: { id: "mercy", name: "Mercy West", short: "MCW", hue: "#0EA5A5", emr: "Meditech" },
-  northline: { id: "northline", name: "Northline Children's", short: "NLC", hue: "#E8590C", emr: "Epic" },
+  northline: {
+    id: "northline",
+    name: "Northline Children's",
+    short: "NLC",
+    hue: "#E8590C",
+    emr: "Epic",
+  },
 };
 
 export const inputStyle = {
-  width: "100%", boxSizing: "border-box", border: "1px solid " + T.line, background: "#fff",
-  borderRadius: 14, padding: "13px 15px", fontSize: 15, fontFamily: font, outline: "none", color: T.ink,
+  width: "100%",
+  boxSizing: "border-box",
+  border: "1px solid " + T.line,
+  background: "#fff",
+  borderRadius: 14,
+  padding: "13px 15px",
+  fontSize: 15,
+  fontFamily: font,
+  outline: "none",
+  color: T.ink,
 };
 
 export const card = (accent) => ({
