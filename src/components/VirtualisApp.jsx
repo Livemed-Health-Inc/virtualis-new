@@ -462,90 +462,100 @@ function VFab({ onConsult, onAlis, onPage, onTelehealth, float }) {
           right: float ? 26 : 0,
           left: float ? "auto" : 0,
           display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          gap: 18,
+          justifyContent: "center",
           pointerEvents: "none",
         }}
       >
-        {open && (
-          <div
-            style={{
-              display: "flex",
-              gap: 18,
-              pointerEvents: "auto",
-              animation: "rise .26s cubic-bezier(.2,.8,.3,1)",
-            }}
-          >
-            {actions.map((a, i) => (
-              <button
-                key={a.label}
-                onClick={() => {
-                  setOpen(false);
-                  a.run();
-                }}
-                style={{
-                  all: "unset",
-                  cursor: "pointer",
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  gap: 7,
-                  animation: `rise .3s ${i * 0.045}s cubic-bezier(.2,.8,.3,1) backwards`,
-                }}
-              >
-                <span
+        <div style={{ position: "relative", width: 56, height: 56 }}>
+          {open &&
+            actions.map((a, i) => {
+              const angles = float ? [176, 148, 120, 92] : [154, 122, 58, 26];
+              const r = float ? 116 : 104;
+              const rad = (angles[i] * Math.PI) / 180;
+              return (
+                <button
+                  key={a.label}
+                  onClick={() => {
+                    setOpen(false);
+                    a.run();
+                  }}
                   style={{
-                    width: 54,
-                    height: 54,
-                    borderRadius: 27,
+                    all: "unset",
+                    cursor: "pointer",
+                    position: "absolute",
+                    left: 0,
+                    top: 0,
+                    width: 56,
+                    height: 56,
                     display: "flex",
+                    flexDirection: "column",
                     alignItems: "center",
                     justifyContent: "center",
-                    background: "rgba(255,255,255,.16)",
-                    backdropFilter: "blur(18px) saturate(150%)",
-                    border: "1px solid rgba(255,255,255,.34)",
-                    boxShadow: "0 10px 26px rgba(11,15,26,.28)",
+                    pointerEvents: "auto",
+                    "--fx": `${Math.cos(rad) * r}px`,
+                    "--fy": `${-Math.sin(rad) * r}px`,
+                    animation: `fanOut .42s ${i * 0.05}s cubic-bezier(.18,.9,.28,1.1) both`,
                   }}
                 >
-                  {a.icon}
-                </span>
-                <span
-                  style={{
-                    fontSize: 11,
-                    fontWeight: 620,
-                    color: "#fff",
-                    letterSpacing: 0.2,
-                  }}
-                >
-                  {a.label}
-                </span>
-              </button>
-            ))}
-          </div>
-        )}
-        <button
-          onClick={() => setOpen(!open)}
-          aria-label="Quick actions"
-          aria-expanded={open}
-          style={{
-            all: "unset",
-            cursor: "pointer",
-            width: 54,
-            height: 54,
-            borderRadius: 27,
-            background: "linear-gradient(135deg,#2E5CD6,#0F1E52)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            boxShadow: "0 12px 28px rgba(27,63,160,.42)",
-            transform: open ? "scale(.94)" : "none",
-            transition: "transform .28s cubic-bezier(.2,.8,.3,1)",
-            pointerEvents: "auto",
-          }}
-        >
-          <VMark size={28} mono />
-        </button>
+                  <span
+                    style={{
+                      width: 56,
+                      height: 56,
+                      borderRadius: 28,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      background:
+                        "linear-gradient(150deg, rgba(255,255,255,.20), rgba(255,255,255,.06))",
+                      backdropFilter: "blur(24px) saturate(180%)",
+                      WebkitBackdropFilter: "blur(24px) saturate(180%)",
+                      border: "1px solid rgba(255,255,255,.28)",
+                      boxShadow:
+                        "inset 0 1px 0 rgba(255,255,255,.35), 0 8px 24px rgba(11,15,26,.22)",
+                    }}
+                  >
+                    {a.icon}
+                  </span>
+                  <span
+                    style={{
+                      position: "absolute",
+                      top: 62,
+                      fontSize: 10.5,
+                      fontWeight: 600,
+                      color: "rgba(255,255,255,.86)",
+                      letterSpacing: 0.3,
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {a.label}
+                  </span>
+                </button>
+              );
+            })}
+          <button
+            onClick={() => setOpen(!open)}
+            aria-label="Quick actions"
+            aria-expanded={open}
+            style={{
+              all: "unset",
+              cursor: "pointer",
+              width: 56,
+              height: 56,
+              boxSizing: "border-box",
+              borderRadius: 28,
+              background: "linear-gradient(135deg,#2E5CD6,#0F1E52)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              boxShadow: "0 12px 28px rgba(27,63,160,.42)",
+              transform: open ? "rotate(45deg) scale(.9)" : "none",
+              transition: "transform .34s cubic-bezier(.2,.8,.3,1)",
+              pointerEvents: "auto",
+            }}
+          >
+            <VMark size={28} mono />
+          </button>
+        </div>
       </div>
     </>
   );
