@@ -130,9 +130,8 @@ export function Login() {
             maxWidth: 440,
           }}
         >
-          Virtualis® is patented, AI-powered clinical communication with telehealth built in. Sent
-          once — triaged by acuity, matched to the on-call specialist, delivered with escalation
-          tracking.
+          AI-powered clinical communication with telehealth built in. Every message is triaged by
+          acuity and routed to the right on-call clinician.
         </p>
 
         <div
