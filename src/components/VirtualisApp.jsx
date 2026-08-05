@@ -398,7 +398,7 @@ function FacilityBar({ scope, active, setActive, counts }) {
   );
 }
 
-function VFab({ onConsult, onAlis, onPage, onTelehealth, onSchedule, onCredentials, onSignOut }) {
+function VFab({ onConsult, onAlis, onPage, onTelehealth, float }) {
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
@@ -410,14 +410,14 @@ function VFab({ onConsult, onAlis, onPage, onTelehealth, onSchedule, onCredentia
     return () => window.removeEventListener("keydown", onKey);
   }, [open]);
 
-  const Icon = ({ c, children }) => (
+  const Icon = ({ children }) => (
     <svg
-      width="20"
-      height="20"
+      width="23"
+      height="23"
       viewBox="0 0 24 24"
       fill="none"
-      stroke={c}
-      strokeWidth="2.2"
+      stroke="#fff"
+      strokeWidth="2.1"
       strokeLinecap="round"
       strokeLinejoin="round"
     >
@@ -427,31 +427,18 @@ function VFab({ onConsult, onAlis, onPage, onTelehealth, onSchedule, onCredentia
 
   const actions = [
     {
-      label: "New consult",
-      sub: "Structured patient request",
+      label: "Consult",
       icon: (
-        <Icon c={T.blue}>
+        <Icon>
           <path d="M12 5v14M5 12h14" />
         </Icon>
       ),
       run: onConsult,
     },
     {
-      label: "STAT page on-call",
-      sub: "Critical callback now",
-      accent: T.red,
+      label: "Page",
       icon: (
-        <Icon c={T.red}>
-          <path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2Z" />
-        </Icon>
-      ),
-      run: () => onPage("stat"),
-    },
-    {
-      label: "Page on-call",
-      sub: "Routine callback",
-      icon: (
-        <Icon c={T.blue}>
+        <Icon>
           <rect x="4" y="6" width="16" height="12" rx="3" />
           <path d="M8 10h8M8 13.5h5" />
         </Icon>
@@ -459,10 +446,9 @@ function VFab({ onConsult, onAlis, onPage, onTelehealth, onSchedule, onCredentia
       run: () => onPage("routine"),
     },
     {
-      label: "Start telehealth",
-      sub: "Video visit",
+      label: "Video",
       icon: (
-        <Icon c={T.blue}>
+        <Icon>
           <rect x="2.5" y="6" width="13" height="12" rx="3" />
           <path d="M15.5 11 L21.5 7.5v9L15.5 13Z" />
         </Icon>
@@ -470,48 +456,13 @@ function VFab({ onConsult, onAlis, onPage, onTelehealth, onSchedule, onCredentia
       run: onTelehealth,
     },
     {
-      label: "Ask ALIS AI",
-      sub: "Clinical assistant",
+      label: "ALIS",
       icon: (
-        <Icon c={T.blueDeep}>
+        <Icon>
           <path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9Z" />
         </Icon>
       ),
       run: onAlis,
-    },
-    {
-      label: "My schedule",
-      sub: "On-call & shifts",
-      icon: (
-        <Icon c={T.blue}>
-          <rect x="3.5" y="5" width="17" height="16" rx="3" />
-          <path d="M8 3v4M16 3v4M3.5 10.5h17" />
-        </Icon>
-      ),
-      run: onSchedule,
-    },
-    {
-      label: "My credentials",
-      sub: "Facility privileges",
-      icon: (
-        <Icon c={T.blue}>
-          <rect x="4" y="7" width="16" height="12" rx="3" />
-          <path d="M12 11v4M9 14h6" />
-          <circle cx="12" cy="11" r="1.5" fill={T.blue} stroke="none" />
-        </Icon>
-      ),
-      run: onCredentials,
-    },
-    {
-      label: "Sign out",
-      sub: "End session",
-      muted: true,
-      icon: (
-        <Icon c={T.faint}>
-          <path d="M10 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h4M16 17l5-5-5-5M21 12H9" />
-        </Icon>
-      ),
-      run: onSignOut,
     },
   ];
 
@@ -523,8 +474,8 @@ function VFab({ onConsult, onAlis, onPage, onTelehealth, onSchedule, onCredentia
           style={{
             position: "absolute",
             inset: 0,
-            background: "rgba(11,15,26,.28)",
-            backdropFilter: "blur(2px)",
+            background: "rgba(11,15,26,.44)",
+            backdropFilter: "blur(10px)",
             zIndex: 40,
             animation: "fadeIn .2s ease",
           }}
@@ -533,123 +484,71 @@ function VFab({ onConsult, onAlis, onPage, onTelehealth, onSchedule, onCredentia
       <div
         style={{
           position: "absolute",
-          right: 0,
-          left: 0,
-          bottom: 0,
           zIndex: 41,
+          bottom: float ? 26 : "calc(14px + env(safe-area-inset-bottom))",
+          right: float ? 26 : 0,
+          left: float ? "auto" : 0,
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
-          padding: `0 16px calc(88px + env(safe-area-inset-bottom))`,
-          pointerEvents: open ? "auto" : "none",
+          gap: 18,
+          pointerEvents: "none",
         }}
       >
         {open && (
           <div
             style={{
-              width: "100%",
-              maxWidth: 420,
-              background: "#fff",
-              borderRadius: 24,
-              boxShadow: "0 20px 50px rgba(11,15,26,.18)",
-              border: "1px solid " + T.line,
-              overflow: "hidden",
               display: "flex",
-              flexDirection: "column",
-              maxHeight: "58vh",
-              animation: "rise .25s cubic-bezier(.2,.8,.3,1)",
-              marginBottom: 12,
+              gap: 18,
+              pointerEvents: "auto",
+              animation: "rise .26s cubic-bezier(.2,.8,.3,1)",
             }}
           >
-            <div style={{ padding: "14px 16px 10px", textAlign: "center", flexShrink: 0 }}>
-              <div
-                style={{
-                  width: 36,
-                  height: 5,
-                  borderRadius: 3,
-                  background: T.line,
-                  margin: "0 auto",
+            {actions.map((a, i) => (
+              <button
+                key={a.label}
+                onClick={() => {
+                  setOpen(false);
+                  a.run();
                 }}
-              />
-              <div
                 style={{
-                  fontSize: 13,
-                  fontWeight: 650,
-                  color: T.sub,
-                  marginTop: 8,
-                  letterSpacing: 0.3,
+                  all: "unset",
+                  cursor: "pointer",
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  gap: 7,
+                  animation: `rise .3s ${i * 0.045}s cubic-bezier(.2,.8,.3,1) backwards`,
                 }}
               >
-                Quick actions
-              </div>
-            </div>
-            <div style={{ overflowY: "auto", WebkitOverflowScrolling: "touch" }}>
-              {actions.map((a) => (
-                <button
-                  key={a.label}
-                  onClick={() => {
-                    setOpen(false);
-                    a.run();
-                  }}
+                <span
                   style={{
-                    all: "unset",
-                    cursor: "pointer",
-                    width: "100%",
-                    boxSizing: "border-box",
+                    width: 54,
+                    height: 54,
+                    borderRadius: 27,
                     display: "flex",
                     alignItems: "center",
-                    gap: 14,
-                    padding: "13px 16px",
-                    borderTop: "1px solid " + T.line,
-                    transition: "background .15s ease",
+                    justifyContent: "center",
+                    background: "rgba(255,255,255,.16)",
+                    backdropFilter: "blur(18px) saturate(150%)",
+                    border: "1px solid rgba(255,255,255,.34)",
+                    boxShadow: "0 10px 26px rgba(11,15,26,.28)",
                   }}
-                  onMouseEnter={(e) => (e.currentTarget.style.background = T.blueSoft)}
-                  onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
                 >
-                  <span
-                    style={{
-                      width: 38,
-                      height: 38,
-                      borderRadius: 12,
-                      background: a.muted ? T.ghost : a.accent ? a.accent + "14" : T.blueSoft,
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      flexShrink: 0,
-                    }}
-                  >
-                    {a.icon}
-                  </span>
-                  <span style={{ minWidth: 0, flex: 1 }}>
-                    <span
-                      style={{
-                        display: "block",
-                        fontSize: 15,
-                        fontWeight: 650,
-                        color: a.muted ? T.sub : T.ink,
-                      }}
-                    >
-                      {a.label}
-                    </span>
-                    <span style={{ display: "block", fontSize: 12, color: T.faint, marginTop: 1 }}>
-                      {a.sub}
-                    </span>
-                  </span>
-                  <svg
-                    width="18"
-                    height="18"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke={T.faint}
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <path d="M9 5l7 7-7 7" />
-                  </svg>
-                </button>
-              ))}
-            </div>
+                  {a.icon}
+                </span>
+                <span
+                  style={{
+                    fontSize: 11,
+                    fontWeight: 620,
+                    color: "#fff",
+                    letterSpacing: 0.2,
+                  }}
+                >
+                  {a.label}
+                </span>
+              </button>
+            ))}
           </div>
         )}
         <button
@@ -659,15 +558,15 @@ function VFab({ onConsult, onAlis, onPage, onTelehealth, onSchedule, onCredentia
           style={{
             all: "unset",
             cursor: "pointer",
-            width: 58,
-            height: 58,
-            borderRadius: 29,
+            width: 54,
+            height: 54,
+            borderRadius: 27,
             background: "linear-gradient(135deg,#2E5CD6,#0F1E52)",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
             boxShadow: "0 12px 28px rgba(27,63,160,.42)",
-            transform: open ? "rotate(45deg) scale(1.04)" : "rotate(0)",
+            transform: open ? "scale(.94)" : "none",
             transition: "transform .28s cubic-bezier(.2,.8,.3,1)",
             pointerEvents: "auto",
           }}
