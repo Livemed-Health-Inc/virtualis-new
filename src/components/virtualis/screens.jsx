@@ -19,6 +19,7 @@ import {
   Empty,
   Wordmark,
   Lockup,
+  AnimatedLogo,
 } from "./ui";
 import { SPECIALTIES, SHIFTS, STAFF, ME, credentialedFacilities } from "./data";
 
@@ -49,93 +50,106 @@ export function Login() {
     if (mode === "up" && !data.session) setNote("Check your email to confirm your account.");
   };
 
-
-
-
   return (
-    <div style={{ flex: 1, overflowY: "auto", display: "flex", justifyContent: "center" }}>
+    <div
+      style={{
+        flex: 1,
+        overflowY: "auto",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        padding: "44px 20px 64px",
+      }}
+    >
       <div
         style={{
           width: "100%",
-          maxWidth: 1120,
-          padding: "0 22px",
-          display: "grid",
-          gap: 34,
-          gridTemplateColumns: "1fr",
-          alignContent: "start",
+          maxWidth: 480,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          textAlign: "center",
+          animation: "rise .5s ease backwards",
         }}
-        className="v-login-grid"
       >
-        <div style={{ paddingTop: 56 }}>
-          <Lockup height={40} />
-          <div
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: 8,
-              background: "#fff",
-              border: "1px solid " + T.line,
-              borderRadius: 22,
-              padding: "8px 16px",
-              marginTop: 34,
-              fontFamily: mono,
-              fontSize: 11,
-              fontWeight: 600,
-              letterSpacing: 2.4,
-              color: T.ink,
-            }}
-          >
-            <span style={{ width: 7, height: 7, borderRadius: 4, background: T.blue }} /> THE
-            PLATFORM
-          </div>
-          <h1
-            style={{
-              fontSize: "clamp(34px, 5vw, 54px)",
-              fontWeight: 780,
-              letterSpacing: -1.6,
-              color: T.ink,
-              margin: "16px 0 0",
-              lineHeight: 1.05,
-            }}
-          >
-            Messaging that
-            <br />
-            triages itself.
-          </h1>
-          <p
-            style={{
-              fontSize: "clamp(15px, 1.5vw, 18px)",
-              color: T.sub,
-              marginTop: 12,
-              lineHeight: 1.55,
-              maxWidth: 520,
-            }}
-          >
-            Virtualis® is patented, AI-powered clinical communication with telehealth built in. Sent
-            once — triaged by acuity, matched to the on-call specialist, delivered with escalation
-            tracking.
-          </p>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 10, marginTop: 22 }}>
-            {["critical", "urgent", "routine"].map((k) => (
-              <span
-                key={k}
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: 8,
-                  background: "#fff",
-                  border: "1px solid " + T.line,
-                  borderRadius: 16,
-                  padding: "8px 13px",
-                  fontSize: 12.5,
-                  fontWeight: 600,
-                  color: T.sub,
-                }}
-              >
-                <Glyph level={k} size={10} gap={2} w={4} /> {ACUITY[k].label}
-              </span>
-            ))}
-          </div>
+        <AnimatedLogo size={148} />
+
+        <div
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 8,
+            background: "#fff",
+            border: "1px solid " + T.line,
+            borderRadius: 22,
+            padding: "7px 14px",
+            marginTop: 28,
+            fontFamily: mono,
+            fontSize: 10.5,
+            fontWeight: 600,
+            letterSpacing: 2.2,
+            color: T.ink,
+          }}
+        >
+          <span style={{ width: 6, height: 6, borderRadius: 3, background: T.blue }} /> THE PLATFORM
+        </div>
+
+        <h1
+          style={{
+            fontSize: "clamp(32px, 6vw, 48px)",
+            fontWeight: 780,
+            letterSpacing: -1.4,
+            color: T.ink,
+            margin: "18px 0 0",
+            lineHeight: 1.05,
+          }}
+        >
+          Messaging that
+          <br />
+          triages itself.
+        </h1>
+        <p
+          style={{
+            fontSize: "clamp(15px, 2vw, 17.5px)",
+            color: T.sub,
+            marginTop: 12,
+            lineHeight: 1.55,
+            maxWidth: 440,
+          }}
+        >
+          Virtualis® is patented, AI-powered clinical communication with telehealth built in. Sent
+          once — triaged by acuity, matched to the on-call specialist, delivered with escalation
+          tracking.
+        </p>
+
+        <div
+          style={{
+            display: "flex",
+            flexWrap: "wrap",
+            justifyContent: "center",
+            gap: 10,
+            marginTop: 22,
+          }}
+        >
+          {["critical", "urgent", "routine"].map((k) => (
+            <span
+              key={k}
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 8,
+                background: "#fff",
+                border: "1px solid " + T.line,
+                borderRadius: 16,
+                padding: "8px 13px",
+                fontSize: 12.5,
+                fontWeight: 600,
+                color: T.sub,
+              }}
+            >
+              <Glyph level={k} size={10} gap={2} w={4} /> {ACUITY[k].label}
+            </span>
+          ))}
         </div>
 
         <div
@@ -144,13 +158,12 @@ export function Login() {
             borderRadius: 24,
             border: "1px solid " + T.line,
             boxShadow: "0 12px 32px rgba(27,63,160,.06)",
-            padding: 22,
-            marginTop: 8,
-            alignSelf: "start",
+            padding: 24,
+            marginTop: 32,
             width: "100%",
-            maxWidth: 430,
-            justifySelf: "center",
+            maxWidth: 420,
             boxSizing: "border-box",
+            textAlign: "left",
           }}
         >
           <div style={{ fontSize: 14, fontWeight: 620, color: T.ink, marginBottom: 8 }}>Email</div>
@@ -237,7 +250,6 @@ export function Login() {
           >
             Use demo login · demo@virtualis.health
           </button>
-
 
           <div
             style={{

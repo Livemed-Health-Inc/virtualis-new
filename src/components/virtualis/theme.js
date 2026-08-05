@@ -91,6 +91,11 @@ export const KEYFRAMES = `
   @keyframes flow { 0%,100% { opacity:.25; transform: translateX(0) } 50% { opacity:1; transform: translateX(3px) } }
   @keyframes barIn { from { transform: scaleY(.2); opacity:0 } to { transform: scaleY(1); opacity:1 } }
   @keyframes acuityPulse { 0%,100% { opacity:1 } 50% { opacity:.45 } }
+  @keyframes logoPulse { 0%,100% { transform: scale(1); opacity:1 } 50% { transform: scale(1.03); opacity:.95 } }
+  @keyframes ringExpand { 0% { transform: scale(.92); opacity:.55 } 100% { transform: scale(1.35); opacity:0 } }
+  @keyframes pixelFloat1 { 0%,100% { transform: translate(0,0) } 25% { transform: translate(4px,-6px) } 50% { transform: translate(-2px,-10px) } 75% { transform: translate(-6px,-4px) } }
+  @keyframes pixelFloat2 { 0%,100% { transform: translate(0,0) } 25% { transform: translate(-5px,4px) } 50% { transform: translate(3px,8px) } 75% { transform: translate(6px,2px) } }
+  @keyframes pixelFloat3 { 0%,100% { transform: translate(0,0) } 33% { transform: translate(6px,2px) } 66% { transform: translate(-4px,6px) } }
   @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important } }
   button:focus-visible, input:focus-visible, textarea:focus-visible { outline: 2px solid ${T.blue}; outline-offset: 2px; border-radius: 12px }
   ::placeholder { color: ${T.faint} }
