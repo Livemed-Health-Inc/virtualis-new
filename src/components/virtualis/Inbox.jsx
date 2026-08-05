@@ -8,8 +8,6 @@ import {
   PersonIcon,
   DoorIcon,
   Empty,
-  useTicker,
-  fmtClock,
   font,
 } from "./ui";
 
