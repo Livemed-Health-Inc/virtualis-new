@@ -40,6 +40,74 @@ export function Lockup({ height = 34, light }) {
   );
 }
 
+/* Centered hero logo with subtle pulse rings and floating pixel dots.
+   Uses the real trademarked V mark. */
+export function AnimatedLogo({ size = 140 }) {
+  const dot = (s, top, left, delay, color) => (
+    <span
+      key={`${top}-${left}`}
+      style={{
+        position: "absolute",
+        top,
+        left,
+        width: s,
+        height: s,
+        borderRadius: 2,
+        background: color,
+        animation: `pixelFloat${((delay % 3) + 1)} ${4 + delay * 0.4}s ease-in-out infinite`,
+        animationDelay: `${delay * 0.3}s`,
+        boxShadow: `0 0 ${s * 2}px ${color}80`,
+      }}
+    />
+  );
+  return (
+    <div
+      style={{
+        position: "relative",
+        width: size,
+        height: size,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+      }}
+    >
+      <span
+        style={{
+          position: "absolute",
+          inset: -size * 0.12,
+          borderRadius: "50%",
+          border: `1.5px solid ${T.blue}20`,
+          animation: "ringExpand 3.2s ease-out infinite",
+        }}
+      />
+      <span
+        style={{
+          position: "absolute",
+          inset: -size * 0.06,
+          borderRadius: "50%",
+          border: `1.5px solid ${T.blue}30`,
+          animation: "ringExpand 3.2s ease-out infinite",
+          animationDelay: "1.1s",
+        }}
+      />
+      <div
+        style={{
+          position: "relative",
+          zIndex: 2,
+          animation: "logoPulse 4s ease-in-out infinite",
+          filter: `drop-shadow(0 ${size * 0.08}px ${size * 0.12}px ${T.blue}25)`,
+        }}
+      >
+        <VMark size={size * 0.72} />
+      </div>
+      {dot(size * 0.09, "-8%", "88%", 1, T.blue)}
+      {dot(size * 0.07, "78%", "-4%", 2, "#60A5FA")}
+      {dot(size * 0.06, "12%", "-10%", 3, "#93C5FD")}
+      {dot(size * 0.08, "92%", "72%", 4, T.blueDeep)}
+    </div>
+  );
+}
+
 
 export function Wordmark({ size = 22, light }) {
   return (
