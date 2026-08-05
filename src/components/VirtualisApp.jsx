@@ -164,36 +164,9 @@ function TabBar({ tab, setTab, unread, onNew }) {
     >
       <Item t={TABS[0]} />
       <Item t={TABS[1]} />
-      <button
-        onClick={onNew}
-        aria-label="New consult"
-        style={{
-          all: "unset",
-          cursor: "pointer",
-          width: 54,
-          height: 54,
-          borderRadius: 27,
-          background: "linear-gradient(135deg,#2E5CFF,#1E3FCC)",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          margin: "0 8px 12px",
-          boxShadow: "0 10px 24px rgba(41,112,255,.4)",
-          flexShrink: 0,
-        }}
-      >
-        <svg
-          width="24"
-          height="24"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="#fff"
-          strokeWidth="2.5"
-          strokeLinecap="round"
-        >
-          <path d="M12 5v14M5 12h14" />
-        </svg>
-      </button>
+      {/* Space for the floating V trigger, which overlays this slot. */}
+      <span style={{ width: 54, margin: "0 8px 12px", flexShrink: 0 }} aria-hidden />
+
       <Item t={TABS[2]} />
       <Item t={TABS[3]} />
     </div>
