@@ -6,7 +6,6 @@ import {
   inputStyle,
   Avatar,
   Glyph,
-  AcuityBadge,
   Back,
   PersonIcon,
   DoorIcon,
