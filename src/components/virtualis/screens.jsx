@@ -62,7 +62,7 @@ export function Login() {
         display: "flex",
         justifyContent: "center",
         alignItems: wide ? "center" : "flex-start",
-        padding: wide ? "48px clamp(28px, 5vw, 72px)" : "40px 20px 64px",
+        padding: wide ? "48px clamp(52px, 5vw, 72px)" : "40px 20px 64px",
       }}
     >
       <div
