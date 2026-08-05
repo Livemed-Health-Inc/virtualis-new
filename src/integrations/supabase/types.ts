@@ -1,0 +1,473 @@
+export type Json =
+  | string
+  | number
+  | boolean
+  | null
+  | { [key: string]: Json | undefined }
+  | Json[]
+
+export type Database = {
+  // Allows to automatically instantiate createClient with right options
+  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
+  __InternalSupabase: {
+    PostgrestVersion: "14.15"
+  }
+  public: {
+    Tables: {
+      care_team: {
+        Row: {
+          created_at: string
+          dept: string
+          facility_id: string
+          id: string
+          initials: string
+          name: string
+          online: boolean
+          role: string
+        }
+        Insert: {
+          created_at?: string
+          dept: string
+          facility_id: string
+          id?: string
+          initials: string
+          name: string
+          online?: boolean
+          role: string
+        }
+        Update: {
+          created_at?: string
+          dept?: string
+          facility_id?: string
+          id?: string
+          initials?: string
+          name?: string
+          online?: boolean
+          role?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "care_team_facility_id_fkey"
+            columns: ["facility_id"]
+            isOneToOne: false
+            referencedRelation: "facilities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      facilities: {
+        Row: {
+          created_at: string
+          emr: string
+          hue: string
+          id: string
+          name: string
+          short: string
+        }
+        Insert: {
+          created_at?: string
+          emr: string
+          hue: string
+          id: string
+          name: string
+          short: string
+        }
+        Update: {
+          created_at?: string
+          emr?: string
+          hue?: string
+          id?: string
+          name?: string
+          short?: string
+        }
+        Relationships: []
+      }
+      messages: {
+        Row: {
+          body: string
+          created_at: string
+          id: string
+          kind: string
+          sender_id: string | null
+          sender_name: string
+          thread_id: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          id?: string
+          kind?: string
+          sender_id?: string | null
+          sender_name: string
+          thread_id: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          id?: string
+          kind?: string
+          sender_id?: string | null
+          sender_name?: string
+          thread_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_thread_id_fkey"
+            columns: ["thread_id"]
+            isOneToOne: false
+            referencedRelation: "threads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          dept: string
+          home_facility: string
+          id: string
+          initials: string
+          name: string
+          online: boolean
+          role: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          dept?: string
+          home_facility?: string
+          id: string
+          initials?: string
+          name?: string
+          online?: boolean
+          role?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          dept?: string
+          home_facility?: string
+          id?: string
+          initials?: string
+          name?: string
+          online?: boolean
+          role?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profiles_home_facility_fkey"
+            columns: ["home_facility"]
+            isOneToOne: false
+            referencedRelation: "facilities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      provider_credentials: {
+        Row: {
+          created_at: string
+          expires_on: string
+          facility_id: string
+          id: string
+          privileges: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          expires_on?: string
+          facility_id: string
+          id?: string
+          privileges?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          expires_on?: string
+          facility_id?: string
+          id?: string
+          privileges?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "provider_credentials_facility_id_fkey"
+            columns: ["facility_id"]
+            isOneToOne: false
+            referencedRelation: "facilities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      shifts: {
+        Row: {
+          acuity: Database["public"]["Enums"]["acuity_level"]
+          created_at: string
+          day_of_month: number
+          facility_id: string
+          id: string
+          label: string
+          time_label: string
+        }
+        Insert: {
+          acuity?: Database["public"]["Enums"]["acuity_level"]
+          created_at?: string
+          day_of_month: number
+          facility_id: string
+          id?: string
+          label: string
+          time_label: string
+        }
+        Update: {
+          acuity?: Database["public"]["Enums"]["acuity_level"]
+          created_at?: string
+          day_of_month?: number
+          facility_id?: string
+          id?: string
+          label?: string
+          time_label?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shifts_facility_id_fkey"
+            columns: ["facility_id"]
+            isOneToOne: false
+            referencedRelation: "facilities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      thread_reads: {
+        Row: {
+          last_read_at: string
+          thread_id: string
+          user_id: string
+        }
+        Insert: {
+          last_read_at?: string
+          thread_id: string
+          user_id: string
+        }
+        Update: {
+          last_read_at?: string
+          thread_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "thread_reads_thread_id_fkey"
+            columns: ["thread_id"]
+            isOneToOne: false
+            referencedRelation: "threads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      threads: {
+        Row: {
+          acuity: Database["public"]["Enums"]["acuity_level"]
+          confidence: number
+          context: string
+          created_at: string
+          created_by: string | null
+          dob: string | null
+          facility_id: string
+          id: string
+          is_team: boolean
+          last_message_at: string
+          members: string | null
+          mrn: string | null
+          name: string
+          patient: string
+          reason: string
+          room: string
+        }
+        Insert: {
+          acuity?: Database["public"]["Enums"]["acuity_level"]
+          confidence?: number
+          context?: string
+          created_at?: string
+          created_by?: string | null
+          dob?: string | null
+          facility_id: string
+          id?: string
+          is_team?: boolean
+          last_message_at?: string
+          members?: string | null
+          mrn?: string | null
+          name: string
+          patient?: string
+          reason?: string
+          room?: string
+        }
+        Update: {
+          acuity?: Database["public"]["Enums"]["acuity_level"]
+          confidence?: number
+          context?: string
+          created_at?: string
+          created_by?: string | null
+          dob?: string | null
+          facility_id?: string
+          id?: string
+          is_team?: boolean
+          last_message_at?: string
+          members?: string | null
+          mrn?: string | null
+          name?: string
+          patient?: string
+          reason?: string
+          room?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "threads_facility_id_fkey"
+            columns: ["facility_id"]
+            isOneToOne: false
+            referencedRelation: "facilities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      has_facility_access: {
+        Args: { _facility: string; _user_id: string }
+        Returns: boolean
+      }
+    }
+    Enums: {
+      acuity_level: "critical" | "urgent" | "routine"
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
+  }
+}
+
+type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
+
+type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
+
+export type Tables<
+  DefaultSchemaTableNameOrOptions extends
+    | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+        DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
+    : never = never,
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+      DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
+      Row: infer R
+    }
+    ? R
+    : never
+  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])
+    ? (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
+        Row: infer R
+      }
+      ? R
+      : never
+    : never
+
+export type TablesInsert<
+  DefaultSchemaTableNameOrOptions extends
+    | keyof DefaultSchema["Tables"]
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    : never = never,
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+      Insert: infer I
+    }
+    ? I
+    : never
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+        Insert: infer I
+      }
+      ? I
+      : never
+    : never
+
+export type TablesUpdate<
+  DefaultSchemaTableNameOrOptions extends
+    | keyof DefaultSchema["Tables"]
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    : never = never,
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+      Update: infer U
+    }
+    ? U
+    : never
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+        Update: infer U
+      }
+      ? U
+      : never
+    : never
+
+export type Enums<
+  DefaultSchemaEnumNameOrOptions extends
+    | keyof DefaultSchema["Enums"]
+    | { schema: keyof DatabaseWithoutInternals },
+  EnumName extends DefaultSchemaEnumNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
+    : never = never,
+> = DefaultSchemaEnumNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
+  : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
+    ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
+    : never
+
+export type CompositeTypes<
+  PublicCompositeTypeNameOrOptions extends
+    | keyof DefaultSchema["CompositeTypes"]
+    | { schema: keyof DatabaseWithoutInternals },
+  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
+    : never = never,
+> = PublicCompositeTypeNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
+  : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
+    ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
+    : never
+
+export const Constants = {
+  public: {
+    Enums: {
+      acuity_level: ["critical", "urgent", "routine"],
+    },
+  },
+} as const

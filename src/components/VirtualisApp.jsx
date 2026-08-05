@@ -1,7 +1,7 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { T, font, mono, ACUITY, FACILITIES, useMediaQuery, KEYFRAMES } from "./virtualis/theme";
 import { VMark, Avatar, Glyph, Wordmark } from "./virtualis/ui";
-import { INITIAL_THREADS, ME, credentialedFacilities } from "./virtualis/data";
+import { VirtualisProvider, useVirtualis } from "@/lib/virtualis/store";
 import Inbox from "./virtualis/Inbox";
 import Thread from "./virtualis/Thread";
 import Alis from "./virtualis/Alis";
@@ -200,7 +200,7 @@ function TabBar({ tab, setTab, unread, onNew }) {
   );
 }
 
-function Rail({ tab, setTab, unread, onNew, onProfile, wide }) {
+function Rail({ tab, setTab, unread, onNew, onProfile, wide, me }) {
   return (
     <div
       style={{
@@ -328,12 +328,12 @@ function Rail({ tab, setTab, unread, onNew, onProfile, wide }) {
           justifyContent: wide ? "flex-start" : "center",
         }}
       >
-        <Avatar initials={ME.initials} team size={36} />
+        <Avatar initials={me.initials} team size={36} />
         {wide && (
           <span style={{ minWidth: 0 }}>
-            <span style={{ display: "block", fontSize: 13, fontWeight: 640 }}>{ME.name}</span>
+            <span style={{ display: "block", fontSize: 13, fontWeight: 640 }}>{me.name}</span>
             <span style={{ display: "block", fontSize: 11, color: "#8DA2CF" }}>
-              {ME.credentials.length} facilities
+              {me.credentials.length} facilities
             </span>
           </span>
         )}
@@ -582,14 +582,33 @@ function VFab({ onConsult, onAlis, onPage }) {
 }
 
 export default function VirtualisApp() {
+  return (
+    <VirtualisProvider>
+      <Workstation />
+    </VirtualisProvider>
+  );
+}
+
+function Workstation() {
   const isDesktop = useMediaQuery("(min-width: 1100px)");
   const isTablet = useMediaQuery("(min-width: 760px)");
   const multiPane = isTablet;
 
-  const [authed, setAuthed] = useState(false);
+  const {
+    ready,
+    session,
+    me,
+    scope,
+    staff,
+    shifts,
+    threads,
+    sendMessage,
+    createThread,
+    markRead,
+    signOut,
+  } = useVirtualis();
+
   const [tab, setTab] = useState("inbox");
-  const [threads, setThreads] = useState(INITIAL_THREADS);
-  const [acked, setAcked] = useState(new Set());
   const [filter, setFilter] = useState("all");
   const [query, setQuery] = useState("");
   const [facility, setFacility] = useState("all");
@@ -601,16 +620,19 @@ export default function VirtualisApp() {
   const [creds, setCreds] = useState(false);
   const [toast, setToast] = useState(null);
 
-  const scope = useMemo(() => credentialedFacilities(), []);
+  const authed = !!session;
   /* Credentialing gate: nothing outside the physician's privileges is
-     ever rendered, whatever the active facility filter is. */
+     ever rendered — RLS enforces the same rule server-side. */
   const visible = threads.filter((t) => scope.includes(t.facility));
   const scoped = visible.filter((t) => facility === "all" || t.facility === facility);
-  const unread = visible.filter((t) => !acked.has(t.id)).length;
-  const criticalUnread = visible.filter((t) => t.acuity === "critical" && !acked.has(t.id)).length;
+  const acked = new Set(visible.filter((t) => t.newCount === 0).map((t) => t.id));
+  const unread = visible.filter((t) => t.newCount > 0).length;
+  const criticalUnread = visible.filter((t) => t.acuity === "critical" && t.newCount > 0).length;
   const perFacility = visible.reduce(
     (m, t) =>
-      acked.has(t.id) ? m : { ...m, [t.facility]: (m[t.facility] || 0) + 1, all: (m.all || 0) + 1 },
+      t.newCount === 0
+        ? m
+        : { ...m, [t.facility]: (m[t.facility] || 0) + 1, all: (m.all || 0) + 1 },
     {},
   );
 
@@ -623,65 +645,39 @@ export default function VirtualisApp() {
     setTimeout(() => setToast(null), 2600);
   };
   const openThread = (id) => {
-    setAcked((s) => new Set(s).add(id));
+    markRead(id);
     setOpenId(id);
   };
-  const openFromStaff = (s) => {
-    if (s.threadId) {
-      openThread(s.threadId);
-      setTab("inbox");
-      return;
-    }
-    const id = Math.max(...threads.map((t) => t.id)) + 1;
-    setThreads((th) => [
-      {
-        id,
-        name: s.name,
-        context: s.dept,
-        facility: s.facility,
-        patient: "—",
-        room: "—",
-        time: "Now",
-        ageSec: 0,
-        acuity: "routine",
-        newCount: 0,
-        reason: "",
-        confidence: 0,
-        msgs: [],
-      },
-      ...th,
-    ]);
-    setAcked((a) => new Set(a).add(id));
-    setOpenId(id);
+  const openFromStaff = async (s) => {
     setTab("inbox");
+    const existing = threads.find((t) => t.name === s.name && t.facility === s.facility);
+    if (existing) return openThread(existing.id);
+    const id = await createThread({
+      name: s.name,
+      context: s.dept,
+      facility: s.facility,
+      acuity: "routine",
+    });
+    if (id) setOpenId(id);
+    else flash("Could not open that conversation");
   };
   const sendConsult = (payload) => {
     setConsulting(false);
     setRouting(payload);
-    setTimeout(() => {
+    setTimeout(async () => {
       const { patient, reason, acuity, spec, facility: fac, telehealth } = payload;
-      const id = Math.max(...threads.map((t) => t.id)) + 1;
-      setThreads((th) => [
-        {
-          id,
-          name: "Dr. Elena Vasquez",
-          context: `Tele-${spec} · On-Call`,
-          facility: fac,
-          patient,
-          room: "—",
-          time: "Now",
-          ageSec: 0,
-          acuity,
-          newCount: 0,
-          reason,
-          confidence: 91,
-          msgs: [{ me: true, who: "You", kind: "consult", text: reason, t: "Now" }],
-        },
-        ...th,
-      ]);
-      setAcked((a) => new Set(a).add(id));
+      const id = await createThread({
+        name: `Tele-${spec} On-Call`,
+        context: `Tele-${spec} · On-Call`,
+        facility: fac,
+        patient,
+        acuity,
+        reason,
+        confidence: 91,
+      });
       setRouting(null);
       setTab("inbox");
+      if (!id) return flash("Consult could not be routed");
       setOpenId(id);
       if (telehealth) setVideoId(id);
       flash(`Routed · ${ACUITY[acuity].label} · ${spec} on-call`);
@@ -717,7 +713,7 @@ export default function VirtualisApp() {
               marginTop: 3,
             }}
           >
-            Hello, Dr. Hussain
+            Hello, {me.name.replace(/^Dr\.\s*/, "Dr. ")}
           </div>
           <div style={{ fontSize: 12.5, color: T.sub, marginTop: 1 }}>
             Tuesday, Aug 4 ·{" "}
@@ -737,7 +733,7 @@ export default function VirtualisApp() {
             onClick={() => setCreds(true)}
             style={{ all: "unset", cursor: "pointer", marginLeft: "auto" }}
           >
-            <Avatar initials={ME.initials} team size={40} />
+            <Avatar initials={me.initials} team size={40} />
           </button>
         )}
       </div>
@@ -823,7 +819,7 @@ export default function VirtualisApp() {
       onBack={() => setConsulting(false)}
       onSend={sendConsult}
       facilityScope={scope}
-      defaultFacility={facility === "all" ? ME.homeFacility : facility}
+      defaultFacility={facility === "all" ? me.homeFacility : facility}
     />
   ) : detailThread ? (
     <ConsultDetail t={detailThread} onBack={() => setDetailId(null)} />
@@ -831,7 +827,7 @@ export default function VirtualisApp() {
 
   let content;
   if (!authed) {
-    content = <Login onSignIn={() => setAuthed(true)} />;
+    content = ready ? <Login /> : null;
   } else if (!multiPane) {
     content =
       pushed ||
@@ -839,6 +835,7 @@ export default function VirtualisApp() {
         <Thread
           t={activeThread}
           onBack={() => setOpenId(null)}
+          onSend={(text) => sendMessage(activeThread.id, text)}
           onDetail={() => setDetailId(activeThread.id)}
           onVideo={() => setVideoId(activeThread.id)}
         />
@@ -846,9 +843,11 @@ export default function VirtualisApp() {
         <>
           <div style={{ flex: 1, display: "flex", flexDirection: "column", minHeight: 0 }}>
             {tab === "inbox" && inboxPane}
-            {tab === "team" && <Directory onChat={openFromStaff} facilityScope={scope} />}
+            {tab === "team" && (
+              <Directory onChat={openFromStaff} facilityScope={scope} staff={staff} />
+            )}
             {tab === "alis" && <Alis />}
-            {tab === "schedule" && <Schedule facilityScope={scope} />}
+            {tab === "schedule" && <Schedule facilityScope={scope} shifts={shifts} />}
           </div>
           {tab !== "alis" && (
             <VFab
@@ -874,6 +873,7 @@ export default function VirtualisApp() {
         <Thread
           t={activeThread}
           embedded
+          onSend={(text) => sendMessage(activeThread.id, text)}
           onDetail={() => setDetailId(activeThread.id)}
           onVideo={() => setVideoId(activeThread.id)}
           onBack={() => setOpenId(null)}
@@ -882,16 +882,17 @@ export default function VirtualisApp() {
         emptyPane
       )
     ) : tab === "team" ? (
-      <Directory onChat={openFromStaff} facilityScope={scope} />
+      <Directory onChat={openFromStaff} facilityScope={scope} staff={staff} />
     ) : tab === "alis" ? (
       <Alis />
     ) : (
-      <Schedule facilityScope={scope} />
+      <Schedule facilityScope={scope} shifts={shifts} />
     );
 
     content = (
       <div style={{ flex: 1, display: "flex", minHeight: 0 }}>
         <Rail
+          me={me}
           tab={tab}
           setTab={setTab}
           unread={unread}
@@ -992,7 +993,7 @@ export default function VirtualisApp() {
           }}
         />
       )}
-      {creds && <Credentials onClose={() => setCreds(false)} />}
+      {creds && <Credentials me={me} onClose={() => setCreds(false)} onSignOut={signOut} />}
     </div>
   );
 }
