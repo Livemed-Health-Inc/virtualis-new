@@ -124,15 +124,26 @@ export function Login() {
         </h1>
         <p
           style={{
-            fontSize: "clamp(15px, 2vw, 17.5px)",
-            color: T.sub,
-            marginTop: 12,
-            lineHeight: 1.55,
+            fontSize: "clamp(17px, 2.4vw, 22px)",
+            fontWeight: 500,
+            color: T.ink,
+            marginTop: 14,
+            lineHeight: 1.45,
             maxWidth: 440,
           }}
         >
-          AI-powered clinical communication with telehealth built in. Every message is triaged by
-          acuity and routed to the right on-call clinician.
+          The right message, to the right clinician, at the right time.
+        </p>
+        <p
+          style={{
+            fontSize: "clamp(13px, 1.8vw, 15px)",
+            color: T.sub,
+            marginTop: 8,
+            lineHeight: 1.5,
+            maxWidth: 440,
+          }}
+        >
+          Powered by patent-allowed AI technology.
         </p>
 
         <div
