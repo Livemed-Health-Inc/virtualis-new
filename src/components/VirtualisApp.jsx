@@ -466,13 +466,29 @@ function VFab({ onConsult, onAlis, onPage, onTelehealth, float }) {
           pointerEvents: "none",
         }}
       >
-        <div style={{ position: "relative", width: 56, height: 56 }}>
-          {open &&
-            actions.map((a, i) => {
-              const angles = float ? [176, 148, 120, 92] : [154, 122, 58, 26];
-              const r = float ? 116 : 104;
-              const rad = (angles[i] * Math.PI) / 180;
-              return (
+        <div
+          style={{
+            position: "relative",
+            width: 56,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: float ? "flex-end" : "center",
+          }}
+        >
+          {open && (
+            <div
+              style={{
+                position: "absolute",
+                bottom: 68,
+                right: float ? 0 : "auto",
+                display: "flex",
+                flexDirection: "column",
+                gap: 10,
+                alignItems: float ? "flex-end" : "center",
+                pointerEvents: "auto",
+              }}
+            >
+              {actions.map((a, i) => (
                 <button
                   key={a.label}
                   onClick={() => {
@@ -482,56 +498,39 @@ function VFab({ onConsult, onAlis, onPage, onTelehealth, float }) {
                   style={{
                     all: "unset",
                     cursor: "pointer",
-                    position: "absolute",
-                    left: 0,
-                    top: 0,
-                    width: 56,
-                    height: 56,
+                    boxSizing: "border-box",
+                    height: 44,
                     display: "flex",
-                    flexDirection: "column",
                     alignItems: "center",
-                    justifyContent: "center",
-                    pointerEvents: "auto",
-                    "--fx": `${Math.cos(rad) * r}px`,
-                    "--fy": `${-Math.sin(rad) * r}px`,
-                    animation: `fanOut .42s ${i * 0.05}s cubic-bezier(.18,.9,.28,1.1) both`,
+                    gap: 10,
+                    padding: "0 16px 0 6px",
+                    borderRadius: 22,
+                    background: T.card,
+                    border: "1px solid " + T.line,
+                    boxShadow: "0 6px 18px rgba(16,24,40,.10)",
+                    whiteSpace: "nowrap",
+                    animation: `rise .3s ${(actions.length - 1 - i) * 0.045}s cubic-bezier(.2,.8,.3,1) both`,
                   }}
                 >
                   <span
                     style={{
-                      width: 56,
-                      height: 56,
-                      borderRadius: 28,
+                      width: 32,
+                      height: 32,
+                      borderRadius: 16,
+                      background: T.blueSoft,
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
-                      background:
-                        "linear-gradient(150deg, rgba(255,255,255,.20), rgba(255,255,255,.06))",
-                      backdropFilter: "blur(24px) saturate(180%)",
-                      WebkitBackdropFilter: "blur(24px) saturate(180%)",
-                      border: "1px solid rgba(255,255,255,.28)",
-                      boxShadow:
-                        "inset 0 1px 0 rgba(255,255,255,.35), 0 8px 24px rgba(11,15,26,.22)",
+                      flexShrink: 0,
                     }}
                   >
                     {a.icon}
                   </span>
-                  <span
-                    style={{
-                      position: "absolute",
-                      top: 62,
-                      fontSize: 10.5,
-                      fontWeight: 600,
-                      color: "rgba(255,255,255,.86)",
-                      letterSpacing: 0.3,
-                      whiteSpace: "nowrap",
-                    }}
-                  >
-                    {a.label}
-                  </span>
+                  <span style={{ fontSize: 14, fontWeight: 640, color: T.ink }}>{a.label}</span>
                 </button>
-              );
-            })}
+              ))}
+            </div>
+          )}
           <button
             onClick={() => setOpen(!open)}
             aria-label="Quick actions"
