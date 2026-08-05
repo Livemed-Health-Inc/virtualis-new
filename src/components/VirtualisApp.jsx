@@ -905,7 +905,9 @@ function Workstation() {
         >
           {secondary}
         </div>
+        {vfab(true)}
       </div>
+
     );
   }
 
