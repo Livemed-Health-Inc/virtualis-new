@@ -819,32 +819,9 @@ function Workstation() {
             {tab === "alis" && <Alis />}
             {tab === "schedule" && <Schedule facilityScope={scope} shifts={shifts} />}
           </div>
-          {tab !== "alis" && (
-            <VFab
-              onConsult={() => setConsulting(true)}
-              onAlis={() => setTab("alis")}
-              onPage={(k) =>
-                flash(
-                  k === "stat"
-                    ? "STAT page sent · Dr. E. Vasquez · Cardiology on-call"
-                    : "Page sent · on-call will call back",
-                )
-              }
-              onTelehealth={() => {
-                const target = activeThread || visible[0];
-                if (target) {
-                  setOpenId(target.id);
-                  setVideoId(target.id);
-                } else {
-                  flash("Open a consult to start a video visit");
-                }
-              }}
-              onSchedule={() => setTab("schedule")}
-              onCredentials={() => setCreds(true)}
-              onSignOut={signOut}
-            />
-          )}
-          <TabBar tab={tab} setTab={setTab} unread={unread} onNew={() => setConsulting(true)} />
+          {vfab(false)}
+          <TabBar tab={tab} setTab={setTab} unread={unread} />
+
         </>
       ));
   } else {
