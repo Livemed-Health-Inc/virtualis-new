@@ -181,7 +181,7 @@ export default function Thread({ t, onBack, onDetail, onVideo, embedded, onSend 
             <span
               style={{ marginLeft: "auto", display: "inline-flex", alignItems: "center", gap: 8 }}
             >
-              <AcuityBadge level={t.acuity} />
+              <Glyph level={t.acuity} size={9} gap={2} w={3.5} />
               <svg
                 width="14"
                 height="14"
@@ -197,46 +197,7 @@ export default function Thread({ t, onBack, onDetail, onVideo, embedded, onSend 
             </span>
           </button>
         )}
-        {t.acuity === "critical" && (
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 9,
-              marginTop: 8,
-              background: ackd ? "#EDFBF3" : "#FEF0EF",
-              border: "1px solid " + (ackd ? "#C9F0DB" : "#FBD9D6"),
-              borderRadius: 13,
-              padding: "8px 12px",
-            }}
-          >
-            <Glyph level="critical" size={8} gap={1.5} w={3.5} pulse={!ackd} />
-            <span
-              style={{ fontSize: 12.5, fontWeight: 600, color: ackd ? T.green : T.red, flex: 1 }}
-            >
-              {ackd
-                ? "Acknowledged — escalation cleared"
-                : "Critical consult · acknowledge to stop escalation"}
-            </span>
-            {!ackd && (
-              <button
-                onClick={() => setAckd(true)}
-                style={{
-                  all: "unset",
-                  cursor: "pointer",
-                  fontSize: 12.5,
-                  fontWeight: 650,
-                  color: "#fff",
-                  background: T.red,
-                  borderRadius: 14,
-                  padding: "6px 13px",
-                }}
-              >
-                Acknowledge
-              </button>
-            )}
-          </div>
-        )}
+
       </div>
 
       <div
