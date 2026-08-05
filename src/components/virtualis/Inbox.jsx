@@ -21,32 +21,6 @@ const initialsOf = (n) =>
     .join("")
     .toUpperCase();
 
-function EscalationPill({ thread, acked }) {
-  const live = useTicker(thread.ageSec || 0, thread.acuity === "critical" && !acked);
-  if (thread.acuity !== "critical" || acked) return null;
-  const left = ACUITY.critical.sla - live;
-  const over = left <= 0;
-  return (
-    <span
-      style={{
-        display: "inline-flex",
-        alignItems: "center",
-        gap: 5,
-        fontFamily: mono,
-        fontSize: 10.5,
-        fontWeight: 600,
-        letterSpacing: 0.4,
-        color: over ? "#fff" : T.red,
-        background: over ? T.red : T.red + "12",
-        border: `1px solid ${T.red}${over ? "" : "33"}`,
-        borderRadius: 12,
-        padding: "2px 8px",
-      }}
-    >
-      {over ? "ESCALATED · BACKUP ON-CALL" : `SLA ${fmtClock(left)}`}
-    </span>
-  );
-}
 
 function Row({ t, ack, unreadCount, onOpen, selected, i }) {
   const last = (t.msgs || [])[(t.msgs || []).length - 1] || { text: t.reason || "", kind: null };
