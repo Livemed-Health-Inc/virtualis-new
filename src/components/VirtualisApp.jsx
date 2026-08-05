@@ -738,61 +738,41 @@ function Workstation() {
     />
   );
 
-  const emptyPane = (
-    <div
+  const listToggle = (
+    <button
+      onClick={() => setListCollapsed((v) => !v)}
+      title={listCollapsed ? "Show inbox" : "Collapse inbox"}
       style={{
-        flex: 1,
+        all: "unset",
+        cursor: "pointer",
+        position: "absolute",
+        top: 14,
+        left: 12,
+        zIndex: 12,
+        width: 30,
+        height: 30,
+        borderRadius: 10,
         display: "flex",
-        flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
-        gap: 10,
-        padding: 32,
-        textAlign: "center",
+        background: "rgba(255,255,255,.82)",
+        border: "1px solid " + T.line,
+        backdropFilter: "blur(12px)",
+        boxShadow: "0 4px 14px rgba(16,24,40,.06)",
       }}
     >
-      <div
-        style={{
-          width: 64,
-          height: 64,
-          borderRadius: 32,
-          background: "#fff",
-          border: "1px solid " + T.line,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          boxShadow: "0 8px 24px rgba(16,24,40,.06)",
-        }}
-      >
-        <VMark size={32} />
-      </div>
-      <Wordmark size={20} />
-      <div style={{ fontSize: 14, color: T.sub, maxWidth: 320, lineHeight: 1.5 }}>
-        Select a consult to open the thread, patient context, and one-tap telehealth.
-      </div>
-      <div style={{ display: "flex", gap: 10, marginTop: 6 }}>
-        {["critical", "urgent", "routine"].map((k) => (
-          <span
-            key={k}
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: 7,
-              fontSize: 12,
-              fontWeight: 600,
-              color: T.sub,
-              background: "#fff",
-              border: "1px solid " + T.line,
-              borderRadius: 14,
-              padding: "6px 11px",
-            }}
-          >
-            <Glyph level={k} size={9} gap={2} w={3.5} /> {ACUITY[k].label}
-          </span>
-        ))}
-      </div>
-    </div>
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
+        <rect x="3" y="4" width="18" height="16" rx="3" stroke={T.sub} strokeWidth="1.7" />
+        <path
+          d="M9 4v16"
+          stroke={listCollapsed ? T.blue : T.sub}
+          strokeWidth="1.7"
+          strokeLinecap="round"
+        />
+      </svg>
+    </button>
   );
+
 
   const pushed = consulting ? (
     <NewConsult
