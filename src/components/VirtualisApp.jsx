@@ -958,6 +958,18 @@ function Workstation() {
                     : "Page sent · on-call will call back",
                 )
               }
+              onTelehealth={() => {
+                const target = activeThread || visible[0];
+                if (target) {
+                  setOpenId(target.id);
+                  setVideoId(target.id);
+                } else {
+                  flash("Open a consult to start a video visit");
+                }
+              }}
+              onSchedule={() => setTab("schedule")}
+              onCredentials={() => setCreds(true)}
+              onSignOut={signOut}
             />
           )}
           <TabBar tab={tab} setTab={setTab} unread={unread} onNew={() => setConsulting(true)} />
