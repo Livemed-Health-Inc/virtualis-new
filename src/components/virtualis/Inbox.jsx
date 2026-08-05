@@ -202,7 +202,7 @@ function Row({ t, ack, unreadCount, onOpen, selected, i }) {
                 </span>
               </>
             )}
-            <EscalationPill thread={t} acked={ack} />
+            
           </div>
           <div
             style={{
