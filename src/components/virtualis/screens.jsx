@@ -74,6 +74,11 @@ export function Login() {
       >
         <AnimatedLogo size={148} />
 
+        <div style={{ marginTop: 18, animation: "rise .55s .1s ease backwards" }}>
+          <Lockup height={44} />
+        </div>
+
+
         <div
           style={{
             display: "inline-flex",
