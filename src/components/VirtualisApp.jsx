@@ -389,7 +389,7 @@ function VFab({ onConsult, onAlis, onPage, onTelehealth, float }) {
       height="23"
       viewBox="0 0 24 24"
       fill="none"
-      stroke="#fff"
+      stroke={T.blue}
       strokeWidth="2.1"
       strokeLinecap="round"
       strokeLinejoin="round"
