@@ -280,7 +280,7 @@ export default function Inbox({
 
   return (
     <>
-      <div style={{ padding: "14px 18px 12px", position: "relative", zIndex: 1 }}>
+      <div style={{ padding: "14px clamp(14px,2.2vw,22px) 12px", position: "relative", zIndex: 1 }}>
         {header}
         <div
           style={{
