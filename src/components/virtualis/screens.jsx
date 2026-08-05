@@ -21,6 +21,7 @@ import {
   Lockup,
   AnimatedLogo,
 } from "./ui";
+import { useMediaQuery } from "./theme";
 import { SPECIALTIES, SHIFTS, STAFF, ME, credentialedFacilities } from "./data";
 
 /* ── Login ─────────────────────────────────────────────────────── */
