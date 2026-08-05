@@ -40,26 +40,25 @@ export function Lockup({ height = 34, light }) {
   );
 }
 
-/* Centered hero logo with subtle pulse rings and floating pixel dots.
-   Uses the real trademarked V mark. */
+/* Centered hero logo: the trademarked V inside a clinical comms halo —
+   an ECG trace ring, soft pulse rings, and orbiting care icons. */
+const HALO_ICONS = [
+  // message bubble
+  <path key="m" d="M4 6h16v10H9l-5 4V6Z" />,
+  // heart / vitals
+  <path key="h" d="M12 20s-7-4.6-7-9.4A3.9 3.9 0 0 1 12 8a3.9 3.9 0 0 1 7 2.6C19 15.4 12 20 12 20Z" />,
+  // video visit
+  <g key="v">
+    <rect x="3" y="7" width="12" height="10" rx="2.6" />
+    <path d="M15 11l6-3.2v8.4L15 13Z" />
+  </g>,
+  // care plus
+  <path key="p" d="M12 5v14M5 12h14" />,
+];
+
 export function AnimatedLogo({ size = 140 }) {
-  const dot = (s, top, left, delay, color) => (
-    <span
-      key={`${top}-${left}`}
-      style={{
-        position: "absolute",
-        top,
-        left,
-        width: s,
-        height: s,
-        borderRadius: 2,
-        background: color,
-        animation: `pixelFloat${((delay % 3) + 1)} ${4 + delay * 0.4}s ease-in-out infinite`,
-        animationDelay: `${delay * 0.3}s`,
-        boxShadow: `0 0 ${s * 2}px ${color}80`,
-      }}
-    />
-  );
+  const orbitR = size * 0.62;
+  const chip = size * 0.24;
   return (
     <div
       style={{
@@ -71,25 +70,91 @@ export function AnimatedLogo({ size = 140 }) {
         justifyContent: "center",
       }}
     >
-      <span
+      {[0, 1.6].map((d) => (
+        <span
+          key={d}
+          style={{
+            position: "absolute",
+            inset: -size * 0.1,
+            borderRadius: "50%",
+            border: `1.5px solid ${T.blue}26`,
+            animation: "ringExpand 3.4s ease-out infinite",
+            animationDelay: `${d}s`,
+          }}
+        />
+      ))}
+
+      {/* ECG trace circling the mark */}
+      <svg
+        viewBox="0 0 200 200"
         style={{
           position: "absolute",
-          inset: -size * 0.12,
-          borderRadius: "50%",
-          border: `1.5px solid ${T.blue}20`,
-          animation: "ringExpand 3.2s ease-out infinite",
+          inset: -size * 0.24,
+          width: size * 1.48,
+          height: size * 1.48,
+          overflow: "visible",
         }}
-      />
-      <span
+      >
+        <circle cx="100" cy="100" r="86" fill="none" stroke={`${T.blue}1A`} strokeWidth="1.2" />
+        <circle
+          cx="100"
+          cy="100"
+          r="86"
+          fill="none"
+          stroke={T.blue}
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeDasharray="26 514"
+          style={{ animation: "ecgTrace 5.5s linear infinite" }}
+        />
+      </svg>
+
+      {/* Orbiting clinical icons */}
+      <div
         style={{
           position: "absolute",
-          inset: -size * 0.06,
-          borderRadius: "50%",
-          border: `1.5px solid ${T.blue}30`,
-          animation: "ringExpand 3.2s ease-out infinite",
-          animationDelay: "1.1s",
+          inset: 0,
+          animation: "orbit 22s linear infinite",
         }}
-      />
+      >
+        {HALO_ICONS.map((icon, i) => {
+          const a = (i / HALO_ICONS.length) * Math.PI * 2;
+          return (
+            <span
+              key={i}
+              style={{
+                position: "absolute",
+                left: `calc(50% + ${Math.cos(a) * orbitR}px - ${chip / 2}px)`,
+                top: `calc(50% + ${Math.sin(a) * orbitR}px - ${chip / 2}px)`,
+                width: chip,
+                height: chip,
+                borderRadius: chip / 2,
+                background: "rgba(255,255,255,.86)",
+                border: `1px solid ${T.blue}26`,
+                boxShadow: `0 6px 16px ${T.blue}1F`,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                animation: "orbitBack 22s linear infinite",
+              }}
+            >
+              <svg
+                width={chip * 0.54}
+                height={chip * 0.54}
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke={T.blue}
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                {icon}
+              </svg>
+            </span>
+          );
+        })}
+      </div>
+
       <div
         style={{
           position: "relative",
@@ -98,12 +163,8 @@ export function AnimatedLogo({ size = 140 }) {
           filter: `drop-shadow(0 ${size * 0.08}px ${size * 0.12}px ${T.blue}25)`,
         }}
       >
-        <VMark size={size * 0.72} />
+        <VMark size={size * 0.66} />
       </div>
-      {dot(size * 0.09, "-8%", "88%", 1, T.blue)}
-      {dot(size * 0.07, "78%", "-4%", 2, "#60A5FA")}
-      {dot(size * 0.06, "12%", "-10%", 3, "#93C5FD")}
-      {dot(size * 0.08, "92%", "72%", 4, T.blueDeep)}
     </div>
   );
 }

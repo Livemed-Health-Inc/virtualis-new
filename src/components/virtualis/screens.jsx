@@ -76,7 +76,7 @@ export function Login() {
 
         <div
           style={{
-            marginTop: 20,
+            marginTop: 40,
             width: "100%",
             display: "flex",
             justifyContent: "center",
@@ -104,7 +104,8 @@ export function Login() {
             color: T.ink,
           }}
         >
-          <span style={{ width: 6, height: 6, borderRadius: 3, background: T.blue }} /> THE PLATFORM
+          <span style={{ width: 6, height: 6, borderRadius: 3, background: T.blue }} /> CLINICAL
+          COMMUNICATION
         </div>
 
         <h1
@@ -130,9 +131,8 @@ export function Login() {
             maxWidth: 440,
           }}
         >
-          Virtualis® is patented, AI-powered clinical communication with telehealth built in. Sent
-          once — triaged by acuity, matched to the on-call specialist, delivered with escalation
-          tracking.
+          AI-powered clinical communication with telehealth built in. Every message is triaged by
+          acuity and routed to the right on-call clinician.
         </p>
 
         <div
@@ -238,7 +238,7 @@ export function Login() {
               boxShadow: "0 8px 20px rgba(41,112,255,.3)",
             }}
           >
-            {busy ? "…" : mode === "in" ? "Sign In →" : "Create account →"}
+            {busy ? "…" : mode === "in" ? "Sign in" : "Create account"}
           </button>
           <button
             onClick={() => {
@@ -253,7 +253,7 @@ export function Login() {
               width: "100%",
               textAlign: "center",
               marginTop: 10,
-              border: "1px dashed " + T.line,
+              border: "1px solid " + T.line,
               color: T.sub,
               fontSize: 13.5,
               fontWeight: 600,
@@ -261,7 +261,7 @@ export function Login() {
               padding: "12px 0",
             }}
           >
-            Use demo login · demo@virtualis.health
+            Use demo login
           </button>
 
           <div
@@ -288,10 +288,10 @@ export function Login() {
               <rect x="4" y="10" width="16" height="11" rx="2.5" />
               <path d="M8 10V7a4 4 0 0 1 8 0v3" />
             </svg>
-            HIPAA-secure login with staff verification
+            HIPAA secure login
           </div>
           <div style={{ textAlign: "center", fontSize: 11, color: T.faint, marginTop: 18 }}>
-            Virtualis® · intelligent medicine
+            Virtualis®
           </div>
         </div>
       </div>

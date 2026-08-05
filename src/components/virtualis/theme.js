@@ -96,6 +96,9 @@ export const KEYFRAMES = `
   @keyframes pixelFloat1 { 0%,100% { transform: translate(0,0) } 25% { transform: translate(4px,-6px) } 50% { transform: translate(-2px,-10px) } 75% { transform: translate(-6px,-4px) } }
   @keyframes pixelFloat2 { 0%,100% { transform: translate(0,0) } 25% { transform: translate(-5px,4px) } 50% { transform: translate(3px,8px) } 75% { transform: translate(6px,2px) } }
   @keyframes pixelFloat3 { 0%,100% { transform: translate(0,0) } 33% { transform: translate(6px,2px) } 66% { transform: translate(-4px,6px) } }
+  @keyframes orbit { to { transform: rotate(360deg) } }
+  @keyframes orbitBack { to { transform: rotate(-360deg) } }
+  @keyframes ecgTrace { to { stroke-dashoffset: -300 } }
   @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important } }
   button:focus-visible, input:focus-visible, textarea:focus-visible { outline: 2px solid ${T.blue}; outline-offset: 2px; border-radius: 12px }
   ::placeholder { color: ${T.faint} }
