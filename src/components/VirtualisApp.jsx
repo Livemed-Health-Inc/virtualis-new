@@ -795,6 +795,25 @@ function Workstation() {
     <ConsultDetail t={detailThread} onBack={() => setDetailId(null)} />
   ) : null;
 
+  const vfab = (float) => (
+    <VFab
+      float={float}
+      onConsult={() => setConsulting(true)}
+      onAlis={() => setTab("alis")}
+      onPage={() => flash("Page sent · on-call will call back")}
+      onTelehealth={() => {
+        const target = activeThread || visible[0];
+        if (target) {
+          setOpenId(target.id);
+          setVideoId(target.id);
+        } else {
+          flash("Open a consult to start a video visit");
+        }
+      }}
+    />
+  );
+
+
   let content;
   if (!authed) {
     content = ready ? <Login /> : null;
