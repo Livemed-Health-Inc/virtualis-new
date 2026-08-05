@@ -321,7 +321,7 @@ function FacilityBar({ scope, active, setActive, counts }) {
     ...scope.map((id) => FACILITIES[id]),
   ];
   return (
-    <div style={{ display: "flex", gap: 8, overflowX: "auto", paddingBottom: 10 }}>
+    <div className="vx-hscroll" style={{ display: "flex", gap: 8, paddingBottom: 10 }}>
       {items.map((f) => {
         const on = active === f.id;
         const n = counts[f.id] || 0;
