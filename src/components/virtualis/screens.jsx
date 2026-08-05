@@ -218,7 +218,7 @@ export function Login() {
             onClick={() => {
               setErr("");
               setEmail("demo@virtualis.health");
-              setPw("virtualis123");
+              setPw("Vx7-Tele-Care-2026");
             }}
             style={{
               all: "unset",
