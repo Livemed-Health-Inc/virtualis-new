@@ -548,7 +548,7 @@ function VFab({ onConsult, onAlis, onPage, onTelehealth, float }) {
               alignItems: "center",
               justifyContent: "center",
               boxShadow: "0 12px 28px rgba(27,63,160,.42)",
-              transform: open ? "rotate(45deg) scale(.9)" : "none",
+              transform: open ? "scale(.92)" : "none",
               transition: "transform .34s cubic-bezier(.2,.8,.3,1)",
               pointerEvents: "auto",
             }}
