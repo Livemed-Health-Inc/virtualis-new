@@ -746,32 +746,35 @@ function Workstation() {
         all: "unset",
         cursor: "pointer",
         position: "absolute",
-        top: 14,
-        left: 12,
+        top: "50%",
+        left: 0,
+        transform: "translateY(-50%)",
         zIndex: 12,
-        width: 30,
-        height: 30,
-        borderRadius: 10,
+        width: 20,
+        height: 56,
+        borderRadius: "0 10px 10px 0",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        background: "rgba(255,255,255,.82)",
+        background: "rgba(255,255,255,.7)",
         border: "1px solid " + T.line,
-        backdropFilter: "blur(12px)",
-        boxShadow: "0 4px 14px rgba(16,24,40,.06)",
+        borderLeft: "none",
+        backdropFilter: "blur(14px)",
+        boxShadow: "0 6px 18px rgba(16,24,40,.07)",
       }}
     >
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
-        <rect x="3" y="4" width="18" height="16" rx="3" stroke={T.sub} strokeWidth="1.7" />
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
         <path
-          d="M9 4v16"
-          stroke={listCollapsed ? T.blue : T.sub}
-          strokeWidth="1.7"
+          d={listCollapsed ? "M9 5l7 7-7 7" : "M15 5l-7 7 7 7"}
+          stroke={T.sub}
+          strokeWidth="2.2"
           strokeLinecap="round"
+          strokeLinejoin="round"
         />
       </svg>
     </button>
   );
+
 
 
   const pushed = consulting ? (
