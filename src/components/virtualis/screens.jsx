@@ -241,15 +241,29 @@ export function Login() {
             {busy ? "…" : mode === "in" ? "Sign in" : "Create account"}
           </button>
           <button
-            onClick={() => {
+            onClick={async () => {
+              const DEMO = { email: "demo@virtualis.health", password: "Vx7-Tele-Care-2026" };
               setErr("");
-              setEmail("demo@virtualis.health");
-              setPw("Vx7-Tele-Care-2026");
+              setNote("");
+              setEmail(DEMO.email);
+              setPw(DEMO.password);
+              setBusy(true);
+              let { error } = await supabase.auth.signInWithPassword(DEMO);
+              if (error) {
+                await supabase.auth.signUp({
+                  ...DEMO,
+                  options: { emailRedirectTo: window.location.origin },
+                });
+                ({ error } = await supabase.auth.signInWithPassword(DEMO));
+              }
+              setBusy(false);
+              if (error) setErr(error.message);
             }}
+            disabled={busy}
             style={{
               all: "unset",
               boxSizing: "border-box",
-              cursor: "pointer",
+              cursor: busy ? "wait" : "pointer",
               width: "100%",
               textAlign: "center",
               marginTop: 10,
@@ -259,10 +273,12 @@ export function Login() {
               fontWeight: 600,
               borderRadius: 16,
               padding: "12px 0",
+              opacity: busy ? 0.6 : 1,
             }}
           >
-            Use demo login
+            {busy ? "…" : "Quick demo login"}
           </button>
+
 
           <div
             style={{
