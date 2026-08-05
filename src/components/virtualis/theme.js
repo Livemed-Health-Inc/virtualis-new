@@ -99,7 +99,7 @@ export const KEYFRAMES = `
   @keyframes orbit { to { transform: rotate(360deg) } }
   @keyframes orbitBack { to { transform: rotate(-360deg) } }
   @keyframes ecgTrace { to { stroke-dashoffset: -300 } }
-  @keyframes fanOut { from { transform: translate(0,0) scale(.35); opacity:0 } to { transform: translate(var(--fx), var(--fy)) scale(1); opacity:1 } }
+  
   @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important } }
   button:focus-visible, input:focus-visible, textarea:focus-visible { outline: 2px solid ${T.blue}; outline-offset: 2px; border-radius: 12px }
   ::placeholder { color: ${T.faint} }
