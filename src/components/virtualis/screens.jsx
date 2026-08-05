@@ -76,7 +76,7 @@ export function Login() {
 
         <div
           style={{
-            marginTop: 20,
+            marginTop: 40,
             width: "100%",
             display: "flex",
             justifyContent: "center",
