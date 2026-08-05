@@ -99,7 +99,7 @@ const TABS = [
   },
 ];
 
-function TabBar({ tab, setTab, unread, onNew }) {
+function TabBar({ tab, setTab, unread }) {
   const Item = ({ t: item }) => (
     <button
       onClick={() => setTab(item.k)}
