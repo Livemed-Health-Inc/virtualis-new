@@ -834,6 +834,10 @@ function Workstation() {
         </>
       ));
   } else {
+    const inboxTab = tab === "inbox" && !pushed;
+    const expandedInbox = inboxTab && !activeThread;
+    const showList = inboxTab && !(activeThread && listCollapsed);
+
     const secondary = pushed ? (
       pushed
     ) : tab === "inbox" ? (
@@ -846,9 +850,7 @@ function Workstation() {
           onVideo={() => setVideoId(activeThread.id)}
           onBack={() => setOpenId(null)}
         />
-      ) : (
-        emptyPane
-      )
+      ) : null
     ) : tab === "team" ? (
       <Directory onChat={openFromStaff} facilityScope={scope} staff={staff} />
     ) : tab === "alis" ? (
@@ -868,35 +870,59 @@ function Workstation() {
           onNew={() => setConsulting(true)}
           onProfile={() => setCreds(true)}
         />
-        {tab === "inbox" && (
+        {showList && (
           <div
             style={{
-              width: isDesktop ? "clamp(360px, 30vw, 460px)" : "clamp(344px, 44vw, 400px)",
+              width: expandedInbox
+                ? "100%"
+                : isDesktop
+                  ? "clamp(360px, 30vw, 460px)"
+                  : "clamp(344px, 44vw, 400px)",
+              flex: expandedInbox ? 1 : "0 0 auto",
               flexShrink: 0,
-              borderRight: "1px solid " + T.line,
+              borderRight: expandedInbox ? "none" : "1px solid " + T.line,
               display: "flex",
               flexDirection: "column",
               minHeight: 0,
+              minWidth: 0,
               background: T.bg,
+              transition: "width .28s cubic-bezier(.22,1,.36,1)",
             }}
           >
-            {inboxPane}
+            <div
+              style={{
+                flex: 1,
+                minHeight: 0,
+                width: "100%",
+                maxWidth: expandedInbox ? 880 : "none",
+                margin: expandedInbox ? "0 auto" : 0,
+                display: "flex",
+                flexDirection: "column",
+              }}
+            >
+              {inboxPane}
+            </div>
           </div>
         )}
-        <div
-          style={{
-            flex: 1,
-            minWidth: 0,
-            display: "flex",
-            flexDirection: "column",
-            minHeight: 0,
-            background: tab === "inbox" ? "#FBFCFE" : T.bg,
-          }}
-        >
-          {secondary}
-        </div>
+        {secondary && (
+          <div
+            style={{
+              flex: 1,
+              minWidth: 0,
+              display: "flex",
+              flexDirection: "column",
+              minHeight: 0,
+              position: "relative",
+              background: tab === "inbox" ? "#FBFCFE" : T.bg,
+            }}
+          >
+            {inboxTab && activeThread && listToggle}
+            {secondary}
+          </div>
+        )}
         {vfab(true)}
       </div>
+
 
     );
   }
