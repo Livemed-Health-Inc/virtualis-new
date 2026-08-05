@@ -105,4 +105,10 @@ export const KEYFRAMES = `
   ::-webkit-scrollbar { width: 8px; height: 8px }
   ::-webkit-scrollbar-thumb { background: #D8DDE6; border-radius: 8px }
   ::-webkit-scrollbar-track { background: transparent }
+  .vx-hscroll { overflow-x: auto; overflow-y: hidden; scrollbar-width: none; -ms-overflow-style: none; scroll-snap-type: x proximity; -webkit-overflow-scrolling: touch;
+    -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 10px, #000 calc(100% - 22px), transparent 100%);
+    mask-image: linear-gradient(90deg, transparent 0, #000 10px, #000 calc(100% - 22px), transparent 100%); }
+  .vx-hscroll::-webkit-scrollbar { display: none }
+  .vx-hscroll > * { scroll-snap-align: start }
 `;
+

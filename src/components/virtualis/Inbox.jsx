@@ -280,7 +280,7 @@ export default function Inbox({
 
   return (
     <>
-      <div style={{ padding: "14px 18px 12px", position: "relative", zIndex: 1 }}>
+      <div style={{ padding: "14px clamp(14px,2.2vw,22px) 12px", position: "relative", zIndex: 1 }}>
         {header}
         <div
           style={{
@@ -330,8 +330,10 @@ export default function Inbox({
           )}
         </div>
         <div
-          style={{ display: "flex", gap: 8, overflowX: "auto", marginTop: 13, paddingBottom: 2 }}
+          className="vx-hscroll"
+          style={{ display: "flex", gap: 8, marginTop: 13, paddingBottom: 2 }}
         >
+
           {pills.map((p) => {
             const active = filter === p.k,
               dark = p.k === "all";
@@ -372,7 +374,7 @@ export default function Inbox({
         style={{
           flex: 1,
           overflowY: "auto",
-          padding: "2px 15px 16px",
+          padding: "2px clamp(12px,2vw,20px) 20px",
           display: "flex",
           flexDirection: "column",
           gap: 10,

@@ -321,7 +321,7 @@ function FacilityBar({ scope, active, setActive, counts }) {
     ...scope.map((id) => FACILITIES[id]),
   ];
   return (
-    <div style={{ display: "flex", gap: 8, overflowX: "auto", paddingBottom: 10 }}>
+    <div className="vx-hscroll" style={{ display: "flex", gap: 8, paddingBottom: 10 }}>
       {items.map((f) => {
         const on = active === f.id;
         const n = counts[f.id] || 0;
@@ -881,7 +881,7 @@ function Workstation() {
         {tab === "inbox" && (
           <div
             style={{
-              width: isDesktop ? 400 : 340,
+              width: isDesktop ? "clamp(360px, 30vw, 460px)" : "clamp(344px, 44vw, 400px)",
               flexShrink: 0,
               borderRight: "1px solid " + T.line,
               display: "flex",
