@@ -881,7 +881,7 @@ function Workstation() {
         {tab === "inbox" && (
           <div
             style={{
-              width: isDesktop ? 400 : 340,
+              width: isDesktop ? "clamp(360px, 30vw, 460px)" : "clamp(320px, 40vw, 380px)",
               flexShrink: 0,
               borderRight: "1px solid " + T.line,
               display: "flex",
