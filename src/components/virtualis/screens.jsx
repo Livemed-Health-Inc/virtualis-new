@@ -49,13 +49,8 @@ export function Login() {
     if (mode === "up" && !data.session) setNote("Check your email to confirm your account.");
   };
 
-  const google = async () => {
-    setErr("");
-    const result = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: window.location.origin,
-    });
-    if (result.error) setErr("Google sign-in failed. Try again.");
-  };
+
+
 
   return (
     <div style={{ flex: 1, overflowY: "auto", display: "flex", justifyContent: "center" }}>
