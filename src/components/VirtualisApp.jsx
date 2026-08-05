@@ -598,6 +598,7 @@ function Workstation() {
   const [routing, setRouting] = useState(null);
   const [creds, setCreds] = useState(false);
   const [toast, setToast] = useState(null);
+  const [listCollapsed, setListCollapsed] = useState(false);
 
   const authed = !!session;
   /* Credentialing gate: nothing outside the physician's privileges is
