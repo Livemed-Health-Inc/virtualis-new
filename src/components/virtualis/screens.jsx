@@ -19,6 +19,7 @@ import {
   Empty,
   Wordmark,
   Lockup,
+  AnimatedLogo,
 } from "./ui";
 import { SPECIALTIES, SHIFTS, STAFF, ME, credentialedFacilities } from "./data";
 
