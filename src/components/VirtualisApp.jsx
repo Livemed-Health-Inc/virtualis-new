@@ -598,6 +598,7 @@ function Workstation() {
   const [routing, setRouting] = useState(null);
   const [creds, setCreds] = useState(false);
   const [toast, setToast] = useState(null);
+  const [listCollapsed, setListCollapsed] = useState(false);
 
   const authed = !!session;
   /* Credentialing gate: nothing outside the physician's privileges is
@@ -737,61 +738,44 @@ function Workstation() {
     />
   );
 
-  const emptyPane = (
-    <div
+  const listToggle = (
+    <button
+      onClick={() => setListCollapsed((v) => !v)}
+      title={listCollapsed ? "Show inbox" : "Collapse inbox"}
       style={{
-        flex: 1,
+        all: "unset",
+        cursor: "pointer",
+        position: "absolute",
+        top: "50%",
+        left: 0,
+        transform: "translateY(-50%)",
+        zIndex: 12,
+        width: 20,
+        height: 56,
+        borderRadius: "0 10px 10px 0",
         display: "flex",
-        flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
-        gap: 10,
-        padding: 32,
-        textAlign: "center",
+        background: "rgba(255,255,255,.7)",
+        border: "1px solid " + T.line,
+        borderLeft: "none",
+        backdropFilter: "blur(14px)",
+        boxShadow: "0 6px 18px rgba(16,24,40,.07)",
       }}
     >
-      <div
-        style={{
-          width: 64,
-          height: 64,
-          borderRadius: 32,
-          background: "#fff",
-          border: "1px solid " + T.line,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          boxShadow: "0 8px 24px rgba(16,24,40,.06)",
-        }}
-      >
-        <VMark size={32} />
-      </div>
-      <Wordmark size={20} />
-      <div style={{ fontSize: 14, color: T.sub, maxWidth: 320, lineHeight: 1.5 }}>
-        Select a consult to open the thread, patient context, and one-tap telehealth.
-      </div>
-      <div style={{ display: "flex", gap: 10, marginTop: 6 }}>
-        {["critical", "urgent", "routine"].map((k) => (
-          <span
-            key={k}
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: 7,
-              fontSize: 12,
-              fontWeight: 600,
-              color: T.sub,
-              background: "#fff",
-              border: "1px solid " + T.line,
-              borderRadius: 14,
-              padding: "6px 11px",
-            }}
-          >
-            <Glyph level={k} size={9} gap={2} w={3.5} /> {ACUITY[k].label}
-          </span>
-        ))}
-      </div>
-    </div>
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
+        <path
+          d={listCollapsed ? "M9 5l7 7-7 7" : "M15 5l-7 7 7 7"}
+          stroke={T.sub}
+          strokeWidth="2.2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+    </button>
   );
+
+
 
   const pushed = consulting ? (
     <NewConsult
@@ -853,6 +837,10 @@ function Workstation() {
         </>
       ));
   } else {
+    const inboxTab = tab === "inbox" && !pushed;
+    const expandedInbox = inboxTab && !activeThread;
+    const showList = inboxTab && !(activeThread && listCollapsed);
+
     const secondary = pushed ? (
       pushed
     ) : tab === "inbox" ? (
@@ -865,9 +853,7 @@ function Workstation() {
           onVideo={() => setVideoId(activeThread.id)}
           onBack={() => setOpenId(null)}
         />
-      ) : (
-        emptyPane
-      )
+      ) : null
     ) : tab === "team" ? (
       <Directory onChat={openFromStaff} facilityScope={scope} staff={staff} />
     ) : tab === "alis" ? (
@@ -887,35 +873,59 @@ function Workstation() {
           onNew={() => setConsulting(true)}
           onProfile={() => setCreds(true)}
         />
-        {tab === "inbox" && (
+        {showList && (
           <div
             style={{
-              width: isDesktop ? "clamp(360px, 30vw, 460px)" : "clamp(344px, 44vw, 400px)",
+              width: expandedInbox
+                ? "100%"
+                : isDesktop
+                  ? "clamp(360px, 30vw, 460px)"
+                  : "clamp(344px, 44vw, 400px)",
+              flex: expandedInbox ? 1 : "0 0 auto",
               flexShrink: 0,
-              borderRight: "1px solid " + T.line,
+              borderRight: expandedInbox ? "none" : "1px solid " + T.line,
               display: "flex",
               flexDirection: "column",
               minHeight: 0,
+              minWidth: 0,
               background: T.bg,
+              transition: "width .28s cubic-bezier(.22,1,.36,1)",
             }}
           >
-            {inboxPane}
+            <div
+              style={{
+                flex: 1,
+                minHeight: 0,
+                width: "100%",
+                maxWidth: expandedInbox ? 880 : "none",
+                margin: expandedInbox ? "0 auto" : 0,
+                display: "flex",
+                flexDirection: "column",
+              }}
+            >
+              {inboxPane}
+            </div>
           </div>
         )}
-        <div
-          style={{
-            flex: 1,
-            minWidth: 0,
-            display: "flex",
-            flexDirection: "column",
-            minHeight: 0,
-            background: tab === "inbox" ? "#FBFCFE" : T.bg,
-          }}
-        >
-          {secondary}
-        </div>
+        {secondary && (
+          <div
+            style={{
+              flex: 1,
+              minWidth: 0,
+              display: "flex",
+              flexDirection: "column",
+              minHeight: 0,
+              position: "relative",
+              background: tab === "inbox" ? "#FBFCFE" : T.bg,
+            }}
+          >
+            {inboxTab && activeThread && listToggle}
+            {secondary}
+          </div>
+        )}
         {vfab(true)}
       </div>
+
 
     );
   }
