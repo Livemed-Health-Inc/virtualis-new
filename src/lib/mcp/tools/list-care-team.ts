@@ -44,16 +44,17 @@ export default defineTool({
         online: s.online,
       }));
 
-    const shifts = Object.entries(SHIFTS as Record<string, Array<Record<string, string>>>).flatMap(
-      ([day, list]) =>
-        list.map((s) => ({
-          day: Number(day),
-          label: s.label,
-          facility: FACILITIES[s.facility]?.name ?? s.facility,
-          time: s.time,
-          acuity: s.acuity,
-        })),
+    type Shift = { label: string; facility: string; time: string; acuity: string };
+    const shifts = Object.entries(SHIFTS as Record<string, Shift[]>).flatMap(([day, list]) =>
+      list.map((s) => ({
+        day: Number(day),
+        label: s.label,
+        facility: FACILITIES[s.facility]?.name ?? s.facility,
+        time: s.time,
+        acuity: s.acuity,
+      })),
     );
+
 
     const result = {
       provider: { name: ME.name, role: ME.role, credentials: ME.credentials },
