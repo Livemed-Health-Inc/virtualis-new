@@ -385,8 +385,8 @@ function VFab({ onConsult, onAlis, onPage, onTelehealth, float }) {
 
   const Icon = ({ children }) => (
     <svg
-      width="23"
-      height="23"
+      width="20"
+      height="20"
       viewBox="0 0 24 24"
       fill="none"
       stroke={T.blue}
