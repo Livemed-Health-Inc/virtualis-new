@@ -89,7 +89,7 @@ export function Login() {
             style={{
               display: "flex",
               alignItems: "center",
-              gap: wide ? 28 : 0,
+              gap: wide ? 52 : 0,
               flexDirection: wide ? "row" : "column",
             }}
           >
