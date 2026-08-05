@@ -29,7 +29,7 @@ export function Lockup({ height = 34, light }) {
       src={logo.url}
       alt="Virtualis — intelligent medicine"
       style={{
-        height: `clamp(${Math.round(height * 0.7)}px, ${height / 10}vw, ${height}px)`,
+        height: `clamp(${Math.round(height * 0.85)}px, ${height / 5}vw, ${Math.round(height * 1.3)}px)`,
         width: "auto",
         maxWidth: "100%",
         objectFit: "contain",
