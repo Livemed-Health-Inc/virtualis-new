@@ -104,7 +104,8 @@ export function Login() {
             color: T.ink,
           }}
         >
-          <span style={{ width: 6, height: 6, borderRadius: 3, background: T.blue }} /> THE PLATFORM
+          <span style={{ width: 6, height: 6, borderRadius: 3, background: T.blue }} /> CLINICAL
+          COMMUNICATION
         </div>
 
         <h1
