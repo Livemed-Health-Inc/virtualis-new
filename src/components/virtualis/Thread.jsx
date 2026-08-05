@@ -22,16 +22,18 @@ const initialsOf = (n) =>
     .join("")
     .toUpperCase();
 
-export default function Thread({ t, onBack, onDetail, onVideo, embedded }) {
+export default function Thread({ t, onBack, onDetail, onVideo, embedded, onSend }) {
   const [draft, setDraft] = useState("");
   const [extra, setExtra] = useState([]);
   const [sheet, setSheet] = useState(null);
   const [ackd, setAckd] = useState(false);
   const endRef = useRef(null);
-  const msgs = [...t.msgs, ...extra];
+  /* Persisted messages arrive on `t.msgs`; `extra` only holds the optimistic
+     echo for the split second before the insert round-trips. */
+  const msgs = onSend ? t.msgs : [...t.msgs, ...extra];
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [extra.length, t.id]);
+  }, [msgs.length, t.id]);
   useEffect(() => {
     setExtra([]);
     setAckd(false);
@@ -39,8 +41,10 @@ export default function Thread({ t, onBack, onDetail, onVideo, embedded }) {
   }, [t.id]);
 
   const send = () => {
-    if (!draft.trim()) return;
-    setExtra((e) => [...e, { me: true, who: "You", text: draft.trim(), t: "Now" }]);
+    const text = draft.trim();
+    if (!text) return;
+    if (onSend) onSend(text);
+    else setExtra((e) => [...e, { me: true, who: "You", text, t: "Now" }]);
     setDraft("");
   };
 

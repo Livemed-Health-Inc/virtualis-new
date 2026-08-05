@@ -1,4 +1,7 @@
 import { useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { lovable } from "@/integrations/lovable/index";
+
 import {
   T,
   mono,
@@ -20,9 +23,40 @@ import {
 import { SPECIALTIES, SHIFTS, STAFF, ME, credentialedFacilities } from "./data";
 
 /* ── Login ─────────────────────────────────────────────────────── */
-export function Login({ onSignIn }) {
+export function Login() {
   const [email, setEmail] = useState("");
   const [pw, setPw] = useState("");
+  const [mode, setMode] = useState("in");
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState("");
+  const [note, setNote] = useState("");
+
+  const submit = async () => {
+    setErr("");
+    setNote("");
+    setBusy(true);
+    const fn =
+      mode === "in"
+        ? supabase.auth.signInWithPassword({ email, password: pw })
+        : supabase.auth.signUp({
+            email,
+            password: pw,
+            options: { emailRedirectTo: window.location.origin },
+          });
+    const { data, error } = await fn;
+    setBusy(false);
+    if (error) return setErr(error.message);
+    if (mode === "up" && !data.session) setNote("Check your email to confirm your account.");
+  };
+
+  const google = async () => {
+    setErr("");
+    const result = await lovable.auth.signInWithOAuth("google", {
+      redirect_uri: window.location.origin,
+    });
+    if (result.error) setErr("Google sign-in failed. Try again.");
+  };
+
   return (
     <div style={{ flex: 1, overflowY: "auto", display: "flex", justifyContent: "center" }}>
       <div
@@ -142,14 +176,34 @@ export function Login({ onSignIn }) {
             style={inputStyle}
           />
           <div style={{ textAlign: "right", marginTop: 12 }}>
-            <span style={{ fontSize: 13.5, color: T.blue, fontWeight: 570 }}>Forgot password?</span>
+            <button
+              onClick={() => setMode(mode === "in" ? "up" : "in")}
+              style={{
+                all: "unset",
+                cursor: "pointer",
+                fontSize: 13.5,
+                color: T.blue,
+                fontWeight: 570,
+              }}
+            >
+              {mode === "in" ? "Create an account" : "I already have an account"}
+            </button>
           </div>
+          {err && (
+            <div style={{ fontSize: 13, color: T.red, marginTop: 12, fontWeight: 560 }}>{err}</div>
+          )}
+          {note && (
+            <div style={{ fontSize: 13, color: T.green, marginTop: 12, fontWeight: 560 }}>
+              {note}
+            </div>
+          )}
           <button
-            onClick={onSignIn}
+            onClick={submit}
+            disabled={busy || !email || !pw}
             style={{
               all: "unset",
               boxSizing: "border-box",
-              cursor: "pointer",
+              cursor: busy ? "wait" : "pointer",
               width: "100%",
               textAlign: "center",
               marginTop: 18,
@@ -159,13 +213,14 @@ export function Login({ onSignIn }) {
               fontWeight: 650,
               borderRadius: 16,
               padding: "15px 0",
+              opacity: busy || !email || !pw ? 0.6 : 1,
               boxShadow: "0 8px 20px rgba(41,112,255,.3)",
             }}
           >
-            Sign In →
+            {busy ? "…" : mode === "in" ? "Sign In →" : "Create account →"}
           </button>
           <button
-            onClick={onSignIn}
+            onClick={google}
             style={{
               all: "unset",
               boxSizing: "border-box",
@@ -185,23 +240,27 @@ export function Login({ onSignIn }) {
               gap: 8,
             }}
           >
-            <svg
-              width="17"
-              height="17"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke={T.ink}
-              strokeWidth="1.9"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M7 3H5a2 2 0 0 0-2 2v2M17 3h2a2 2 0 0 1 2 2v2M7 21H5a2 2 0 0 1-2-2v-2M17 21h2a2 2 0 0 0 2-2v-2" />
-              <circle cx="9" cy="10" r="0.8" fill={T.ink} />
-              <circle cx="15" cy="10" r="0.8" fill={T.ink} />
-              <path d="M9 15c.8.8 1.8 1.2 3 1.2s2.2-.4 3-1.2" />
+            <svg width="17" height="17" viewBox="0 0 24 24" aria-hidden="true">
+              <path
+                fill="#4285F4"
+                d="M21.6 12.23c0-.68-.06-1.36-.18-2.03H12v3.84h5.4a4.6 4.6 0 0 1-2 3.03v2.5h3.23c1.9-1.74 2.97-4.3 2.97-7.34Z"
+              />
+              <path
+                fill="#34A853"
+                d="M12 22c2.7 0 4.96-.9 6.62-2.43l-3.23-2.5c-.9.6-2.05.95-3.39.95-2.6 0-4.8-1.76-5.6-4.12H3.08v2.58A10 10 0 0 0 12 22Z"
+              />
+              <path
+                fill="#FBBC05"
+                d="M6.4 13.9a6 6 0 0 1 0-3.82V7.5H3.08a10 10 0 0 0 0 9l3.32-2.6Z"
+              />
+              <path
+                fill="#EA4335"
+                d="M12 5.98c1.47 0 2.79.5 3.83 1.5l2.86-2.86C16.95 2.99 14.7 2 12 2A10 10 0 0 0 3.08 7.5L6.4 10.1c.8-2.37 3-4.12 5.6-4.12Z"
+              />
             </svg>
-            Sign in with Face ID
+            Continue with Google
           </button>
+
           <div
             style={{
               display: "flex",
@@ -238,10 +297,11 @@ export function Login({ onSignIn }) {
 }
 
 /* ── Directory ─────────────────────────────────────────────────── */
-export function Directory({ onChat, facilityScope }) {
+export function Directory({ onChat, facilityScope, staff = STAFF }) {
   const [seg, setSeg] = useState("All");
   const [q, setQ] = useState("");
-  const shown = STAFF.filter((s) => facilityScope.includes(s.facility))
+  const shown = staff
+    .filter((s) => facilityScope.includes(s.facility))
     .filter(
       (s) =>
         seg === "All" || (seg === "Physicians" ? s.role === "Physician" : s.role !== "Physician"),
@@ -1230,7 +1290,7 @@ export function ConsultDetail({ t, onBack }) {
 }
 
 /* ── Schedule ──────────────────────────────────────────────────── */
-export function Schedule({ facilityScope }) {
+export function Schedule({ facilityScope, shifts: schedule = SHIFTS }) {
   const days = ["Tue", "Wed", "Thu", "Fri", "Sat"];
   return (
     <>
@@ -1289,7 +1349,7 @@ export function Schedule({ facilityScope }) {
         }}
       >
         {[4, 5, 6, 7, 8].map((d, i) => {
-          const shifts = (SHIFTS[d] || []).filter((s) => facilityScope.includes(s.facility));
+          const shifts = (schedule[d] || []).filter((s) => facilityScope.includes(s.facility));
           const today = d === 4;
           return (
             <div
@@ -1392,7 +1452,7 @@ export function Schedule({ facilityScope }) {
 }
 
 /* ── Credentials sheet ─────────────────────────────────────────── */
-export function Credentials({ onClose }) {
+export function Credentials({ onClose, me = ME, onSignOut }) {
   return (
     <div
       onClick={onClose}
@@ -1432,10 +1492,10 @@ export function Credentials({ onClose }) {
           }}
         />
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-          <Avatar initials={ME.initials} team size={46} />
+          <Avatar initials={me.initials} team size={46} />
           <div>
-            <div style={{ fontSize: 17, fontWeight: 700, color: T.ink }}>{ME.name}</div>
-            <div style={{ fontSize: 12.5, color: T.sub }}>{ME.role} · Virtualis®</div>
+            <div style={{ fontSize: 17, fontWeight: 700, color: T.ink }}>{me.name}</div>
+            <div style={{ fontSize: 12.5, color: T.sub }}>{me.role} · Virtualis®</div>
           </div>
         </div>
         <div
@@ -1450,7 +1510,7 @@ export function Credentials({ onClose }) {
         >
           ACTIVE CREDENTIALS
         </div>
-        {ME.credentials.map((c) => (
+        {me.credentials.map((c) => (
           <div
             key={c.facility}
             style={{
@@ -1514,6 +1574,27 @@ export function Credentials({ onClose }) {
         >
           Close
         </button>
+        {onSignOut && (
+          <button
+            onClick={onSignOut}
+            style={{
+              all: "unset",
+              boxSizing: "border-box",
+              cursor: "pointer",
+              width: "100%",
+              textAlign: "center",
+              marginTop: 8,
+              color: T.red,
+              fontSize: 14.5,
+              fontWeight: 620,
+              borderRadius: 16,
+              padding: "12px 0",
+              border: "1px solid #FDE0DD",
+            }}
+          >
+            Sign out
+          </button>
+        )}
       </div>
     </div>
   );

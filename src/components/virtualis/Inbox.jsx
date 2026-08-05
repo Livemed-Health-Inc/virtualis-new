@@ -49,7 +49,7 @@ function EscalationPill({ thread, acked }) {
 }
 
 function Row({ t, ack, unreadCount, onOpen, selected, i }) {
-  const last = t.msgs[t.msgs.length - 1];
+  const last = (t.msgs || [])[(t.msgs || []).length - 1] || { text: t.reason || "", kind: null };
   return (
     <button
       onClick={onOpen}
