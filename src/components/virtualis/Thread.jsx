@@ -415,7 +415,7 @@ export default function Thread({ t, onBack, onDetail, onVideo, embedded, onSend 
                     {[
                       ["✓", "Acknowledge"],
                       ["👍", "Agree"],
-                      ["❗", "Escalate"],
+                      
                     ].map(([e, l]) => (
                       <button
                         key={l}
