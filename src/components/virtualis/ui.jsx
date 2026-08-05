@@ -1,59 +1,45 @@
 import { useEffect, useState } from "react";
 import { T, mono, font, ACUITY, FACILITIES, inputStyle } from "./theme";
-import logo from "@/assets/virtualis-logo.png.asset.json";
+import logo from "@/assets/virtualis-lockup.png.asset.json";
+import vmark from "@/assets/v-mark.png.asset.json";
 
-/* V mark — SVG redraw of the logo's swoosh + pixel motif so it stays
-   crisp at 14px and tintable on dark surfaces. */
+/* Trademarked V mark. `mono` renders it white for dark surfaces. */
 export function VMark({ size = 30, mono: white }) {
-  const id = "vg" + size + (white ? "m" : "");
   return (
-    <svg width={size} height={size} viewBox="0 0 32 32" fill="none" aria-hidden>
-      <defs>
-        <linearGradient id={id} x1="4" y1="4" x2="28" y2="28">
-          <stop offset="0" stopColor="#4C8DFF" />
-          <stop offset="1" stopColor="#1B3FA0" />
-        </linearGradient>
-      </defs>
-      <path
-        d="M11 6 C22 8 27 13 25.5 19 C24.2 24.2 19 27.5 14 28"
-        stroke={white ? "rgba(255,255,255,.55)" : "#38A0FF"}
-        strokeWidth="2.4"
-        strokeLinecap="round"
-        fill="none"
-        opacity=".85"
-      />
-      <path
-        d="M6 8 L14.5 26 C15.1 27.3 16.9 27.3 17.5 26 L26 8"
-        stroke={white ? "#fff" : `url(#${id})`}
-        strokeWidth="4.6"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        fill="none"
-      />
-      <rect x="3" y="3.6" width="3.4" height="3.4" rx="0.9" fill={white ? "#fff" : "#2E5CFF"} />
-      <rect
-        x="7.6"
-        y="1.4"
-        width="2.2"
-        height="2.2"
-        rx="0.7"
-        fill={white ? "#fff" : "#8FB6FF"}
-        opacity="0.9"
-      />
-    </svg>
+    <img
+      src={vmark.url}
+      alt="Virtualis"
+      style={{
+        height: size,
+        width: "auto",
+        maxWidth: "100%",
+        display: "block",
+        flexShrink: 0,
+        objectFit: "contain",
+        filter: white ? "brightness(0) invert(1)" : "none",
+      }}
+    />
   );
 }
 
-/* Full lockup from the trademark artwork. */
-export function Lockup({ height = 34 }) {
+/* Full lockup from the trademark artwork — fluid, never wider than its box. */
+export function Lockup({ height = 34, light }) {
   return (
     <img
       src={logo.url}
       alt="Virtualis — intelligent medicine"
-      style={{ height, width: "auto", display: "block" }}
+      style={{
+        height: `clamp(${Math.round(height * 0.7)}px, ${height / 10}vw, ${height}px)`,
+        width: "auto",
+        maxWidth: "100%",
+        objectFit: "contain",
+        display: "block",
+        filter: light ? "brightness(0) invert(1)" : "none",
+      }}
     />
   );
 }
+
 
 export function Wordmark({ size = 22, light }) {
   return (
