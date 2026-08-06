@@ -373,41 +373,32 @@ function FacilityBar({ scope, active, setActive, counts }) {
 
 function VFab({ onConsult, onAlis, onPage, onTelehealth, float }) {
   const [open, setOpen] = useState(false);
-  const [closing, setClosing] = useState(false);
-
-  const close = () => {
-    if (!open || closing) return;
-    setClosing(true);
-    setTimeout(() => {
-      setClosing(false);
-      setOpen(false);
-    }, 220);
-  };
 
   useEffect(() => {
     if (!open) return;
     const onKey = (e) => {
-      if (e.key === "Escape") close();
+      if (e.key === "Escape") setOpen(false);
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [open, closing]);
+  }, [open]);
 
   const Icon = ({ children }) => (
     <svg
-      width="18"
-      height="18"
+      width="21"
+      height="21"
       viewBox="0 0 24 24"
       fill="none"
-      stroke={T.blueDeep}
-      strokeWidth="1.9"
+      stroke={T.card}
+      strokeWidth="2"
       strokeLinecap="round"
       strokeLinejoin="round"
-      style={{ flexShrink: 0 }}
     >
       {children}
     </svg>
   );
+
+
 
   const actions = [
     {
@@ -450,11 +441,16 @@ function VFab({ onConsult, onAlis, onPage, onTelehealth, float }) {
     },
   ];
 
+  /* Quarter fan: each action gets its own indexed trajectory out of the V. */
+  const angles = float ? [168, 144, 120, 96] : [147, 113, 79, 45];
+  const radius = float ? 150 : 146;
+
+
   return (
     <>
       {open && (
         <div
-          onClick={close}
+          onClick={() => setOpen(false)}
           style={{ position: "absolute", inset: 0, zIndex: 40, background: "transparent" }}
         />
       )}
@@ -476,68 +472,79 @@ function VFab({ onConsult, onAlis, onPage, onTelehealth, float }) {
             width: 56,
             display: "flex",
             flexDirection: "column",
-            alignItems: "center",
+            alignItems: float ? "flex-end" : "center",
           }}
         >
-          {open && (
-            <div
-              style={{
-                position: "absolute",
-                bottom: 70,
-                right: float ? 0 : "auto",
-                left: float ? "auto" : "50%",
-                transform: float ? "none" : "translateX(-50%)",
-                display: "flex",
-                flexDirection: "column",
-                gap: 10,
-                pointerEvents: "auto",
-              }}
-            >
-              {actions.map((a, i) => {
-                const order = closing ? i : actions.length - 1 - i;
-                return (
-                  <button
-                    key={a.label}
-                    onClick={() => {
-                      close();
-                      a.run();
-                    }}
+          {open &&
+            actions.map((a, i) => {
+              const rad = (angles[i] * Math.PI) / 180;
+              const fx = Math.cos(rad) * radius;
+              const fy = -Math.sin(rad) * radius;
+              return (
+                <button
+                  key={a.label}
+                  onClick={() => {
+                    setOpen(false);
+                    a.run();
+                  }}
+                  style={{
+                    all: "unset",
+                    cursor: "pointer",
+                    boxSizing: "border-box",
+                    position: "absolute",
+                    left: "50%",
+                    bottom: 0,
+                    width: 64,
+                    marginLeft: -32,
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    gap: 7,
+                    pointerEvents: "auto",
+                    "--fx": `${fx}px`,
+                    "--fy": `${fy}px`,
+                    animation: `fanPop .42s ${i * 0.045}s cubic-bezier(.18,.9,.28,1.06) both`,
+                  }}
+                >
+                  <span
                     style={{
-                      all: "unset",
-                      cursor: "pointer",
-                      boxSizing: "border-box",
-                      width: 148,
+                      width: 52,
+                      height: 52,
+                      borderRadius: 26,
+                      background: T.blueDeep,
+                      border: `2px solid ${T.card}`,
+                      boxShadow: "0 10px 28px rgba(27,63,160,.38), 0 0 0 3px rgba(46,92,255,.14)",
                       display: "flex",
                       alignItems: "center",
-                      gap: 10,
-                      padding: "11px 16px",
-                      borderRadius: 999,
-                      background: "rgba(255,255,255,.82)",
-                      backdropFilter: "blur(18px) saturate(160%)",
-                      WebkitBackdropFilter: "blur(18px) saturate(160%)",
-                      border: "1px solid rgba(46,92,255,.18)",
-                      boxShadow:
-                        "0 1px 0 rgba(255,255,255,.9) inset, 0 10px 26px rgba(15,30,82,.16)",
-                      color: T.blueDeep,
-                      fontSize: 13.5,
-                      fontWeight: 650,
-                      letterSpacing: 0.1,
-                      whiteSpace: "nowrap",
-                      animation: `${closing ? "capsuleOut .2s" : "capsuleIn .34s"} ${
-                        order * 0.04
-                      }s cubic-bezier(.2,.9,.3,1.02) both`,
+                      justifyContent: "center",
+                      flexShrink: 0,
                     }}
                   >
                     {a.icon}
+                  </span>
+                  <span
+                    style={{
+                      fontSize: 11.5,
+                      fontWeight: 700,
+                      letterSpacing: 0.1,
+                      color: T.blueDeep,
+                      whiteSpace: "nowrap",
+                      padding: "2px 8px",
+                      borderRadius: 999,
+                      background: T.card,
+                      border: `1px solid ${T.line}`,
+                      boxShadow: "0 4px 12px rgba(27,63,160,.12)",
+                    }}
+                  >
+
                     {a.label}
-                  </button>
-                );
-              })}
-            </div>
-          )}
+                  </span>
+                </button>
+              );
+            })}
 
           <button
-            onClick={() => (open ? close() : setOpen(true))}
+            onClick={() => setOpen(!open)}
             aria-label="Quick actions"
             aria-expanded={open}
             style={{
@@ -551,31 +558,24 @@ function VFab({ onConsult, onAlis, onPage, onTelehealth, float }) {
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              boxShadow:
-                open && !closing
-                  ? "0 0 0 5px rgba(46,92,255,.13), 0 10px 26px rgba(27,63,160,.4)"
-                  : "0 0 0 0 rgba(46,92,255,.13), 0 12px 28px rgba(27,63,160,.42)",
-              transform: open && !closing ? "rotate(45deg) scale(.94)" : "none",
+              boxShadow: open
+                ? "0 0 0 1px rgba(190,214,255,.45), 0 14px 36px rgba(27,63,160,.55)"
+                : "0 12px 28px rgba(27,63,160,.42)",
+              transform: open ? "rotate(45deg) scale(.94)" : "none",
               transition: "transform .38s cubic-bezier(.2,.8,.3,1), box-shadow .3s ease",
               pointerEvents: "auto",
             }}
           >
-            <div
-              style={{
-                transform: open && !closing ? "rotate(-45deg)" : "none",
-                transition: "transform .38s cubic-bezier(.2,.8,.3,1)",
-                display: "flex",
-              }}
-            >
+            <div style={{ transform: open ? "rotate(-45deg)" : "none", display: "flex" }}>
               <VMark size={28} mono />
             </div>
           </button>
         </div>
       </div>
+
     </>
   );
 }
-
 
 export default function VirtualisApp() {
   return (
