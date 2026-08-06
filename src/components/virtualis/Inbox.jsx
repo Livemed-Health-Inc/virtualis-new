@@ -355,6 +355,7 @@ export default function Inbox({
     urgent: threads.filter((t) => t.acuity === "urgent").length,
     routine: threads.filter((t) => t.acuity === "routine").length,
   };
+  const [view, setView] = useState("acuity");
   const q = query.trim().toLowerCase();
   const shown = threads
     .filter((t) => filter === "all" || t.acuity === filter)
@@ -480,6 +481,41 @@ export default function Inbox({
             );
           })}
         </div>
+        <div
+          style={{
+            display: "flex",
+            gap: 4,
+            marginTop: 11,
+            padding: 4,
+            background: "#EEF0F4",
+            borderRadius: 14,
+          }}
+        >
+          {[
+            ["acuity", "Acuity"],
+            ["patient", "Patient"],
+          ].map(([k, label]) => (
+            <button
+              key={k}
+              onClick={() => setView(k)}
+              style={{
+                all: "unset",
+                cursor: "pointer",
+                flex: 1,
+                textAlign: "center",
+                padding: "7px 0",
+                borderRadius: 10,
+                fontSize: 13,
+                fontWeight: 620,
+                color: view === k ? "#fff" : T.sub,
+                background: view === k ? "linear-gradient(135deg,#2E5CFF,#1E3FCC)" : "transparent",
+                transition: "all .2s ease",
+              }}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
       </div>
 
       <div
@@ -502,7 +538,12 @@ export default function Inbox({
             }
           />
         )}
-        {bands.map(([band, list]) => (
+        {view === "patient" &&
+          groupByPatient(shown).map((g) => (
+            <PatientCard key={g.key} g={g} openThread={openThread} selectedId={selectedId} />
+          ))}
+        {view === "acuity" &&
+          bands.map(([band, list]) => (
           <div key={band} style={{ display: "flex", flexDirection: "column", gap: 10 }}>
             <div
               style={{
