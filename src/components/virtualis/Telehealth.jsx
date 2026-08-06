@@ -10,7 +10,7 @@ const VITALS = [
 ];
 
 export default function Telehealth({ t, onEnd }) {
-  const [stage, setStage] = useState("waiting"); // waiting → live → note
+  const [stage, setStage] = useState("waiting"); // waiting → live
   const [mic, setMic] = useState(true);
   const [cam, setCam] = useState(true);
   const [scribe, setScribe] = useState(true);
@@ -23,142 +23,6 @@ export default function Telehealth({ t, onEnd }) {
   }, [stage]);
 
   const a = ACUITY[t.acuity];
-
-  if (stage === "note") {
-    return (
-      <div
-        style={{
-          position: "absolute",
-          inset: 0,
-          zIndex: 75,
-          background: T.bg,
-          display: "flex",
-          flexDirection: "column",
-          animation: "fadeIn .25s ease",
-        }}
-      >
-        <div
-          style={{
-            padding: "16px 18px",
-            borderBottom: "1px solid " + T.line,
-            background: "#fff",
-            display: "flex",
-            alignItems: "center",
-            gap: 10,
-          }}
-        >
-          <span
-            style={{
-              width: 30,
-              height: 30,
-              borderRadius: 15,
-              background: "linear-gradient(135deg,#2E5CD6,#0F1E52)",
-              display: "inline-flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <VMark size={16} mono />
-          </span>
-          <div style={{ fontSize: 16.5, fontWeight: 700, color: T.ink }}>
-            ALIS-drafted encounter note
-          </div>
-        </div>
-        <div style={{ flex: 1, overflowY: "auto", padding: 18 }}>
-          <div
-            style={{
-              maxWidth: 780,
-              margin: "0 auto",
-              background: "#fff",
-              border: "1px solid " + T.line,
-              borderRadius: 20,
-              padding: 20,
-            }}
-          >
-            <div
-              style={{
-                fontFamily: mono,
-                fontSize: 10.5,
-                letterSpacing: 1.8,
-                color: T.faint,
-                fontWeight: 650,
-              }}
-            >
-              DRAFT · UNSIGNED · {fmtClock(elapsed)} ENCOUNTER
-            </div>
-            {[
-              [
-                "Subjective",
-                `${t.patient} seen by telehealth for ${t.reason || "clinical evaluation"}. Reports ongoing symptoms since this morning; denies new neurologic deficit.`,
-              ],
-              [
-                "Objective",
-                "Awake, alert, mildly diaphoretic on camera. HR 104, BP 96/58, SpO₂ 94% on 3L, temp 38.1 °C, RR 22.",
-              ],
-              [
-                "Assessment",
-                `${a.label} acuity presentation consistent with the referring team's concern. Differential and workup discussed with bedside RN.`,
-              ],
-              [
-                "Plan",
-                "Continue current therapy, repeat labs in 2 hours, bedside reassessment. Escalate to ICU if MAP < 65 despite fluids.",
-              ],
-            ].map(([h, b]) => (
-              <div key={h} style={{ marginTop: 15 }}>
-                <div
-                  style={{ fontSize: 13, fontWeight: 700, color: T.blueDeep, letterSpacing: 0.2 }}
-                >
-                  {h}
-                </div>
-                <div style={{ fontSize: 14.5, color: T.ink, lineHeight: 1.55, marginTop: 4 }}>
-                  {b}
-                </div>
-              </div>
-            ))}
-            <div style={{ display: "flex", gap: 10, marginTop: 22, flexWrap: "wrap" }}>
-              <button
-                onClick={onEnd}
-                style={{
-                  all: "unset",
-                  cursor: "pointer",
-                  flex: 1,
-                  minWidth: 150,
-                  textAlign: "center",
-                  background: "linear-gradient(135deg,#2E5CFF,#1E3FCC)",
-                  color: "#fff",
-                  fontSize: 15,
-                  fontWeight: 650,
-                  borderRadius: 15,
-                  padding: "14px 0",
-                  boxShadow: "0 8px 20px rgba(41,112,255,.28)",
-                }}
-              >
-                Sign &amp; file to chart
-              </button>
-              <button
-                onClick={onEnd}
-                style={{
-                  all: "unset",
-                  cursor: "pointer",
-                  flex: 1,
-                  minWidth: 150,
-                  textAlign: "center",
-                  background: "#F2F4F7",
-                  color: T.ink,
-                  fontSize: 15,
-                  fontWeight: 640,
-                  borderRadius: 15,
-                  padding: "14px 0",
-                }}
-              >
-                Save draft
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div
@@ -445,7 +309,7 @@ export default function Telehealth({ t, onEnd }) {
           </button>
         ))}
         <button
-          onClick={() => setStage("note")}
+          onClick={onEnd}
           style={{
             all: "unset",
             cursor: "pointer",
@@ -461,7 +325,7 @@ export default function Telehealth({ t, onEnd }) {
             boxShadow: "0 10px 24px rgba(240,68,56,.35)",
           }}
         >
-          End &amp; draft note
+          End visit
         </button>
       </div>
     </div>
