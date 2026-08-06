@@ -268,6 +268,7 @@ export function VirtualisProvider({ children }) {
     sendMessage,
     createThread,
     markRead,
+    updateProfile,
     signOut,
     reload: load,
   };
