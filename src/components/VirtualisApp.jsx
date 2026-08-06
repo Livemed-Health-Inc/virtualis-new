@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { T, font, mono, ACUITY, FACILITIES, useMediaQuery, KEYFRAMES } from "./virtualis/theme";
-import { VMark, Avatar, Glyph, Wordmark } from "./virtualis/ui";
+import { VMark, Avatar, Glyph, Wordmark, patientKey } from "./virtualis/ui";
 import { VirtualisProvider, useVirtualis } from "@/lib/virtualis/store";
 import Inbox from "./virtualis/Inbox";
 import Thread from "./virtualis/Thread";
