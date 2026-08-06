@@ -180,11 +180,22 @@ function Row({ t, ack, unreadCount, onOpen, selected, i }) {
           style={{
             display: "flex",
             flexDirection: "column",
+            alignItems: "center",
             justifyContent: "center",
+            gap: 7,
             marginRight: 13,
           }}
         >
           <Glyph level={t.acuity} pulse={t.acuity === "critical"} />
+          <span
+            style={{
+              width: 7,
+              height: 7,
+              borderRadius: 4,
+              background: T.blue,
+              boxShadow: "0 0 0 3px rgba(46,92,255,.14)",
+            }}
+          />
         </span>
       )}
       <div style={{ display: "flex", gap: 12, flex: 1, minWidth: 0 }}>
