@@ -223,8 +223,12 @@ export function VirtualisProvider({ children }) {
   const signOut = useCallback(async () => {
     await supabase.auth.signOut();
     setProfile(null);
+    setCredentials([]);
+    setStaff([]);
+    setShifts({});
     setThreadRows([]);
     setMessages([]);
+    setReads({});
   }, []);
 
   const value = {

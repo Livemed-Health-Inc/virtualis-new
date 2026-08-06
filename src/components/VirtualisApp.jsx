@@ -618,6 +618,24 @@ function Workstation() {
   const [listCollapsed, setListCollapsed] = useState(false);
 
   const authed = !!session;
+
+  /* Signing out must leave nothing behind: every overlay and view
+     selection resets the moment the session disappears. */
+  useEffect(() => {
+    if (authed) return;
+    setTab("inbox");
+    setFilter("all");
+    setQuery("");
+    setFacility("all");
+    setOpenId(null);
+    setDetailId(null);
+    setVideoId(null);
+    setConsulting(false);
+    setRouting(null);
+    setCreds(false);
+    setListCollapsed(false);
+  }, [authed]);
+
   /* Credentialing gate: nothing outside the physician's privileges is
      ever rendered — RLS enforces the same rule server-side. */
   const visible = threads.filter((t) => scope.includes(t.facility));
@@ -1014,8 +1032,8 @@ function Workstation() {
         </div>
       )}
       {content}
-      {routing && <RoutingScreen payload={routing} />}
-      {videoThread && (
+      {authed && routing && <RoutingScreen payload={routing} />}
+      {authed && videoThread && (
         <Telehealth
           t={videoThread}
           onEnd={() => {
@@ -1024,7 +1042,9 @@ function Workstation() {
           }}
         />
       )}
-      {creds && <Credentials me={me} onClose={() => setCreds(false)} onSignOut={signOut} />}
+      {authed && creds && (
+        <Credentials me={me} onClose={() => setCreds(false)} onSignOut={signOut} />
+      )}
     </div>
   );
 }
