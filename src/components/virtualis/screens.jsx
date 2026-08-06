@@ -53,7 +53,9 @@ export function Login() {
     if (mode === "up" && !data.session) setNote("Check your email to confirm your account.");
   };
 
-  const wide = useMediaQuery("(min-width: 900px)");
+  const wide = useMediaQuery(
+    "(min-width: 900px), (orientation: landscape) and (min-width: 700px)",
+  );
   const align = wide ? "flex-start" : "center";
 
   return (
