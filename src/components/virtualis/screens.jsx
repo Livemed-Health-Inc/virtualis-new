@@ -296,6 +296,7 @@ export function Login() {
                 const { data } = await supabase.auth.getUser();
                 if (data.user)
                   await supabase.from("thread_reads").delete().eq("user_id", data.user.id);
+                await reload?.();
               }
               setBusy(false);
               if (error) setErr(error.message);
