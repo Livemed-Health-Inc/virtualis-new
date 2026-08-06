@@ -450,3 +450,39 @@ export const fmtClock = (s) =>
   `${Math.floor(Math.abs(s) / 60)}:${String(Math.abs(s) % 60).padStart(2, "0")}`;
 
 export { T, mono, font, ACUITY, FACILITIES, inputStyle };
+
+/* Patient identity: MRN when we have it, otherwise name + facility. Used to
+   thread every consult for the same patient into one conversation group. */
+export const patientKey = (t) =>
+  t.mrn ? `mrn:${String(t.mrn).toLowerCase()}` : `${(t.patient || "").toLowerCase()}|${t.facility}`;
+
+const RANK = { critical: 0, urgent: 1, routine: 2 };
+
+export function groupByPatient(threads) {
+  const map = new Map();
+  threads.forEach((t) => {
+    const k = patientKey(t);
+    const g = map.get(k) || {
+      key: k,
+      patient: t.patient,
+      room: t.room,
+      mrn: t.mrn,
+      facility: t.facility,
+      acuity: t.acuity,
+      unread: 0,
+      time: t.time,
+      threads: [],
+    };
+    if (RANK[t.acuity] < RANK[g.acuity]) g.acuity = t.acuity;
+    g.unread += t.newCount || 0;
+    g.threads.push(t);
+    map.set(k, g);
+  });
+  return [...map.values()]
+    .map((g) => ({
+      ...g,
+      threads: g.threads.sort((a, b) => RANK[a.acuity] - RANK[b.acuity]),
+      time: g.threads[0]?.time,
+    }))
+    .sort((a, b) => RANK[a.acuity] - RANK[b.acuity] || b.unread - a.unread);
+}
