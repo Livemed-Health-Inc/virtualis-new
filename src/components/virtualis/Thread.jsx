@@ -21,7 +21,7 @@ const initialsOf = (n) =>
     .join("")
     .toUpperCase();
 
-export default function Thread({ t, onBack, onDetail, onVideo, embedded, onSend }) {
+export default function Thread({ t, onBack, onDetail, onVideo, embedded, onSend, related = [], onOpenThread }) {
   const [draft, setDraft] = useState("");
   const [extra, setExtra] = useState([]);
   const [sheet, setSheet] = useState(null);
