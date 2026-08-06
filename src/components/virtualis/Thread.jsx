@@ -21,7 +21,7 @@ const initialsOf = (n) =>
     .join("")
     .toUpperCase();
 
-export default function Thread({ t, onBack, onDetail, onVideo, embedded, onSend }) {
+export default function Thread({ t, onBack, onDetail, onVideo, embedded, onSend, related = [], onOpenThread }) {
   const [draft, setDraft] = useState("");
   const [extra, setExtra] = useState([]);
   const [sheet, setSheet] = useState(null);
@@ -196,7 +196,51 @@ export default function Thread({ t, onBack, onDetail, onVideo, embedded, onSend 
             </span>
           </button>
         )}
-
+        {related.length > 0 && (
+          <div style={{ marginTop: 9 }}>
+            <div
+              style={{
+                fontFamily: mono,
+                fontSize: 9.5,
+                letterSpacing: 1.6,
+                color: T.faint,
+                textTransform: "uppercase",
+                marginBottom: 6,
+              }}
+            >
+              Also for this patient
+            </div>
+            <div className="vx-hscroll" style={{ display: "flex", gap: 7 }}>
+              {related.map((r) => (
+                <button
+                  key={r.id}
+                  onClick={() => onOpenThread?.(r.id)}
+                  style={{
+                    all: "unset",
+                    cursor: "pointer",
+                    flexShrink: 0,
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: 7,
+                    fontSize: 12.5,
+                    fontWeight: 600,
+                    color: T.ink,
+                    background: "#fff",
+                    border: "1px solid " + T.line,
+                    borderRadius: 18,
+                    padding: "7px 13px",
+                  }}
+                >
+                  <Glyph level={r.acuity} size={8} gap={1.5} w={3.2} />
+                  {r.team ? r.members : r.context}
+                  {r.newCount > 0 && (
+                    <span style={{ color: T.blue, fontWeight: 700 }}>{r.newCount}</span>
+                  )}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
       <div

@@ -201,9 +201,12 @@ export function VirtualisProvider({ children }) {
           facility_id: input.facility,
           patient: input.patient || "—",
           room: input.room || "—",
+          mrn: input.mrn || null,
           acuity: input.acuity ?? "routine",
           reason: input.reason ?? "",
           confidence: input.confidence ?? 0,
+          is_team: !!input.team,
+          members: input.members ?? null,
           created_by: userId,
         })
         .select()

@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   T,
   mono,
@@ -9,6 +10,7 @@ import {
   DoorIcon,
   Empty,
   font,
+  groupByPatient,
 } from "./ui";
 
 const initialsOf = (n) =>
@@ -19,6 +21,116 @@ const initialsOf = (n) =>
     .join("")
     .toUpperCase();
 
+
+/* One patient, every specialty consult opened on them. */
+function PatientCard({ g, openThread, selectedId }) {
+  return (
+    <div
+      style={{
+        background: "#fff",
+        border: "1px solid " + (g.threads.some((t) => t.id === selectedId) ? "#C9DBFF" : T.line),
+        borderRadius: 20,
+        padding: 14,
+        display: "flex",
+        flexDirection: "column",
+        gap: 11,
+      }}
+    >
+      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+        <Avatar initials={initialsOf(g.patient)} size={38} />
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div
+            style={{
+              fontSize: 15,
+              fontWeight: 660,
+              color: T.ink,
+              letterSpacing: -0.2,
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+            }}
+          >
+            {g.patient}
+          </div>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 7,
+              marginTop: 3,
+              fontSize: 11.5,
+              color: T.sub,
+            }}
+          >
+            <FacilityChip id={g.facility} />
+            {g.mrn && <span style={{ fontFamily: mono, fontSize: 10.5 }}>MRN {g.mrn}</span>}
+            <span>· Room {g.room}</span>
+          </div>
+        </div>
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <Glyph level={g.acuity} size={13} gap={2.5} w={4.5} />
+          {g.unread > 0 && (
+            <span
+              style={{
+                minWidth: 20,
+                textAlign: "center",
+                fontSize: 11,
+                fontWeight: 700,
+                color: "#fff",
+                background: ACUITY[g.acuity].color,
+                borderRadius: 10,
+                padding: "2px 6px",
+              }}
+            >
+              {g.unread}
+            </span>
+          )}
+        </div>
+      </div>
+      <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+        {g.threads.map((t) => (
+          <button
+            key={t.id}
+            onClick={() => openThread(t.id)}
+            style={{
+              all: "unset",
+              boxSizing: "border-box",
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              gap: 9,
+              width: "100%",
+              padding: "9px 11px",
+              borderRadius: 14,
+              background: t.id === selectedId ? "#EEF4FF" : "#F7F8FA",
+              border: "1px solid " + (t.id === selectedId ? "#D6E4FF" : T.line),
+            }}
+          >
+            <Glyph level={t.acuity} size={9} gap={1.6} w={3.4} />
+            <span
+              style={{
+                fontSize: 13,
+                fontWeight: 600,
+                color: T.ink,
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                flex: 1,
+                minWidth: 0,
+              }}
+            >
+              {t.team ? t.members : t.context}
+            </span>
+            {t.newCount > 0 && (
+              <span style={{ fontSize: 11, fontWeight: 700, color: T.blue }}>{t.newCount}</span>
+            )}
+            <span style={{ fontSize: 11, color: T.faint }}>{t.time}</span>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 function Row({ t, ack, unreadCount, onOpen, selected, i }) {
   const last = (t.msgs || [])[(t.msgs || []).length - 1] || { text: t.reason || "", kind: null };
@@ -243,6 +355,7 @@ export default function Inbox({
     urgent: threads.filter((t) => t.acuity === "urgent").length,
     routine: threads.filter((t) => t.acuity === "routine").length,
   };
+  const [view, setView] = useState("acuity");
   const q = query.trim().toLowerCase();
   const shown = threads
     .filter((t) => filter === "all" || t.acuity === filter)
@@ -368,6 +481,41 @@ export default function Inbox({
             );
           })}
         </div>
+        <div
+          style={{
+            display: "flex",
+            gap: 4,
+            marginTop: 11,
+            padding: 4,
+            background: "#EEF0F4",
+            borderRadius: 14,
+          }}
+        >
+          {[
+            ["acuity", "Acuity"],
+            ["patient", "Patient"],
+          ].map(([k, label]) => (
+            <button
+              key={k}
+              onClick={() => setView(k)}
+              style={{
+                all: "unset",
+                cursor: "pointer",
+                flex: 1,
+                textAlign: "center",
+                padding: "7px 0",
+                borderRadius: 10,
+                fontSize: 13,
+                fontWeight: 620,
+                color: view === k ? "#fff" : T.sub,
+                background: view === k ? "linear-gradient(135deg,#2E5CFF,#1E3FCC)" : "transparent",
+                transition: "all .2s ease",
+              }}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
       </div>
 
       <div
@@ -390,7 +538,12 @@ export default function Inbox({
             }
           />
         )}
-        {bands.map(([band, list]) => (
+        {view === "patient" &&
+          groupByPatient(shown).map((g) => (
+            <PatientCard key={g.key} g={g} openThread={openThread} selectedId={selectedId} />
+          ))}
+        {view === "acuity" &&
+          bands.map(([band, list]) => (
           <div key={band} style={{ display: "flex", flexDirection: "column", gap: 10 }}>
             <div
               style={{
