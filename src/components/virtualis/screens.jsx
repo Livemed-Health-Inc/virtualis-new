@@ -92,7 +92,7 @@ export function Login() {
               display: "flex",
               alignItems: "center",
               flexDirection: "column",
-              marginLeft: wide ? -32 : 0,
+              marginLeft: 0,
             }}
           >
             <AnimatedLogo size={wide ? 138 : 118} />
