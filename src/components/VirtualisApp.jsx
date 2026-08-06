@@ -529,8 +529,13 @@ function VFab({ onConsult, onAlis, onPage, onTelehealth, float }) {
                       letterSpacing: 0.1,
                       color: T.ink,
                       whiteSpace: "nowrap",
+                      padding: "2px 8px",
+                      borderRadius: 999,
+                      background: "rgba(255,255,255,.94)",
+                      boxShadow: "0 2px 8px rgba(16,24,40,.06)",
                     }}
                   >
+
                     {a.label}
                   </span>
                 </button>
