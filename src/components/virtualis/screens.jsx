@@ -1131,7 +1131,7 @@ export function NewConsult({ onBack, onSend, facilityScope, defaultFacility }) {
 
           <button
             disabled={!ready}
-            onClick={() => onSend({ patient, reason, acuity, spec, facility, telehealth })}
+            onClick={() => onSend({ patient, mrn, reason, acuity, spec, facility, telehealth })}
             style={{
               all: "unset",
               boxSizing: "border-box",
@@ -1717,7 +1717,7 @@ export function RoutingScreen({ payload }) {
     { t: "Acuity triaged", d: `${a.label} — glyph assigned`, delay: 0.2 },
     {
       t: "Credentialed on-call matched",
-      d: `Dr. E. Vasquez · ${payload.spec} · 96% match`,
+      d: `${[].concat(payload.spec).join(" · ")} · 96% match`,
       delay: 1.0,
     },
     {
