@@ -91,19 +91,15 @@ export function Login() {
             style={{
               display: "flex",
               alignItems: "center",
-              gap: wide ? 52 : 0,
-              flexDirection: wide ? "row" : "column",
+              flexDirection: "column",
             }}
           >
             <AnimatedLogo size={wide ? 132 : 118} />
-            <div
-              style={{
-                marginTop: wide ? 0 : 36,
-                animation: "rise .55s .1s ease backwards",
-              }}
-            >
-              <Lockup height={wide ? 56 : 54} />
-            </div>
+            {!wide && (
+              <div style={{ marginTop: 36, animation: "rise .55s .1s ease backwards" }}>
+                <Lockup height={54} />
+              </div>
+            )}
           </div>
 
           <div
