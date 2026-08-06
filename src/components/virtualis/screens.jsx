@@ -91,19 +91,15 @@ export function Login() {
             style={{
               display: "flex",
               alignItems: "center",
-              gap: wide ? 52 : 0,
-              flexDirection: wide ? "row" : "column",
+              flexDirection: "column",
             }}
           >
             <AnimatedLogo size={wide ? 132 : 118} />
-            <div
-              style={{
-                marginTop: wide ? 0 : 36,
-                animation: "rise .55s .1s ease backwards",
-              }}
-            >
-              <Lockup height={wide ? 56 : 54} />
-            </div>
+            {!wide && (
+              <div style={{ marginTop: 36, animation: "rise .55s .1s ease backwards" }}>
+                <Lockup height={54} />
+              </div>
+            )}
           </div>
 
           <div
@@ -196,6 +192,12 @@ export function Login() {
           </div>
         </div>
 
+        <div style={{ minWidth: 0, display: "flex", flexDirection: "column", alignItems: "center" }}>
+        {wide && (
+          <div style={{ marginBottom: 22, animation: "rise .55s .1s ease backwards" }}>
+            <Lockup height={56} />
+          </div>
+        )}
         <div
           style={{
             background: "#fff",
@@ -308,6 +310,7 @@ export function Login() {
           <div style={{ textAlign: "center", fontSize: 11, color: T.faint, marginTop: 18 }}>
             Virtualis®
           </div>
+        </div>
         </div>
       </div>
     </div>
