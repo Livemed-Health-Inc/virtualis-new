@@ -1032,8 +1032,8 @@ function Workstation() {
         </div>
       )}
       {content}
-      {routing && <RoutingScreen payload={routing} />}
-      {videoThread && (
+      {authed && routing && <RoutingScreen payload={routing} />}
+      {authed && videoThread && (
         <Telehealth
           t={videoThread}
           onEnd={() => {
@@ -1042,7 +1042,9 @@ function Workstation() {
           }}
         />
       )}
-      {creds && <Credentials me={me} onClose={() => setCreds(false)} onSignOut={signOut} />}
+      {authed && creds && (
+        <Credentials me={me} onClose={() => setCreds(false)} onSignOut={signOut} />
+      )}
     </div>
   );
 }
