@@ -192,6 +192,12 @@ export function Login() {
           </div>
         </div>
 
+        <div style={{ minWidth: 0, display: "flex", flexDirection: "column", alignItems: "center" }}>
+        {wide && (
+          <div style={{ marginBottom: 22, animation: "rise .55s .1s ease backwards" }}>
+            <Lockup height={56} />
+          </div>
+        )}
         <div
           style={{
             background: "#fff",
