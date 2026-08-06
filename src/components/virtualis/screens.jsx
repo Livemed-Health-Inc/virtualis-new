@@ -800,6 +800,15 @@ export function NewConsult({ onBack, onSend, facilityScope, defaultFacility }) {
               placeholder={mode === "Existing Patient" ? "Search by name or MRN…" : "Full name"}
               style={inputStyle}
             />
+            <div style={{ fontSize: 14, fontWeight: 620, color: T.ink, margin: "15px 0 7px" }}>
+              MRN <span style={{ color: T.faint, fontWeight: 500 }}>optional</span>
+            </div>
+            <input
+              value={mrn}
+              onChange={(e) => setMrn(e.target.value)}
+              placeholder="Links every consult for this patient"
+              style={inputStyle}
+            />
             <div
               style={{
                 display: "flex",
