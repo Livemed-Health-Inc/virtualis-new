@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { T, mono, ACUITY, VMark, Avatar, VideoIcon, FacilityChip, useTicker, fmtClock } from "./ui";
+import { T, mono, VMark, Avatar, VideoIcon, FacilityChip, useTicker, fmtClock } from "./ui";
 
 const VITALS = [
   { k: "HR", v: "104", u: "bpm", warn: true },
@@ -21,8 +21,6 @@ export default function Telehealth({ t, onEnd }) {
     const id = setTimeout(() => setStage("live"), 2400);
     return () => clearTimeout(id);
   }, [stage]);
-
-  const a = ACUITY[t.acuity];
 
   return (
     <div
