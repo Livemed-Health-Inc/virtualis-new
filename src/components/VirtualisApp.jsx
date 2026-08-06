@@ -814,6 +814,10 @@ function Workstation() {
   );
 
 
+  const related = activeThread
+    ? visible.filter((t) => t.id !== activeThread.id && patientKey(t) === patientKey(activeThread))
+    : [];
+
   let content;
   if (!authed) {
     content = ready ? <Login /> : null;
@@ -823,6 +827,8 @@ function Workstation() {
       (activeThread ? (
         <Thread
           t={activeThread}
+          related={related}
+          onOpenThread={setOpenId}
           onBack={() => setOpenId(null)}
           onSend={(text) => sendMessage(activeThread.id, text)}
           onDetail={() => setDetailId(activeThread.id)}
@@ -854,6 +860,8 @@ function Workstation() {
       activeThread ? (
         <Thread
           t={activeThread}
+          related={related}
+          onOpenThread={setOpenId}
           embedded
           onSend={(text) => sendMessage(activeThread.id, text)}
           onDetail={() => setDetailId(activeThread.id)}
