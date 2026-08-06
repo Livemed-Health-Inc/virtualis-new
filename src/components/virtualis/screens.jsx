@@ -1716,7 +1716,10 @@ export function RoutingScreen({ payload }) {
   const steps = [
     { t: "Acuity triaged", d: `${a.label} — glyph assigned`, delay: 0.2 },
     {
-      t: "Credentialed on-call matched",
+      t:
+        [].concat(payload.spec).length > 1
+          ? "Group consult assembled"
+          : "Credentialed on-call matched",
       d: `${[].concat(payload.spec).join(" · ")} · 96% match`,
       delay: 1.0,
     },
