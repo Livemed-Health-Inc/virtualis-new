@@ -305,6 +305,7 @@ export function Login() {
             Virtualis®
           </div>
         </div>
+        </div>
       </div>
     </div>
   );
