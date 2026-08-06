@@ -442,8 +442,9 @@ function VFab({ onConsult, onAlis, onPage, onTelehealth, float }) {
   ];
 
   /* Quarter fan: each action gets its own indexed trajectory out of the V. */
-  const angles = float ? [176, 143, 110, 77] : [154, 118, 82, 46];
-  const radius = float ? 108 : 100;
+  const angles = float ? [180, 146, 112, 78] : [147, 113, 79, 45];
+  const radius = float ? 130 : 126;
+
 
   return (
     <>
