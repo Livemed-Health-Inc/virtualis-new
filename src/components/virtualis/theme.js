@@ -82,7 +82,8 @@ export function useMediaQuery(query) {
 export const KEYFRAMES = `
   @keyframes slideIn { from { transform: translateX(28px); opacity:.4 } to { transform: translateX(0); opacity:1 } }
   @keyframes rise { from { transform: translateY(12px); opacity:0 } to { transform: translateY(0); opacity:1 } }
-  @keyframes fanPop { from { transform: translate(0,0) scale(.4); opacity:0 } 70% { transform: translate(calc(var(--fx) * 1.04), calc(var(--fy) * 1.04)) scale(1.04); opacity:1 } to { transform: translate(var(--fx), var(--fy)) scale(1); opacity:1 } }
+  @keyframes capsuleIn { from { transform: translateY(14px) scale(.92); opacity:0 } to { transform: translateY(0) scale(1); opacity:1 } }
+  @keyframes capsuleOut { from { transform: translateY(0) scale(1); opacity:1 } to { transform: translateY(12px) scale(.94); opacity:0 } }
 
   @keyframes fadeIn { from { opacity:0 } to { opacity:1 } }
   @keyframes drift { 0%,100% { transform: translate(0,0) } 50% { transform: translate(-14px,10px) } }
