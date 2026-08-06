@@ -441,20 +441,16 @@ function VFab({ onConsult, onAlis, onPage, onTelehealth, float }) {
     },
   ];
 
+  /* Quarter fan: each action gets its own indexed trajectory out of the V. */
+  const angles = float ? [176, 143, 110, 77] : [154, 118, 82, 46];
+  const radius = float ? 108 : 100;
+
   return (
     <>
       {open && (
         <div
           onClick={() => setOpen(false)}
-          style={{
-            position: "absolute",
-            inset: 0,
-            background:
-              "radial-gradient(120% 80% at 50% 100%, rgba(20,44,120,.55), rgba(7,11,22,.62))",
-            backdropFilter: "blur(16px) saturate(140%)",
-            zIndex: 40,
-            animation: "fadeIn .2s ease",
-          }}
+          style={{ position: "absolute", inset: 0, zIndex: 40, background: "transparent" }}
         />
       )}
       <div
@@ -478,35 +474,12 @@ function VFab({ onConsult, onAlis, onPage, onTelehealth, float }) {
             alignItems: float ? "flex-end" : "center",
           }}
         >
-          {open && (
-            <div
-              style={{
-                position: "absolute",
-                bottom: 72,
-                ...(float
-                  ? { right: 0 }
-                  : { left: "50%", marginLeft: 28, transform: "translateX(-100%)" }),
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "flex-end",
-                gap: 14,
-                pointerEvents: "auto",
-              }}
-            >
-              {/* light beam connecting the orbs to the V */}
-              <span
-                style={{
-                  position: "absolute",
-                  right: 27,
-                  top: 6,
-                  bottom: -46,
-                  width: 1,
-                  background:
-                    "linear-gradient(180deg, rgba(140,180,255,0), rgba(140,180,255,.55), rgba(140,180,255,0))",
-                  pointerEvents: "none",
-                }}
-              />
-              {actions.map((a, i) => (
+          {open &&
+            actions.map((a, i) => {
+              const rad = (angles[i] * Math.PI) / 180;
+              const fx = Math.cos(rad) * radius;
+              const fy = -Math.sin(rad) * radius;
+              return (
                 <button
                   key={a.label}
                   onClick={() => {
@@ -517,38 +490,29 @@ function VFab({ onConsult, onAlis, onPage, onTelehealth, float }) {
                     all: "unset",
                     cursor: "pointer",
                     boxSizing: "border-box",
+                    position: "absolute",
+                    left: "50%",
+                    bottom: 0,
+                    width: 64,
+                    marginLeft: -32,
                     display: "flex",
+                    flexDirection: "column",
                     alignItems: "center",
-                    gap: 12,
-                    whiteSpace: "nowrap",
-                    animation: `rise .34s ${(actions.length - 1 - i) * 0.05}s cubic-bezier(.2,.8,.3,1) both`,
+                    gap: 7,
+                    pointerEvents: "auto",
+                    "--fx": `${fx}px`,
+                    "--fy": `${fy}px`,
+                    animation: `fanPop .42s ${i * 0.045}s cubic-bezier(.18,.9,.28,1.06) both`,
                   }}
                 >
                   <span
                     style={{
-                      fontFamily: mono,
-                      fontSize: 10.5,
-                      letterSpacing: 1.9,
-                      fontWeight: 650,
-                      textTransform: "uppercase",
-                      color: "rgba(233,240,255,.92)",
-                      textShadow: "0 1px 10px rgba(6,12,28,.6)",
-                    }}
-                  >
-                    {a.label}
-                  </span>
-                  <span
-                    style={{
-                      position: "relative",
-                      width: 54,
-                      height: 54,
-                      borderRadius: 27,
-                      background:
-                        "linear-gradient(150deg, rgba(255,255,255,.20), rgba(120,160,255,.08))",
-                      border: "1px solid rgba(190,214,255,.30)",
-                      backdropFilter: "blur(14px) saturate(160%)",
-                      boxShadow:
-                        "inset 0 1px 0 rgba(255,255,255,.35), 0 10px 26px rgba(6,14,40,.38)",
+                      width: 52,
+                      height: 52,
+                      borderRadius: 26,
+                      background: T.card,
+                      border: "1px solid " + T.line,
+                      boxShadow: "0 8px 22px rgba(16,24,40,.10)",
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
@@ -557,10 +521,21 @@ function VFab({ onConsult, onAlis, onPage, onTelehealth, float }) {
                   >
                     {a.icon}
                   </span>
+                  <span
+                    style={{
+                      fontSize: 11.5,
+                      fontWeight: 600,
+                      letterSpacing: 0.1,
+                      color: T.ink,
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {a.label}
+                  </span>
                 </button>
-              ))}
-            </div>
-          )}
+              );
+            })}
+
           <button
             onClick={() => setOpen(!open)}
             aria-label="Quick actions"
