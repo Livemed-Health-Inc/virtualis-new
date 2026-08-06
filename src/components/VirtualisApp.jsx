@@ -588,8 +588,13 @@ export default function VirtualisApp() {
 }
 
 function Workstation() {
-  const isDesktop = useMediaQuery("(min-width: 1100px)");
-  const isTablet = useMediaQuery("(min-width: 760px)");
+  // Landscape phones (short but wide) get the full web layout too.
+  const isDesktop = useMediaQuery(
+    "(min-width: 1100px), (orientation: landscape) and (min-width: 700px)",
+  );
+  const isTablet = useMediaQuery(
+    "(min-width: 760px), (orientation: landscape) and (min-width: 640px)",
+  );
   const multiPane = isTablet;
 
   const {
