@@ -148,6 +148,14 @@ export function VirtualisProvider({ children }) {
       name: profile?.name ?? "Clinician",
       initials: profile?.initials ?? "MD",
       role: profile?.role ?? "Virtual Provider",
+      dept: profile?.dept ?? "Internal Medicine",
+      email: session?.user?.email ?? "",
+      prefs: profile?.notification_prefs ?? {
+        critical: true,
+        urgent: true,
+        routine: false,
+        quietOffShift: true,
+      },
       homeFacility: profile?.home_facility ?? scope[0] ?? "saint",
       credentials: credentials.map((c) => ({
         facility: c.facility_id,
@@ -155,7 +163,16 @@ export function VirtualisProvider({ children }) {
         expires: c.expires_on,
       })),
     }),
-    [profile, credentials, scope],
+    [profile, credentials, scope, session],
+  );
+
+  const updateProfile = useCallback(
+    async (patch) => {
+      if (!userId) return;
+      setProfile((p) => ({ ...p, ...patch }));
+      await supabase.from("profiles").update(patch).eq("id", userId);
+    },
+    [userId],
   );
 
   const markRead = useCallback(
@@ -251,6 +268,7 @@ export function VirtualisProvider({ children }) {
     sendMessage,
     createThread,
     markRead,
+    updateProfile,
     signOut,
     reload: load,
   };

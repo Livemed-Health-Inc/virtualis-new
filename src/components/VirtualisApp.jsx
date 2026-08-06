@@ -13,8 +13,8 @@ import {
   NewConsult,
   ConsultDetail,
   RoutingScreen,
-  Credentials,
 } from "./virtualis/screens";
+import { Account } from "./virtualis/Account";
 
 /* ═══ VIRTUALIS® · intelligent medicine ════════════════════════════
    Responsive clinical workstation. Mobile: tab shell with push
@@ -1051,7 +1051,11 @@ function Workstation() {
         />
       )}
       {authed && creds && (
-        <Credentials me={me} onClose={() => setCreds(false)} onSignOut={signOut} />
+        <Account
+          onClose={() => setCreds(false)}
+          onSchedule={() => setTab("schedule")}
+          onSignOut={signOut}
+        />
       )}
     </div>
   );
