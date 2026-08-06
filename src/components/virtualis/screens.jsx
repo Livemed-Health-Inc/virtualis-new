@@ -193,19 +193,33 @@ export function Login() {
           </div>
         </div>
 
-        <div style={{ minWidth: 0, display: "flex", flexDirection: "column", alignItems: "center" }}>
-        {wide && (
-          <div style={{ marginBottom: 22, animation: "rise .55s .1s ease backwards" }}>
-            <Lockup height={56} />
-          </div>
-        )}
         <div
+          style={{
+            minWidth: 0,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+          }}
+        >
+          {wide && (
+            <div
+              style={{
+                marginBottom: 28,
+                width: "100%",
+                maxWidth: 300,
+                animation: "rise .55s .1s ease backwards",
+              }}
+            >
+              <Lockup height={50} />
+            </div>
+          )}
+          <div
           style={{
             background: "#fff",
             borderRadius: 24,
             border: "1px solid " + T.line,
             boxShadow: "0 12px 32px rgba(27,63,160,.06)",
-            padding: 24,
+            padding: "26px 24px 22px",
             marginTop: wide ? 0 : 32,
             marginLeft: wide ? 0 : "auto",
             marginRight: wide ? 0 : "auto",
