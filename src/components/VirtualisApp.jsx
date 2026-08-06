@@ -385,18 +385,19 @@ function VFab({ onConsult, onAlis, onPage, onTelehealth, float }) {
 
   const Icon = ({ children }) => (
     <svg
-      width="20"
-      height="20"
+      width="21"
+      height="21"
       viewBox="0 0 24 24"
       fill="none"
-      stroke={T.blue}
-      strokeWidth="2.1"
+      stroke="#EAF1FF"
+      strokeWidth="1.8"
       strokeLinecap="round"
       strokeLinejoin="round"
     >
       {children}
     </svg>
   );
+
 
   const actions = [
     {
