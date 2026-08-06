@@ -973,9 +973,10 @@ function Workstation() {
           >
             {inboxTab && activeThread && listToggle}
             {secondary}
+            {vfab(true)}
           </div>
         )}
-        {vfab(true)}
+        {!secondary && vfab(true)}
       </div>
 
 
