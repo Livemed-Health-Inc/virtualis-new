@@ -448,8 +448,9 @@ function VFab({ onConsult, onAlis, onPage, onTelehealth, float }) {
           style={{
             position: "absolute",
             inset: 0,
-            background: "rgba(11,15,26,.44)",
-            backdropFilter: "blur(10px)",
+            background:
+              "radial-gradient(120% 80% at 50% 100%, rgba(20,44,120,.55), rgba(7,11,22,.62))",
+            backdropFilter: "blur(16px) saturate(140%)",
             zIndex: 40,
             animation: "fadeIn .2s ease",
           }}
@@ -480,15 +481,30 @@ function VFab({ onConsult, onAlis, onPage, onTelehealth, float }) {
             <div
               style={{
                 position: "absolute",
-                bottom: 68,
-                right: float ? 0 : "auto",
+                bottom: 72,
+                ...(float
+                  ? { right: 0 }
+                  : { left: "50%", marginLeft: 28, transform: "translateX(-100%)" }),
                 display: "flex",
                 flexDirection: "column",
-                gap: 10,
-                alignItems: float ? "flex-end" : "center",
+                alignItems: "flex-end",
+                gap: 14,
                 pointerEvents: "auto",
               }}
             >
+              {/* light beam connecting the orbs to the V */}
+              <span
+                style={{
+                  position: "absolute",
+                  right: 27,
+                  top: 6,
+                  bottom: -46,
+                  width: 1,
+                  background:
+                    "linear-gradient(180deg, rgba(140,180,255,0), rgba(140,180,255,.55), rgba(140,180,255,0))",
+                  pointerEvents: "none",
+                }}
+              />
               {actions.map((a, i) => (
                 <button
                   key={a.label}
@@ -500,25 +516,38 @@ function VFab({ onConsult, onAlis, onPage, onTelehealth, float }) {
                     all: "unset",
                     cursor: "pointer",
                     boxSizing: "border-box",
-                    height: 44,
                     display: "flex",
                     alignItems: "center",
-                    gap: 10,
-                    padding: "0 16px 0 6px",
-                    borderRadius: 22,
-                    background: T.card,
-                    border: "1px solid " + T.line,
-                    boxShadow: "0 6px 18px rgba(16,24,40,.10)",
+                    gap: 12,
                     whiteSpace: "nowrap",
-                    animation: `rise .3s ${(actions.length - 1 - i) * 0.045}s cubic-bezier(.2,.8,.3,1) both`,
+                    animation: `rise .34s ${(actions.length - 1 - i) * 0.05}s cubic-bezier(.2,.8,.3,1) both`,
                   }}
                 >
                   <span
                     style={{
-                      width: 32,
-                      height: 32,
-                      borderRadius: 16,
-                      background: T.blueSoft,
+                      fontFamily: mono,
+                      fontSize: 10.5,
+                      letterSpacing: 1.9,
+                      fontWeight: 650,
+                      textTransform: "uppercase",
+                      color: "rgba(233,240,255,.92)",
+                      textShadow: "0 1px 10px rgba(6,12,28,.6)",
+                    }}
+                  >
+                    {a.label}
+                  </span>
+                  <span
+                    style={{
+                      position: "relative",
+                      width: 54,
+                      height: 54,
+                      borderRadius: 27,
+                      background:
+                        "linear-gradient(150deg, rgba(255,255,255,.20), rgba(120,160,255,.08))",
+                      border: "1px solid rgba(190,214,255,.30)",
+                      backdropFilter: "blur(14px) saturate(160%)",
+                      boxShadow:
+                        "inset 0 1px 0 rgba(255,255,255,.35), 0 10px 26px rgba(6,14,40,.38)",
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
@@ -527,7 +556,6 @@ function VFab({ onConsult, onAlis, onPage, onTelehealth, float }) {
                   >
                     {a.icon}
                   </span>
-                  <span style={{ fontSize: 14, fontWeight: 640, color: T.ink }}>{a.label}</span>
                 </button>
               ))}
             </div>
@@ -547,16 +575,21 @@ function VFab({ onConsult, onAlis, onPage, onTelehealth, float }) {
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              boxShadow: "0 12px 28px rgba(27,63,160,.42)",
-              transform: open ? "scale(.92)" : "none",
-              transition: "transform .34s cubic-bezier(.2,.8,.3,1)",
+              boxShadow: open
+                ? "0 0 0 1px rgba(190,214,255,.45), 0 14px 36px rgba(27,63,160,.55)"
+                : "0 12px 28px rgba(27,63,160,.42)",
+              transform: open ? "rotate(45deg) scale(.94)" : "none",
+              transition: "transform .38s cubic-bezier(.2,.8,.3,1), box-shadow .3s ease",
               pointerEvents: "auto",
             }}
           >
-            <VMark size={28} mono />
+            <div style={{ transform: open ? "rotate(-45deg)" : "none", display: "flex" }}>
+              <VMark size={28} mono />
+            </div>
           </button>
         </div>
       </div>
+
     </>
   );
 }
