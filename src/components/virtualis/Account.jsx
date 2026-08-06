@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
-import { T, mono, useMediaQuery } from "./theme";
-import { FACILITIES, inputStyle, Avatar } from "./ui";
+import { T, mono, FACILITIES, inputStyle, useMediaQuery } from "./theme";
+import { Avatar } from "./ui";
 import { useVirtualis } from "@/lib/virtualis/store";
 
 /* ── Account panel — identity, preferences, policies, sign out ──── */
