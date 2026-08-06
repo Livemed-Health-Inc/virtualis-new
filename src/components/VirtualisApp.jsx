@@ -389,8 +389,8 @@ function VFab({ onConsult, onAlis, onPage, onTelehealth, float }) {
       height="21"
       viewBox="0 0 24 24"
       fill="none"
-      stroke={T.blueDeep}
-      strokeWidth="1.8"
+      stroke={T.card}
+      strokeWidth="2"
       strokeLinecap="round"
       strokeLinejoin="round"
     >
@@ -511,9 +511,9 @@ function VFab({ onConsult, onAlis, onPage, onTelehealth, float }) {
                       width: 52,
                       height: 52,
                       borderRadius: 26,
-                      background: T.blueSoft,
-                      border: "1px solid #D6E4FF",
-                      boxShadow: "0 8px 22px rgba(27,63,160,.14)",
+                      background: T.blueDeep,
+                      border: `2px solid ${T.card}`,
+                      boxShadow: "0 10px 28px rgba(27,63,160,.38), 0 0 0 3px rgba(46,92,255,.14)",
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
@@ -525,14 +525,15 @@ function VFab({ onConsult, onAlis, onPage, onTelehealth, float }) {
                   <span
                     style={{
                       fontSize: 11.5,
-                      fontWeight: 600,
+                      fontWeight: 700,
                       letterSpacing: 0.1,
-                      color: T.ink,
+                      color: T.blueDeep,
                       whiteSpace: "nowrap",
                       padding: "2px 8px",
                       borderRadius: 999,
-                      background: "rgba(255,255,255,.94)",
-                      boxShadow: "0 2px 8px rgba(16,24,40,.06)",
+                      background: T.card,
+                      border: `1px solid ${T.line}`,
+                      boxShadow: "0 4px 12px rgba(27,63,160,.12)",
                     }}
                   >
 
