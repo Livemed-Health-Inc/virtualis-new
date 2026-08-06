@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useVirtualis } from "@/lib/virtualis/store";
 
 
 import {
@@ -26,6 +27,7 @@ import { SPECIALTIES, SHIFTS, STAFF, ME, credentialedFacilities } from "./data";
 
 /* ── Login ─────────────────────────────────────────────────────── */
 export function Login() {
+  const reload = useVirtualis()?.reload;
   const [email, setEmail] = useState("");
   const [pw, setPw] = useState("");
   const [mode, setMode] = useState("in");
