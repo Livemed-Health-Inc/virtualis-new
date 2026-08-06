@@ -658,14 +658,15 @@ export function NewConsult({ onBack, onSend, facilityScope, defaultFacility }) {
   const [mode, setMode] = useState("Existing Patient");
   const [facility, setFacility] = useState(defaultFacility);
   const [patient, setPatient] = useState("");
+  const [mrn, setMrn] = useState("");
   const [reason, setReason] = useState("");
   const [acuity, setAcuity] = useState(null);
-  const [spec, setSpec] = useState(null);
+  const [spec, setSpec] = useState([]);
   const [telehealth, setTelehealth] = useState(false);
   const [voice, setVoice] = useState(false);
   const [specQuery, setSpecQuery] = useState("");
   const suggestion = suggestAcuity(reason);
-  const ready = patient && reason && acuity && spec;
+  const ready = patient && reason && acuity && spec.length > 0;
   const f = FACILITIES[facility];
   const specs = SPECIALTIES.filter((s) => s.toLowerCase().includes(specQuery.toLowerCase()));
 
