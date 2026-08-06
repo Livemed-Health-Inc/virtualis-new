@@ -70,11 +70,11 @@ export function Login() {
       <div
         style={{
           width: "100%",
-          maxWidth: wide ? 1140 : 480,
+          maxWidth: wide ? 1080 : 480,
           display: "grid",
-          gridTemplateColumns: wide ? "minmax(0,1.05fr) minmax(360px,420px)" : "minmax(0,1fr)",
+          gridTemplateColumns: wide ? "minmax(0,1fr) minmax(360px,420px)" : "minmax(0,1fr)",
           alignItems: "center",
-          gap: wide ? "clamp(40px, 6vw, 88px)" : 0,
+          gap: wide ? "clamp(40px, 5vw, 72px)" : 0,
           animation: "rise .5s ease backwards",
         }}
       >
@@ -92,9 +92,10 @@ export function Login() {
               display: "flex",
               alignItems: "center",
               flexDirection: "column",
+              marginLeft: wide ? 6 : 0,
             }}
           >
-            <AnimatedLogo size={wide ? 132 : 118} />
+            <AnimatedLogo size={wide ? 138 : 118} />
             {!wide && (
               <div style={{ marginTop: 36, animation: "rise .55s .1s ease backwards" }}>
                 <Lockup height={54} />
@@ -111,7 +112,7 @@ export function Login() {
               border: "1px solid " + T.line,
               borderRadius: 22,
               padding: "7px 14px",
-              marginTop: wide ? 34 : 28,
+              marginTop: wide ? 44 : 28,
               fontFamily: mono,
               fontSize: 10.5,
               fontWeight: 600,
@@ -192,19 +193,33 @@ export function Login() {
           </div>
         </div>
 
-        <div style={{ minWidth: 0, display: "flex", flexDirection: "column", alignItems: "center" }}>
-        {wide && (
-          <div style={{ marginBottom: 22, animation: "rise .55s .1s ease backwards" }}>
-            <Lockup height={56} />
-          </div>
-        )}
         <div
+          style={{
+            minWidth: 0,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+          }}
+        >
+          {wide && (
+            <div
+              style={{
+                marginBottom: 28,
+                width: "100%",
+                maxWidth: 300,
+                animation: "rise .55s .1s ease backwards",
+              }}
+            >
+              <Lockup height={50} />
+            </div>
+          )}
+          <div
           style={{
             background: "#fff",
             borderRadius: 24,
             border: "1px solid " + T.line,
             boxShadow: "0 12px 32px rgba(27,63,160,.06)",
-            padding: 24,
+            padding: "26px 24px 22px",
             marginTop: wide ? 0 : 32,
             marginLeft: wide ? 0 : "auto",
             marginRight: wide ? 0 : "auto",
