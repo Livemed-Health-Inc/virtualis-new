@@ -234,7 +234,23 @@ export default function Thread({ t, onBack, onDetail, onVideo, embedded, onSend,
                   <Glyph level={r.acuity} size={8} gap={1.5} w={3.2} />
                   {r.team ? r.members : r.context}
                   {r.newCount > 0 && (
-                    <span style={{ color: T.blue, fontWeight: 700 }}>{r.newCount}</span>
+                    <span
+                      style={{
+                        minWidth: 18,
+                        height: 18,
+                        borderRadius: 9,
+                        padding: "0 5px",
+                        background: "linear-gradient(135deg,#2E5CFF,#1E3FCC)",
+                        color: "#fff",
+                        fontSize: 10.5,
+                        fontWeight: 700,
+                        display: "inline-flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
+                    >
+                      {r.newCount}
+                    </span>
                   )}
                 </button>
               ))}

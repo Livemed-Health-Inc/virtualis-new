@@ -122,7 +122,23 @@ function PatientCard({ g, openThread, selectedId }) {
               {t.team ? t.members : t.context}
             </span>
             {t.newCount > 0 && (
-              <span style={{ fontSize: 11, fontWeight: 700, color: T.blue }}>{t.newCount}</span>
+              <span
+                style={{
+                  minWidth: 18,
+                  height: 18,
+                  borderRadius: 9,
+                  padding: "0 5px",
+                  background: "linear-gradient(135deg,#2E5CFF,#1E3FCC)",
+                  color: "#fff",
+                  fontSize: 10.5,
+                  fontWeight: 700,
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                {t.newCount}
+              </span>
             )}
             <span style={{ fontSize: 11, color: T.faint }}>{t.time}</span>
           </button>
