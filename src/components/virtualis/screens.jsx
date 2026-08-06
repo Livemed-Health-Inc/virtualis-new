@@ -70,11 +70,11 @@ export function Login() {
       <div
         style={{
           width: "100%",
-          maxWidth: wide ? 1140 : 480,
+          maxWidth: wide ? 1080 : 480,
           display: "grid",
-          gridTemplateColumns: wide ? "minmax(0,1.05fr) minmax(360px,420px)" : "minmax(0,1fr)",
+          gridTemplateColumns: wide ? "minmax(0,1fr) minmax(360px,420px)" : "minmax(0,1fr)",
           alignItems: "center",
-          gap: wide ? "clamp(40px, 6vw, 88px)" : 0,
+          gap: wide ? "clamp(40px, 5vw, 72px)" : 0,
           animation: "rise .5s ease backwards",
         }}
       >
@@ -92,9 +92,10 @@ export function Login() {
               display: "flex",
               alignItems: "center",
               flexDirection: "column",
+              marginLeft: wide ? -32 : 0,
             }}
           >
-            <AnimatedLogo size={wide ? 132 : 118} />
+            <AnimatedLogo size={wide ? 138 : 118} />
             {!wide && (
               <div style={{ marginTop: 36, animation: "rise .55s .1s ease backwards" }}>
                 <Lockup height={54} />
@@ -111,7 +112,7 @@ export function Login() {
               border: "1px solid " + T.line,
               borderRadius: 22,
               padding: "7px 14px",
-              marginTop: wide ? 34 : 28,
+              marginTop: wide ? 44 : 28,
               fontFamily: mono,
               fontSize: 10.5,
               fontWeight: 600,
