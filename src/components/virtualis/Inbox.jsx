@@ -122,7 +122,23 @@ function PatientCard({ g, openThread, selectedId }) {
               {t.team ? t.members : t.context}
             </span>
             {t.newCount > 0 && (
-              <span style={{ fontSize: 11, fontWeight: 700, color: T.blue }}>{t.newCount}</span>
+              <span
+                style={{
+                  minWidth: 18,
+                  height: 18,
+                  borderRadius: 9,
+                  padding: "0 5px",
+                  background: "linear-gradient(135deg,#2E5CFF,#1E3FCC)",
+                  color: "#fff",
+                  fontSize: 10.5,
+                  fontWeight: 700,
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                {t.newCount}
+              </span>
             )}
             <span style={{ fontSize: 11, color: T.faint }}>{t.time}</span>
           </button>
@@ -164,11 +180,22 @@ function Row({ t, ack, unreadCount, onOpen, selected, i }) {
           style={{
             display: "flex",
             flexDirection: "column",
+            alignItems: "center",
             justifyContent: "center",
+            gap: 7,
             marginRight: 13,
           }}
         >
           <Glyph level={t.acuity} pulse={t.acuity === "critical"} />
+          <span
+            style={{
+              width: 7,
+              height: 7,
+              borderRadius: 4,
+              background: T.blue,
+              boxShadow: "0 0 0 3px rgba(46,92,255,.14)",
+            }}
+          />
         </span>
       )}
       <div style={{ display: "flex", gap: 12, flex: 1, minWidth: 0 }}>

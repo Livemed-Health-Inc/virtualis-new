@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useVirtualis } from "@/lib/virtualis/store";
 
 
 import {
@@ -26,6 +27,7 @@ import { SPECIALTIES, SHIFTS, STAFF, ME, credentialedFacilities } from "./data";
 
 /* ── Login ─────────────────────────────────────────────────────── */
 export function Login() {
+  const reload = useVirtualis()?.reload;
   const [email, setEmail] = useState("");
   const [pw, setPw] = useState("");
   const [mode, setMode] = useState("in");
@@ -288,6 +290,13 @@ export function Login() {
                   options: { emailRedirectTo: window.location.origin },
                 });
                 ({ error } = await supabase.auth.signInWithPassword(DEMO));
+              }
+              if (!error) {
+                /* Demo account always starts with a fresh, unread inbox. */
+                const { data } = await supabase.auth.getUser();
+                if (data.user)
+                  await supabase.from("thread_reads").delete().eq("user_id", data.user.id);
+                await reload?.();
               }
               setBusy(false);
               if (error) setErr(error.message);

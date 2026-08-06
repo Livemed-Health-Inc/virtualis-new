@@ -389,7 +389,7 @@ function VFab({ onConsult, onAlis, onPage, onTelehealth, float }) {
       height="21"
       viewBox="0 0 24 24"
       fill="none"
-      stroke={T.blue}
+      stroke={T.blueDeep}
       strokeWidth="1.8"
       strokeLinecap="round"
       strokeLinejoin="round"
@@ -511,9 +511,9 @@ function VFab({ onConsult, onAlis, onPage, onTelehealth, float }) {
                       width: 52,
                       height: 52,
                       borderRadius: 26,
-                      background: T.card,
-                      border: "1px solid " + T.line,
-                      boxShadow: "0 8px 22px rgba(16,24,40,.10)",
+                      background: T.blueSoft,
+                      border: "1px solid #D6E4FF",
+                      boxShadow: "0 8px 22px rgba(27,63,160,.14)",
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
