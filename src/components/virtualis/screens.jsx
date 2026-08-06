@@ -964,7 +964,53 @@ export function NewConsult({ onBack, onSend, facilityScope, defaultFacility }) {
               marginTop: 14,
             }}
           >
-            <div style={{ fontSize: 16, fontWeight: 680, color: T.ink }}>Specialist *</div>
+            <div style={{ fontSize: 16, fontWeight: 680, color: T.ink }}>Specialists *</div>
+            <div style={{ fontSize: 12.5, color: T.sub, marginTop: 3 }}>
+              Select one or more. Multiple specialties join a single group consult on this patient.
+            </div>
+            {spec.length > 0 && (
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 7, marginTop: 11 }}>
+                {spec.map((s) => (
+                  <span
+                    key={s}
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: 7,
+                      fontSize: 12.5,
+                      fontWeight: 620,
+                      color: T.blueDeep,
+                      background: T.blueSoft,
+                      border: "1px solid #D6E4FF",
+                      borderRadius: 18,
+                      padding: "6px 8px 6px 12px",
+                    }}
+                  >
+                    {s}
+                    <button
+                      onClick={() => setSpec((v) => v.filter((x) => x !== s))}
+                      aria-label={`Remove ${s}`}
+                      style={{
+                        all: "unset",
+                        cursor: "pointer",
+                        width: 16,
+                        height: 16,
+                        borderRadius: 8,
+                        display: "inline-flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        background: "#fff",
+                        color: T.blue,
+                        fontSize: 12,
+                        lineHeight: 1,
+                      }}
+                    >
+                      ×
+                    </button>
+                  </span>
+                ))}
+              </div>
+            )}
             <input
               value={specQuery}
               onChange={(e) => setSpecQuery(e.target.value)}
@@ -982,11 +1028,13 @@ export function NewConsult({ onBack, onSend, facilityScope, defaultFacility }) {
               }}
             >
               {specs.map((s) => {
-                const sel = spec === s;
+                const sel = spec.includes(s);
                 return (
                   <button
                     key={s}
-                    onClick={() => setSpec(s)}
+                    onClick={() =>
+                      setSpec((v) => (v.includes(s) ? v.filter((x) => x !== s) : [...v, s]))
+                    }
                     style={{
                       all: "unset",
                       cursor: "pointer",
