@@ -645,22 +645,29 @@ function Workstation() {
     setConsulting(false);
     setRouting(payload);
     setTimeout(async () => {
-      const { patient, reason, acuity, spec, facility: fac, telehealth } = payload;
+      const { patient, mrn, reason, acuity, spec, facility: fac, telehealth } = payload;
+      const list = [].concat(spec);
+      const group = list.length > 1;
       const id = await createThread({
-        name: `Tele-${spec} On-Call`,
-        context: `Tele-${spec} · On-Call`,
+        name: group ? `${patient} · Group Consult` : `Tele-${list[0]} On-Call`,
+        context: group ? `${list.length} specialties` : `Tele-${list[0]} · On-Call`,
         facility: fac,
         patient,
+        mrn,
         acuity,
         reason,
         confidence: 91,
+        team: group,
+        members: list.join(" · "),
       });
       setRouting(null);
       setTab("inbox");
       if (!id) return flash("Consult could not be routed");
       setOpenId(id);
       if (telehealth) setVideoId(id);
-      flash(`Routed · ${ACUITY[acuity].label} · ${spec} on-call`);
+      flash(
+        `Routed · ${ACUITY[acuity].label} · ${group ? `${list.length} specialties paged` : `${list[0]} on-call`}`,
+      );
     }, 3200);
   };
 
