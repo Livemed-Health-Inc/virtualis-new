@@ -289,6 +289,12 @@ export function Login() {
                 });
                 ({ error } = await supabase.auth.signInWithPassword(DEMO));
               }
+              if (!error) {
+                /* Demo account always starts with a fresh, unread inbox. */
+                const { data } = await supabase.auth.getUser();
+                if (data.user)
+                  await supabase.from("thread_reads").delete().eq("user_id", data.user.id);
+              }
               setBusy(false);
               if (error) setErr(error.message);
             }}
