@@ -389,7 +389,7 @@ function VFab({ onConsult, onAlis, onPage, onTelehealth, float }) {
       height="21"
       viewBox="0 0 24 24"
       fill="none"
-      stroke="#EAF1FF"
+      stroke={T.blue}
       strokeWidth="1.8"
       strokeLinecap="round"
       strokeLinejoin="round"
@@ -397,6 +397,7 @@ function VFab({ onConsult, onAlis, onPage, onTelehealth, float }) {
       {children}
     </svg>
   );
+
 
 
   const actions = [
