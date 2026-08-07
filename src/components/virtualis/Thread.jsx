@@ -203,20 +203,20 @@ export default function Thread({ t, onBack, onDetail, onVideo, embedded, onSend,
           </button>
         )}
         {related.length > 0 && (
-          <div style={{ marginTop: 9 }}>
+          <div style={{ marginTop: isMobile ? 7 : 9 }}>
             <div
               style={{
                 fontFamily: mono,
-                fontSize: 9.5,
+                fontSize: isMobile ? 9 : 9.5,
                 letterSpacing: 1.6,
                 color: T.faint,
                 textTransform: "uppercase",
-                marginBottom: 6,
+                marginBottom: isMobile ? 4 : 6,
               }}
             >
               Also for this patient
             </div>
-            <div className="vx-hscroll" style={{ display: "flex", gap: 7 }}>
+            <div className="vx-hscroll" style={{ display: "flex", gap: isMobile ? 6 : 7 }}>
               {related.map((r) => (
                 <button
                   key={r.id}
@@ -227,28 +227,28 @@ export default function Thread({ t, onBack, onDetail, onVideo, embedded, onSend,
                     flexShrink: 0,
                     display: "inline-flex",
                     alignItems: "center",
-                    gap: 7,
-                    fontSize: 12.5,
+                    gap: isMobile ? 5 : 7,
+                    fontSize: isMobile ? 11.5 : 12.5,
                     fontWeight: 600,
                     color: T.ink,
                     background: "#fff",
                     border: "1px solid " + T.line,
-                    borderRadius: 18,
-                    padding: "7px 13px",
+                    borderRadius: isMobile ? 16 : 18,
+                    padding: isMobile ? "5px 10px" : "7px 13px",
                   }}
                 >
-                  <Glyph level={r.acuity} size={8} gap={1.5} w={3.2} />
+                  <Glyph level={r.acuity} size={isMobile ? 7 : 8} gap={1.5} w={3.2} />
                   {r.team ? r.members : r.context}
                   {r.newCount > 0 && (
                     <span
                       style={{
-                        minWidth: 18,
-                        height: 18,
-                        borderRadius: 9,
+                        minWidth: isMobile ? 16 : 18,
+                        height: isMobile ? 16 : 18,
+                        borderRadius: isMobile ? 8 : 9,
                         padding: "0 5px",
                         background: "linear-gradient(135deg,#2E5CFF,#1E3FCC)",
                         color: "#fff",
-                        fontSize: 10.5,
+                        fontSize: isMobile ? 9.5 : 10.5,
                         fontWeight: 700,
                         display: "inline-flex",
                         alignItems: "center",
