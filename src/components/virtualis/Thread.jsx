@@ -72,13 +72,13 @@ export default function Thread({ t, onBack, onDetail, onVideo, embedded, onSend,
           zIndex: 10,
         }}
       >
-        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: isMobile ? 8 : 10 }}>
           {!embedded && <Back onClick={onBack} label="" />}
-          <Avatar initials={initialsOf(t.name)} team={t.team} size={38} />
+          <Avatar initials={initialsOf(t.name)} team={t.team} size={isMobile ? 32 : 38} />
           <div style={{ flex: 1, minWidth: 0 }}>
             <div
               style={{
-                fontSize: 16,
+                fontSize: isMobile ? 15 : 16,
                 fontWeight: 660,
                 color: T.ink,
                 letterSpacing: -0.25,
@@ -93,7 +93,7 @@ export default function Thread({ t, onBack, onDetail, onVideo, embedded, onSend,
               <FacilityChip id={t.facility} />
               <span
                 style={{
-                  fontSize: 11.5,
+                  fontSize: isMobile ? 11 : 11.5,
                   color: T.sub,
                   overflow: "hidden",
                   textOverflow: "ellipsis",
@@ -114,8 +114,8 @@ export default function Thread({ t, onBack, onDetail, onVideo, embedded, onSend,
               color: "#fff",
               fontSize: 12.5,
               fontWeight: 640,
-              borderRadius: 20,
-              padding: "9px 14px",
+              borderRadius: isMobile ? 18 : 20,
+              padding: isMobile ? "9px" : "9px 14px",
               display: "flex",
               alignItems: "center",
               gap: 6,
@@ -123,7 +123,8 @@ export default function Thread({ t, onBack, onDetail, onVideo, embedded, onSend,
               boxShadow: "0 6px 16px rgba(41,112,255,.28)",
             }}
           >
-            <VideoIcon /> Video
+            <VideoIcon />
+            {!isMobile && "Video"}
           </button>
           <button
             title="Voice call"
@@ -132,16 +133,19 @@ export default function Thread({ t, onBack, onDetail, onVideo, embedded, onSend,
               cursor: "pointer",
               background: "#101828",
               color: "#fff",
-              borderRadius: 20,
-              padding: "10px 12px",
+              borderRadius: isMobile ? 18 : 20,
+              padding: isMobile ? "9px" : "10px 12px",
+              width: isMobile ? 36 : undefined,
+              height: isMobile ? 36 : undefined,
               display: "flex",
               alignItems: "center",
+              justifyContent: "center",
               flexShrink: 0,
             }}
           >
             <svg
-              width="14"
-              height="14"
+              width={isMobile ? 15 : 14}
+              height={isMobile ? 15 : 14}
               viewBox="0 0 24 24"
               fill="none"
               stroke="#fff"
