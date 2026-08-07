@@ -65,18 +65,38 @@ export default function Thread({ t, onBack, onDetail, onVideo, embedded, onSend,
       {isMobile ? (
         <div
           style={{
-            background: "rgba(255,255,255,.9)",
+            background: "rgba(255,255,255,.92)",
             backdropFilter: "blur(18px)",
             borderBottom: "1px solid " + T.line,
-            padding: "6px 10px",
+            padding: "4px 8px",
             position: "sticky",
             top: 0,
             zIndex: 10,
           }}
         >
-          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            {!embedded && <Back onClick={onBack} label="" />}
-            <Avatar initials={initialsOf(t.name)} team={t.team} size={30} />
+          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+            {!embedded && (
+              <button
+                onClick={onBack}
+                title="Back"
+                style={{
+                  all: "unset",
+                  cursor: "pointer",
+                  width: 28,
+                  height: 28,
+                  borderRadius: 14,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  flexShrink: 0,
+                  color: T.sub,
+                }}
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M19 12H5M12 19l-7-7 7-7" />
+                </svg>
+              </button>
+            )}
             <button
               onClick={onDetail}
               style={{
@@ -89,49 +109,52 @@ export default function Thread({ t, onBack, onDetail, onVideo, embedded, onSend,
             >
               <div
                 style={{
-                  fontSize: 14.5,
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 5,
+                  fontSize: 13,
                   fontWeight: 660,
                   color: T.ink,
                   letterSpacing: -0.25,
                   whiteSpace: "nowrap",
                   overflow: "hidden",
                   textOverflow: "ellipsis",
+                  lineHeight: 1.25,
                 }}
               >
+                <Glyph level={t.acuity} size={6} gap={1.2} w={2.6} />
                 {t.name}
               </div>
               <div
                 style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 5,
-                  fontSize: 11,
+                  fontSize: 10,
                   color: T.sub,
                   whiteSpace: "nowrap",
                   overflow: "hidden",
                   textOverflow: "ellipsis",
+                  lineHeight: 1.25,
+                  marginTop: 1,
                 }}
               >
-                <Glyph level={t.acuity} size={7} gap={1.5} w={3} />
                 {t.patient !== "—" ? `${t.patient} · ${t.room}` : t.team ? t.members : t.context}
               </div>
             </button>
             {related.length > 0 && (
               <button
                 onClick={() => setRelOpen((v) => !v)}
-                title="Other consults for this patient"
+                title="Other consults"
                 style={{
                   all: "unset",
                   cursor: "pointer",
                   flexShrink: 0,
-                  height: 32,
-                  minWidth: 32,
-                  padding: "0 8px",
-                  borderRadius: 16,
+                  height: 26,
+                  minWidth: 26,
+                  padding: "0 6px",
+                  borderRadius: 13,
                   background: relOpen ? T.blueSoft : "#fff",
                   border: "1px solid " + T.line,
                   color: T.blueDeep,
-                  fontSize: 12,
+                  fontSize: 10.5,
                   fontWeight: 700,
                   display: "flex",
                   alignItems: "center",
@@ -143,26 +166,26 @@ export default function Thread({ t, onBack, onDetail, onVideo, embedded, onSend,
             )}
             <button
               onClick={onVideo}
-              title="Start telehealth visit"
+              title="Video"
               style={{
                 all: "unset",
                 cursor: "pointer",
                 background: "linear-gradient(135deg,#2E5CFF,#1E3FCC)",
-                borderRadius: 16,
-                width: 32,
-                height: 32,
+                borderRadius: 14,
+                width: 28,
+                height: 28,
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
                 flexShrink: 0,
-                boxShadow: "0 4px 12px rgba(41,112,255,.28)",
+                boxShadow: "0 3px 10px rgba(41,112,255,.28)",
               }}
             >
               <VideoIcon />
             </button>
           </div>
           {relOpen && related.length > 0 && (
-            <div className="vx-hscroll" style={{ display: "flex", gap: 6, marginTop: 6 }}>
+            <div className="vx-hscroll" style={{ display: "flex", gap: 5, marginTop: 5, paddingBottom: 2 }}>
               {related.map((r) => (
                 <button
                   key={r.id}
@@ -176,28 +199,28 @@ export default function Thread({ t, onBack, onDetail, onVideo, embedded, onSend,
                     flexShrink: 0,
                     display: "inline-flex",
                     alignItems: "center",
-                    gap: 5,
-                    fontSize: 11.5,
+                    gap: 4,
+                    fontSize: 10.5,
                     fontWeight: 600,
                     color: T.ink,
                     background: "#fff",
                     border: "1px solid " + T.line,
-                    borderRadius: 16,
-                    padding: "5px 10px",
+                    borderRadius: 14,
+                    padding: "4px 8px",
                   }}
                 >
-                  <Glyph level={r.acuity} size={7} gap={1.5} w={3.2} />
+                  <Glyph level={r.acuity} size={6} gap={1.2} w={2.8} />
                   {r.team ? r.members : r.context}
                   {r.newCount > 0 && (
                     <span
                       style={{
-                        minWidth: 16,
-                        height: 16,
-                        borderRadius: 8,
-                        padding: "0 5px",
+                        minWidth: 14,
+                        height: 14,
+                        borderRadius: 7,
+                        padding: "0 4px",
                         background: "linear-gradient(135deg,#2E5CFF,#1E3FCC)",
                         color: "#fff",
-                        fontSize: 9.5,
+                        fontSize: 9,
                         fontWeight: 700,
                         display: "inline-flex",
                         alignItems: "center",
@@ -421,10 +444,10 @@ export default function Thread({ t, onBack, onDetail, onVideo, embedded, onSend,
         style={{
           flex: 1,
           overflowY: "auto",
-          padding: "12px 14px",
+          padding: isMobile ? "8px 10px" : "12px 14px",
           display: "flex",
           flexDirection: "column",
-          gap: 11,
+          gap: isMobile ? 8 : 11,
         }}
       >
         <div
@@ -434,7 +457,7 @@ export default function Thread({ t, onBack, onDetail, onVideo, embedded, onSend,
             margin: "0 auto",
             display: "flex",
             flexDirection: "column",
-            gap: 11,
+            gap: isMobile ? 8 : 11,
           }}
         >
           {msgs.map((m, i) => (
@@ -579,22 +602,22 @@ export default function Thread({ t, onBack, onDetail, onVideo, embedded, onSend,
                     </div>
                   </div>
                 ) : (
-                  <div
-                    style={{
-                      background: m.me ? "linear-gradient(135deg,#2E5CFF,#1E3FCC)" : "#fff",
-                      color: m.me ? "#fff" : T.ink,
-                      border: m.me ? "none" : "1px solid " + T.line,
-                      borderRadius: m.me ? "20px 20px 6px 20px" : "20px 20px 20px 6px",
-                      padding: "11px 15px",
-                      fontSize: 14.5,
-                      lineHeight: 1.45,
-                      boxShadow: m.me
-                        ? "0 6px 16px rgba(41,112,255,.22)"
-                        : "0 2px 6px rgba(16,24,40,.04)",
-                    }}
-                  >
-                    {m.text}
-                  </div>
+                <div
+                  style={{
+                    background: m.me ? "linear-gradient(135deg,#2E5CFF,#1E3FCC)" : "#fff",
+                    color: m.me ? "#fff" : T.ink,
+                    border: m.me ? "none" : "1px solid " + T.line,
+                    borderRadius: m.me ? "18px 18px 5px 18px" : "18px 18px 18px 5px",
+                    padding: isMobile ? "9px 12px" : "11px 15px",
+                    fontSize: isMobile ? 13.5 : 14.5,
+                    lineHeight: 1.4,
+                    boxShadow: m.me
+                      ? "0 6px 16px rgba(41,112,255,.22)"
+                      : "0 2px 6px rgba(16,24,40,.04)",
+                  }}
+                >
+                  {m.text}
+                </div>
                 )}
               </button>
               <div
@@ -685,18 +708,18 @@ export default function Thread({ t, onBack, onDetail, onVideo, embedded, onSend,
         </div>
       </div>
 
-      <div style={{ padding: "8px 14px 12px" }}>
+      <div style={{ padding: isMobile ? "6px 10px 8px" : "8px 14px 12px" }}>
         <div
-          style={{ maxWidth: 820, margin: "0 auto", display: "flex", gap: 8, alignItems: "center" }}
+          style={{ maxWidth: 820, margin: "0 auto", display: "flex", gap: isMobile ? 6 : 8, alignItems: "center" }}
         >
           <button
             title="Attach"
             style={{
               all: "unset",
               cursor: "pointer",
-              width: 42,
-              height: 42,
-              borderRadius: 14,
+              width: isMobile ? 36 : 42,
+              height: isMobile ? 36 : 42,
+              borderRadius: isMobile ? 12 : 14,
               background: "#EDF0F4",
               display: "flex",
               alignItems: "center",
@@ -705,8 +728,8 @@ export default function Thread({ t, onBack, onDetail, onVideo, embedded, onSend,
             }}
           >
             <svg
-              width="17"
-              height="17"
+              width={isMobile ? 15 : 17}
+              height={isMobile ? 15 : 17}
               viewBox="0 0 24 24"
               fill="none"
               stroke={T.sub}
@@ -721,16 +744,16 @@ export default function Thread({ t, onBack, onDetail, onVideo, embedded, onSend,
             onChange={(e) => setDraft(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && send()}
             placeholder="Message"
-            style={{ ...inputStyle, borderRadius: 24, flex: 1, minWidth: 0 }}
+            style={{ ...inputStyle, borderRadius: 24, flex: 1, minWidth: 0, height: isMobile ? 36 : 42 }}
           />
           <button
             onClick={send}
             style={{
               all: "unset",
               cursor: "pointer",
-              width: 42,
-              height: 42,
-              borderRadius: 21,
+              width: isMobile ? 36 : 42,
+              height: isMobile ? 36 : 42,
+              borderRadius: isMobile ? 18 : 21,
               background: draft.trim() ? "linear-gradient(135deg,#2E5CFF,#1E3FCC)" : T.ghost,
               display: "flex",
               alignItems: "center",
@@ -740,8 +763,8 @@ export default function Thread({ t, onBack, onDetail, onVideo, embedded, onSend,
             }}
           >
             <svg
-              width="16"
-              height="16"
+              width={isMobile ? 14 : 16}
+              height={isMobile ? 14 : 16}
               viewBox="0 0 24 24"
               fill="none"
               stroke="#fff"
