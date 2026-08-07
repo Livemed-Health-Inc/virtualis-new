@@ -29,6 +29,7 @@ export default function Thread({ t, onBack, onDetail, onVideo, embedded, onSend,
   const [ackd, setAckd] = useState(false);
   const endRef = useRef(null);
   const isMobile = useMediaQuery("(max-width: 639px)");
+  const [relOpen, setRelOpen] = useState(false);
   /* Persisted messages arrive on `t.msgs`; `extra` only holds the optimistic
      echo for the split second before the insert round-trips. */
   const msgs = onSend ? t.msgs : [...t.msgs, ...extra];
