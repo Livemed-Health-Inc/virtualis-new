@@ -29,6 +29,7 @@ export default function Thread({ t, onBack, onDetail, onVideo, embedded, onSend,
   const [ackd, setAckd] = useState(false);
   const endRef = useRef(null);
   const isMobile = useMediaQuery("(max-width: 639px)");
+  const [relOpen, setRelOpen] = useState(false);
   /* Persisted messages arrive on `t.msgs`; `extra` only holds the optimistic
      echo for the split second before the insert round-trips. */
   const msgs = onSend ? t.msgs : [...t.msgs, ...extra];
@@ -61,194 +62,142 @@ export default function Thread({ t, onBack, onDetail, onVideo, embedded, onSend,
         background: T.bg,
       }}
     >
-      <div
-        style={{
-          background: "rgba(255,255,255,.86)",
-          backdropFilter: "blur(18px)",
-          borderBottom: "1px solid " + T.line,
-          padding: isMobile ? "8px 12px 6px" : "12px 14px 10px",
-          position: "sticky",
-          top: 0,
-          zIndex: 10,
-        }}
-      >
-        <div style={{ display: "flex", alignItems: "center", gap: isMobile ? 8 : 10 }}>
-          {!embedded && <Back onClick={onBack} label="" />}
-          <Avatar initials={initialsOf(t.name)} team={t.team} size={isMobile ? 32 : 38} />
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <div
+      {isMobile ? (
+        <div
+          style={{
+            background: "rgba(255,255,255,.9)",
+            backdropFilter: "blur(18px)",
+            borderBottom: "1px solid " + T.line,
+            padding: "6px 10px",
+            position: "sticky",
+            top: 0,
+            zIndex: 10,
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            {!embedded && <Back onClick={onBack} label="" />}
+            <Avatar initials={initialsOf(t.name)} team={t.team} size={30} />
+            <button
+              onClick={onDetail}
               style={{
-                fontSize: isMobile ? 15 : 16,
-                fontWeight: 660,
-                color: T.ink,
-                letterSpacing: -0.25,
-                whiteSpace: "nowrap",
-                overflow: "hidden",
-                textOverflow: "ellipsis",
+                all: "unset",
+                cursor: "pointer",
+                flex: 1,
+                minWidth: 0,
+                display: "block",
               }}
             >
-              {t.name}
-            </div>
-            <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 2 }}>
-              <FacilityChip id={t.facility} />
-              <span
+              <div
                 style={{
-                  fontSize: isMobile ? 11 : 11.5,
-                  color: T.sub,
+                  fontSize: 14.5,
+                  fontWeight: 660,
+                  color: T.ink,
+                  letterSpacing: -0.25,
+                  whiteSpace: "nowrap",
                   overflow: "hidden",
                   textOverflow: "ellipsis",
-                  whiteSpace: "nowrap",
                 }}
               >
-                {t.team ? t.members : t.context}
-              </span>
-            </div>
-          </div>
-          <button
-            onClick={onVideo}
-            title="Start telehealth visit"
-            style={{
-              all: "unset",
-              cursor: "pointer",
-              background: "linear-gradient(135deg,#2E5CFF,#1E3FCC)",
-              color: "#fff",
-              fontSize: 12.5,
-              fontWeight: 640,
-              borderRadius: isMobile ? 18 : 20,
-              padding: isMobile ? "9px" : "9px 14px",
-              display: "flex",
-              alignItems: "center",
-              gap: 6,
-              flexShrink: 0,
-              boxShadow: "0 6px 16px rgba(41,112,255,.28)",
-            }}
-          >
-            <VideoIcon />
-            {!isMobile && "Video"}
-          </button>
-          <button
-            title="Voice call"
-            style={{
-              all: "unset",
-              cursor: "pointer",
-              background: "#101828",
-              color: "#fff",
-              borderRadius: isMobile ? 18 : 20,
-              padding: isMobile ? "9px" : "10px 12px",
-              width: isMobile ? 36 : undefined,
-              height: isMobile ? 36 : undefined,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              flexShrink: 0,
-            }}
-          >
-            <svg
-              width={isMobile ? 15 : 14}
-              height={isMobile ? 15 : 14}
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="#fff"
-              strokeWidth="2.2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2Z" />
-            </svg>
-          </button>
-        </div>
-        {t.patient !== "—" && (
-          <button
-            onClick={onDetail}
-            style={{
-              all: "unset",
-              boxSizing: "border-box",
-              cursor: "pointer",
-              marginTop: isMobile ? 8 : 10,
-              width: "100%",
-              display: "flex",
-              alignItems: "center",
-              gap: isMobile ? 6 : 8,
-              background: T.blueSoft,
-              border: "1px solid #D6E4FF",
-              borderRadius: isMobile ? 11 : 13,
-              padding: isMobile ? "7px 11px" : "9px 13px",
-              flexWrap: "wrap",
-            }}
-          >
-            <PersonIcon c={T.blueDeep} />
-            <span style={{ fontSize: isMobile ? 12 : 13, color: T.blueDeep, fontWeight: 620 }}>{t.patient}</span>
-            <span style={{ color: "#C3D5F7" }}>|</span>
-            <DoorIcon />
-            <span style={{ fontSize: isMobile ? 11.5 : 12.5, color: T.blueDeep, fontWeight: 560 }}>
-              Room {t.room}
-            </span>
-            <span
-              style={{ marginLeft: "auto", display: "inline-flex", alignItems: "center", gap: 8 }}
-            >
-              <Glyph level={t.acuity} size={isMobile ? 8 : 9} gap={2} w={3.5} />
-              <svg
-                width="14"
-                height="14"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke={T.blueDeep}
-                strokeWidth="2.4"
-                strokeLinecap="round"
-                strokeLinejoin="round"
+                {t.name}
+              </div>
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 5,
+                  fontSize: 11,
+                  color: T.sub,
+                  whiteSpace: "nowrap",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                }}
               >
-                <path d="M9 5 L16 12 L9 19" />
-              </svg>
-            </span>
-          </button>
-        )}
-        {related.length > 0 && (
-          <div style={{ marginTop: isMobile ? 7 : 9 }}>
-            <div
+                <Glyph level={t.acuity} size={7} gap={1.5} w={3} />
+                {t.patient !== "—" ? `${t.patient} · ${t.room}` : t.team ? t.members : t.context}
+              </div>
+            </button>
+            {related.length > 0 && (
+              <button
+                onClick={() => setRelOpen((v) => !v)}
+                title="Other consults for this patient"
+                style={{
+                  all: "unset",
+                  cursor: "pointer",
+                  flexShrink: 0,
+                  height: 32,
+                  minWidth: 32,
+                  padding: "0 8px",
+                  borderRadius: 16,
+                  background: relOpen ? T.blueSoft : "#fff",
+                  border: "1px solid " + T.line,
+                  color: T.blueDeep,
+                  fontSize: 12,
+                  fontWeight: 700,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                +{related.length}
+              </button>
+            )}
+            <button
+              onClick={onVideo}
+              title="Start telehealth visit"
               style={{
-                fontFamily: mono,
-                fontSize: isMobile ? 9 : 9.5,
-                letterSpacing: 1.6,
-                color: T.faint,
-                textTransform: "uppercase",
-                marginBottom: isMobile ? 4 : 6,
+                all: "unset",
+                cursor: "pointer",
+                background: "linear-gradient(135deg,#2E5CFF,#1E3FCC)",
+                borderRadius: 16,
+                width: 32,
+                height: 32,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                flexShrink: 0,
+                boxShadow: "0 4px 12px rgba(41,112,255,.28)",
               }}
             >
-              Also for this patient
-            </div>
-            <div className="vx-hscroll" style={{ display: "flex", gap: isMobile ? 6 : 7 }}>
+              <VideoIcon />
+            </button>
+          </div>
+          {relOpen && related.length > 0 && (
+            <div className="vx-hscroll" style={{ display: "flex", gap: 6, marginTop: 6 }}>
               {related.map((r) => (
                 <button
                   key={r.id}
-                  onClick={() => onOpenThread?.(r.id)}
+                  onClick={() => {
+                    setRelOpen(false);
+                    onOpenThread?.(r.id);
+                  }}
                   style={{
                     all: "unset",
                     cursor: "pointer",
                     flexShrink: 0,
                     display: "inline-flex",
                     alignItems: "center",
-                    gap: isMobile ? 5 : 7,
-                    fontSize: isMobile ? 11.5 : 12.5,
+                    gap: 5,
+                    fontSize: 11.5,
                     fontWeight: 600,
                     color: T.ink,
                     background: "#fff",
                     border: "1px solid " + T.line,
-                    borderRadius: isMobile ? 16 : 18,
-                    padding: isMobile ? "5px 10px" : "7px 13px",
+                    borderRadius: 16,
+                    padding: "5px 10px",
                   }}
                 >
-                  <Glyph level={r.acuity} size={isMobile ? 7 : 8} gap={1.5} w={3.2} />
+                  <Glyph level={r.acuity} size={7} gap={1.5} w={3.2} />
                   {r.team ? r.members : r.context}
                   {r.newCount > 0 && (
                     <span
                       style={{
-                        minWidth: isMobile ? 16 : 18,
-                        height: isMobile ? 16 : 18,
-                        borderRadius: isMobile ? 8 : 9,
+                        minWidth: 16,
+                        height: 16,
+                        borderRadius: 8,
                         padding: "0 5px",
                         background: "linear-gradient(135deg,#2E5CFF,#1E3FCC)",
                         color: "#fff",
-                        fontSize: isMobile ? 9.5 : 10.5,
+                        fontSize: 9.5,
                         fontWeight: 700,
                         display: "inline-flex",
                         alignItems: "center",
@@ -261,9 +210,212 @@ export default function Thread({ t, onBack, onDetail, onVideo, embedded, onSend,
                 </button>
               ))}
             </div>
+          )}
+        </div>
+      ) : (
+        <div
+          style={{
+            background: "rgba(255,255,255,.86)",
+            backdropFilter: "blur(18px)",
+            borderBottom: "1px solid " + T.line,
+            padding: "12px 14px 10px",
+            position: "sticky",
+            top: 0,
+            zIndex: 10,
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            {!embedded && <Back onClick={onBack} label="" />}
+            <Avatar initials={initialsOf(t.name)} team={t.team} size={38} />
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div
+                style={{
+                  fontSize: 16,
+                  fontWeight: 660,
+                  color: T.ink,
+                  letterSpacing: -0.25,
+                  whiteSpace: "nowrap",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                }}
+              >
+                {t.name}
+              </div>
+              <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 2 }}>
+                <FacilityChip id={t.facility} />
+                <span
+                  style={{
+                    fontSize: 11.5,
+                    color: T.sub,
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  {t.team ? t.members : t.context}
+                </span>
+              </div>
+            </div>
+            <button
+              onClick={onVideo}
+              title="Start telehealth visit"
+              style={{
+                all: "unset",
+                cursor: "pointer",
+                background: "linear-gradient(135deg,#2E5CFF,#1E3FCC)",
+                color: "#fff",
+                fontSize: 12.5,
+                fontWeight: 640,
+                borderRadius: 20,
+                padding: "9px 14px",
+                display: "flex",
+                alignItems: "center",
+                gap: 6,
+                flexShrink: 0,
+                boxShadow: "0 6px 16px rgba(41,112,255,.28)",
+              }}
+            >
+              <VideoIcon />
+              Video
+            </button>
+            <button
+              title="Voice call"
+              style={{
+                all: "unset",
+                cursor: "pointer",
+                background: "#101828",
+                color: "#fff",
+                borderRadius: 20,
+                padding: "10px 12px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                flexShrink: 0,
+              }}
+            >
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="#fff"
+                strokeWidth="2.2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2Z" />
+              </svg>
+            </button>
           </div>
-        )}
-      </div>
+          {t.patient !== "—" && (
+            <button
+              onClick={onDetail}
+              style={{
+                all: "unset",
+                boxSizing: "border-box",
+                cursor: "pointer",
+                marginTop: 10,
+                width: "100%",
+                display: "flex",
+                alignItems: "center",
+                gap: 8,
+                background: T.blueSoft,
+                border: "1px solid #D6E4FF",
+                borderRadius: 13,
+                padding: "9px 13px",
+                flexWrap: "wrap",
+              }}
+            >
+              <PersonIcon c={T.blueDeep} />
+              <span style={{ fontSize: 13, color: T.blueDeep, fontWeight: 620 }}>{t.patient}</span>
+              <span style={{ color: "#C3D5F7" }}>|</span>
+              <DoorIcon />
+              <span style={{ fontSize: 12.5, color: T.blueDeep, fontWeight: 560 }}>
+                Room {t.room}
+              </span>
+              <span
+                style={{ marginLeft: "auto", display: "inline-flex", alignItems: "center", gap: 8 }}
+              >
+                <Glyph level={t.acuity} size={9} gap={2} w={3.5} />
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke={T.blueDeep}
+                  strokeWidth="2.4"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M9 5 L16 12 L9 19" />
+                </svg>
+              </span>
+            </button>
+          )}
+          {related.length > 0 && (
+            <div style={{ marginTop: 9 }}>
+              <div
+                style={{
+                  fontFamily: mono,
+                  fontSize: 9.5,
+                  letterSpacing: 1.6,
+                  color: T.faint,
+                  textTransform: "uppercase",
+                  marginBottom: 6,
+                }}
+              >
+                Also for this patient
+              </div>
+              <div className="vx-hscroll" style={{ display: "flex", gap: 7 }}>
+                {related.map((r) => (
+                  <button
+                    key={r.id}
+                    onClick={() => onOpenThread?.(r.id)}
+                    style={{
+                      all: "unset",
+                      cursor: "pointer",
+                      flexShrink: 0,
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: 7,
+                      fontSize: 12.5,
+                      fontWeight: 600,
+                      color: T.ink,
+                      background: "#fff",
+                      border: "1px solid " + T.line,
+                      borderRadius: 18,
+                      padding: "7px 13px",
+                    }}
+                  >
+                    <Glyph level={r.acuity} size={8} gap={1.5} w={3.2} />
+                    {r.team ? r.members : r.context}
+                    {r.newCount > 0 && (
+                      <span
+                        style={{
+                          minWidth: 18,
+                          height: 18,
+                          borderRadius: 9,
+                          padding: "0 5px",
+                          background: "linear-gradient(135deg,#2E5CFF,#1E3FCC)",
+                          color: "#fff",
+                          fontSize: 10.5,
+                          fontWeight: 700,
+                          display: "inline-flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                        }}
+                      >
+                        {r.newCount}
+                      </span>
+                    )}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
 
       <div
         style={{
