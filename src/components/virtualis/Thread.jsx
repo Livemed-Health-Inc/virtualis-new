@@ -708,18 +708,18 @@ export default function Thread({ t, onBack, onDetail, onVideo, embedded, onSend,
         </div>
       </div>
 
-      <div style={{ padding: "8px 14px 12px" }}>
+      <div style={{ padding: isMobile ? "6px 10px 8px" : "8px 14px 12px" }}>
         <div
-          style={{ maxWidth: 820, margin: "0 auto", display: "flex", gap: 8, alignItems: "center" }}
+          style={{ maxWidth: 820, margin: "0 auto", display: "flex", gap: isMobile ? 6 : 8, alignItems: "center" }}
         >
           <button
             title="Attach"
             style={{
               all: "unset",
               cursor: "pointer",
-              width: 42,
-              height: 42,
-              borderRadius: 14,
+              width: isMobile ? 36 : 42,
+              height: isMobile ? 36 : 42,
+              borderRadius: isMobile ? 12 : 14,
               background: "#EDF0F4",
               display: "flex",
               alignItems: "center",
@@ -728,8 +728,8 @@ export default function Thread({ t, onBack, onDetail, onVideo, embedded, onSend,
             }}
           >
             <svg
-              width="17"
-              height="17"
+              width={isMobile ? 15 : 17}
+              height={isMobile ? 15 : 17}
               viewBox="0 0 24 24"
               fill="none"
               stroke={T.sub}
@@ -744,16 +744,16 @@ export default function Thread({ t, onBack, onDetail, onVideo, embedded, onSend,
             onChange={(e) => setDraft(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && send()}
             placeholder="Message"
-            style={{ ...inputStyle, borderRadius: 24, flex: 1, minWidth: 0 }}
+            style={{ ...inputStyle, borderRadius: 24, flex: 1, minWidth: 0, height: isMobile ? 36 : 42 }}
           />
           <button
             onClick={send}
             style={{
               all: "unset",
               cursor: "pointer",
-              width: 42,
-              height: 42,
-              borderRadius: 21,
+              width: isMobile ? 36 : 42,
+              height: isMobile ? 36 : 42,
+              borderRadius: isMobile ? 18 : 21,
               background: draft.trim() ? "linear-gradient(135deg,#2E5CFF,#1E3FCC)" : T.ghost,
               display: "flex",
               alignItems: "center",
@@ -763,8 +763,8 @@ export default function Thread({ t, onBack, onDetail, onVideo, embedded, onSend,
             }}
           >
             <svg
-              width="16"
-              height="16"
+              width={isMobile ? 14 : 16}
+              height={isMobile ? 14 : 16}
               viewBox="0 0 24 24"
               fill="none"
               stroke="#fff"
