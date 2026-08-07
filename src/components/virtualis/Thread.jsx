@@ -65,18 +65,38 @@ export default function Thread({ t, onBack, onDetail, onVideo, embedded, onSend,
       {isMobile ? (
         <div
           style={{
-            background: "rgba(255,255,255,.9)",
+            background: "rgba(255,255,255,.92)",
             backdropFilter: "blur(18px)",
             borderBottom: "1px solid " + T.line,
-            padding: "6px 10px",
+            padding: "4px 8px",
             position: "sticky",
             top: 0,
             zIndex: 10,
           }}
         >
-          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            {!embedded && <Back onClick={onBack} label="" />}
-            <Avatar initials={initialsOf(t.name)} team={t.team} size={30} />
+          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+            {!embedded && (
+              <button
+                onClick={onBack}
+                title="Back"
+                style={{
+                  all: "unset",
+                  cursor: "pointer",
+                  width: 28,
+                  height: 28,
+                  borderRadius: 14,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  flexShrink: 0,
+                  color: T.sub,
+                }}
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M19 12H5M12 19l-7-7 7-7" />
+                </svg>
+              </button>
+            )}
             <button
               onClick={onDetail}
               style={{
@@ -89,49 +109,52 @@ export default function Thread({ t, onBack, onDetail, onVideo, embedded, onSend,
             >
               <div
                 style={{
-                  fontSize: 14.5,
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 5,
+                  fontSize: 13,
                   fontWeight: 660,
                   color: T.ink,
                   letterSpacing: -0.25,
                   whiteSpace: "nowrap",
                   overflow: "hidden",
                   textOverflow: "ellipsis",
+                  lineHeight: 1.25,
                 }}
               >
+                <Glyph level={t.acuity} size={6} gap={1.2} w={2.6} />
                 {t.name}
               </div>
               <div
                 style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 5,
-                  fontSize: 11,
+                  fontSize: 10,
                   color: T.sub,
                   whiteSpace: "nowrap",
                   overflow: "hidden",
                   textOverflow: "ellipsis",
+                  lineHeight: 1.25,
+                  marginTop: 1,
                 }}
               >
-                <Glyph level={t.acuity} size={7} gap={1.5} w={3} />
                 {t.patient !== "—" ? `${t.patient} · ${t.room}` : t.team ? t.members : t.context}
               </div>
             </button>
             {related.length > 0 && (
               <button
                 onClick={() => setRelOpen((v) => !v)}
-                title="Other consults for this patient"
+                title="Other consults"
                 style={{
                   all: "unset",
                   cursor: "pointer",
                   flexShrink: 0,
-                  height: 32,
-                  minWidth: 32,
-                  padding: "0 8px",
-                  borderRadius: 16,
+                  height: 26,
+                  minWidth: 26,
+                  padding: "0 6px",
+                  borderRadius: 13,
                   background: relOpen ? T.blueSoft : "#fff",
                   border: "1px solid " + T.line,
                   color: T.blueDeep,
-                  fontSize: 12,
+                  fontSize: 10.5,
                   fontWeight: 700,
                   display: "flex",
                   alignItems: "center",
@@ -143,26 +166,26 @@ export default function Thread({ t, onBack, onDetail, onVideo, embedded, onSend,
             )}
             <button
               onClick={onVideo}
-              title="Start telehealth visit"
+              title="Video"
               style={{
                 all: "unset",
                 cursor: "pointer",
                 background: "linear-gradient(135deg,#2E5CFF,#1E3FCC)",
-                borderRadius: 16,
-                width: 32,
-                height: 32,
+                borderRadius: 14,
+                width: 28,
+                height: 28,
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
                 flexShrink: 0,
-                boxShadow: "0 4px 12px rgba(41,112,255,.28)",
+                boxShadow: "0 3px 10px rgba(41,112,255,.28)",
               }}
             >
               <VideoIcon />
             </button>
           </div>
           {relOpen && related.length > 0 && (
-            <div className="vx-hscroll" style={{ display: "flex", gap: 6, marginTop: 6 }}>
+            <div className="vx-hscroll" style={{ display: "flex", gap: 5, marginTop: 5, paddingBottom: 2 }}>
               {related.map((r) => (
                 <button
                   key={r.id}
@@ -176,28 +199,28 @@ export default function Thread({ t, onBack, onDetail, onVideo, embedded, onSend,
                     flexShrink: 0,
                     display: "inline-flex",
                     alignItems: "center",
-                    gap: 5,
-                    fontSize: 11.5,
+                    gap: 4,
+                    fontSize: 10.5,
                     fontWeight: 600,
                     color: T.ink,
                     background: "#fff",
                     border: "1px solid " + T.line,
-                    borderRadius: 16,
-                    padding: "5px 10px",
+                    borderRadius: 14,
+                    padding: "4px 8px",
                   }}
                 >
-                  <Glyph level={r.acuity} size={7} gap={1.5} w={3.2} />
+                  <Glyph level={r.acuity} size={6} gap={1.2} w={2.8} />
                   {r.team ? r.members : r.context}
                   {r.newCount > 0 && (
                     <span
                       style={{
-                        minWidth: 16,
-                        height: 16,
-                        borderRadius: 8,
-                        padding: "0 5px",
+                        minWidth: 14,
+                        height: 14,
+                        borderRadius: 7,
+                        padding: "0 4px",
                         background: "linear-gradient(135deg,#2E5CFF,#1E3FCC)",
                         color: "#fff",
-                        fontSize: 9.5,
+                        fontSize: 9,
                         fontWeight: 700,
                         display: "inline-flex",
                         alignItems: "center",
