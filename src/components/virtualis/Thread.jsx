@@ -602,22 +602,22 @@ export default function Thread({ t, onBack, onDetail, onVideo, embedded, onSend,
                     </div>
                   </div>
                 ) : (
-                  <div
-                    style={{
-                      background: m.me ? "linear-gradient(135deg,#2E5CFF,#1E3FCC)" : "#fff",
-                      color: m.me ? "#fff" : T.ink,
-                      border: m.me ? "none" : "1px solid " + T.line,
-                      borderRadius: m.me ? "20px 20px 6px 20px" : "20px 20px 20px 6px",
-                      padding: "11px 15px",
-                      fontSize: 14.5,
-                      lineHeight: 1.45,
-                      boxShadow: m.me
-                        ? "0 6px 16px rgba(41,112,255,.22)"
-                        : "0 2px 6px rgba(16,24,40,.04)",
-                    }}
-                  >
-                    {m.text}
-                  </div>
+                <div
+                  style={{
+                    background: m.me ? "linear-gradient(135deg,#2E5CFF,#1E3FCC)" : "#fff",
+                    color: m.me ? "#fff" : T.ink,
+                    border: m.me ? "none" : "1px solid " + T.line,
+                    borderRadius: m.me ? "18px 18px 5px 18px" : "18px 18px 18px 5px",
+                    padding: isMobile ? "9px 12px" : "11px 15px",
+                    fontSize: isMobile ? 13.5 : 14.5,
+                    lineHeight: 1.4,
+                    boxShadow: m.me
+                      ? "0 6px 16px rgba(41,112,255,.22)"
+                      : "0 2px 6px rgba(16,24,40,.04)",
+                  }}
+                >
+                  {m.text}
+                </div>
                 )}
               </button>
               <div
