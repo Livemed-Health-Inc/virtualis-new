@@ -164,29 +164,29 @@ export default function Thread({ t, onBack, onDetail, onVideo, embedded, onSend,
               all: "unset",
               boxSizing: "border-box",
               cursor: "pointer",
-              marginTop: 10,
+              marginTop: isMobile ? 8 : 10,
               width: "100%",
               display: "flex",
               alignItems: "center",
-              gap: 8,
+              gap: isMobile ? 6 : 8,
               background: T.blueSoft,
               border: "1px solid #D6E4FF",
-              borderRadius: 13,
-              padding: "9px 13px",
+              borderRadius: isMobile ? 11 : 13,
+              padding: isMobile ? "7px 11px" : "9px 13px",
               flexWrap: "wrap",
             }}
           >
             <PersonIcon c={T.blueDeep} />
-            <span style={{ fontSize: 13, color: T.blueDeep, fontWeight: 620 }}>{t.patient}</span>
+            <span style={{ fontSize: isMobile ? 12 : 13, color: T.blueDeep, fontWeight: 620 }}>{t.patient}</span>
             <span style={{ color: "#C3D5F7" }}>|</span>
             <DoorIcon />
-            <span style={{ fontSize: 12.5, color: T.blueDeep, fontWeight: 560 }}>
+            <span style={{ fontSize: isMobile ? 11.5 : 12.5, color: T.blueDeep, fontWeight: 560 }}>
               Room {t.room}
             </span>
             <span
               style={{ marginLeft: "auto", display: "inline-flex", alignItems: "center", gap: 8 }}
             >
-              <Glyph level={t.acuity} size={9} gap={2} w={3.5} />
+              <Glyph level={t.acuity} size={isMobile ? 8 : 9} gap={2} w={3.5} />
               <svg
                 width="14"
                 height="14"
