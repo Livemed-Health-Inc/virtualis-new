@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { useMediaQuery } from "./theme";
 import {
   T,
   mono,
@@ -27,6 +28,7 @@ export default function Thread({ t, onBack, onDetail, onVideo, embedded, onSend,
   const [sheet, setSheet] = useState(null);
   const [ackd, setAckd] = useState(false);
   const endRef = useRef(null);
+  const isMobile = useMediaQuery("(max-width: 639px)");
   /* Persisted messages arrive on `t.msgs`; `extra` only holds the optimistic
      echo for the split second before the insert round-trips. */
   const msgs = onSend ? t.msgs : [...t.msgs, ...extra];
@@ -64,19 +66,19 @@ export default function Thread({ t, onBack, onDetail, onVideo, embedded, onSend,
           background: "rgba(255,255,255,.86)",
           backdropFilter: "blur(18px)",
           borderBottom: "1px solid " + T.line,
-          padding: "12px 14px 10px",
+          padding: isMobile ? "8px 12px 6px" : "12px 14px 10px",
           position: "sticky",
           top: 0,
           zIndex: 10,
         }}
       >
-        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: isMobile ? 8 : 10 }}>
           {!embedded && <Back onClick={onBack} label="" />}
-          <Avatar initials={initialsOf(t.name)} team={t.team} size={38} />
+          <Avatar initials={initialsOf(t.name)} team={t.team} size={isMobile ? 32 : 38} />
           <div style={{ flex: 1, minWidth: 0 }}>
             <div
               style={{
-                fontSize: 16,
+                fontSize: isMobile ? 15 : 16,
                 fontWeight: 660,
                 color: T.ink,
                 letterSpacing: -0.25,
@@ -91,7 +93,7 @@ export default function Thread({ t, onBack, onDetail, onVideo, embedded, onSend,
               <FacilityChip id={t.facility} />
               <span
                 style={{
-                  fontSize: 11.5,
+                  fontSize: isMobile ? 11 : 11.5,
                   color: T.sub,
                   overflow: "hidden",
                   textOverflow: "ellipsis",
@@ -112,8 +114,8 @@ export default function Thread({ t, onBack, onDetail, onVideo, embedded, onSend,
               color: "#fff",
               fontSize: 12.5,
               fontWeight: 640,
-              borderRadius: 20,
-              padding: "9px 14px",
+              borderRadius: isMobile ? 18 : 20,
+              padding: isMobile ? "9px" : "9px 14px",
               display: "flex",
               alignItems: "center",
               gap: 6,
@@ -121,7 +123,8 @@ export default function Thread({ t, onBack, onDetail, onVideo, embedded, onSend,
               boxShadow: "0 6px 16px rgba(41,112,255,.28)",
             }}
           >
-            <VideoIcon /> Video
+            <VideoIcon />
+            {!isMobile && "Video"}
           </button>
           <button
             title="Voice call"
@@ -130,16 +133,19 @@ export default function Thread({ t, onBack, onDetail, onVideo, embedded, onSend,
               cursor: "pointer",
               background: "#101828",
               color: "#fff",
-              borderRadius: 20,
-              padding: "10px 12px",
+              borderRadius: isMobile ? 18 : 20,
+              padding: isMobile ? "9px" : "10px 12px",
+              width: isMobile ? 36 : undefined,
+              height: isMobile ? 36 : undefined,
               display: "flex",
               alignItems: "center",
+              justifyContent: "center",
               flexShrink: 0,
             }}
           >
             <svg
-              width="14"
-              height="14"
+              width={isMobile ? 15 : 14}
+              height={isMobile ? 15 : 14}
               viewBox="0 0 24 24"
               fill="none"
               stroke="#fff"
@@ -158,29 +164,29 @@ export default function Thread({ t, onBack, onDetail, onVideo, embedded, onSend,
               all: "unset",
               boxSizing: "border-box",
               cursor: "pointer",
-              marginTop: 10,
+              marginTop: isMobile ? 8 : 10,
               width: "100%",
               display: "flex",
               alignItems: "center",
-              gap: 8,
+              gap: isMobile ? 6 : 8,
               background: T.blueSoft,
               border: "1px solid #D6E4FF",
-              borderRadius: 13,
-              padding: "9px 13px",
+              borderRadius: isMobile ? 11 : 13,
+              padding: isMobile ? "7px 11px" : "9px 13px",
               flexWrap: "wrap",
             }}
           >
             <PersonIcon c={T.blueDeep} />
-            <span style={{ fontSize: 13, color: T.blueDeep, fontWeight: 620 }}>{t.patient}</span>
+            <span style={{ fontSize: isMobile ? 12 : 13, color: T.blueDeep, fontWeight: 620 }}>{t.patient}</span>
             <span style={{ color: "#C3D5F7" }}>|</span>
             <DoorIcon />
-            <span style={{ fontSize: 12.5, color: T.blueDeep, fontWeight: 560 }}>
+            <span style={{ fontSize: isMobile ? 11.5 : 12.5, color: T.blueDeep, fontWeight: 560 }}>
               Room {t.room}
             </span>
             <span
               style={{ marginLeft: "auto", display: "inline-flex", alignItems: "center", gap: 8 }}
             >
-              <Glyph level={t.acuity} size={9} gap={2} w={3.5} />
+              <Glyph level={t.acuity} size={isMobile ? 8 : 9} gap={2} w={3.5} />
               <svg
                 width="14"
                 height="14"
@@ -197,20 +203,20 @@ export default function Thread({ t, onBack, onDetail, onVideo, embedded, onSend,
           </button>
         )}
         {related.length > 0 && (
-          <div style={{ marginTop: 9 }}>
+          <div style={{ marginTop: isMobile ? 7 : 9 }}>
             <div
               style={{
                 fontFamily: mono,
-                fontSize: 9.5,
+                fontSize: isMobile ? 9 : 9.5,
                 letterSpacing: 1.6,
                 color: T.faint,
                 textTransform: "uppercase",
-                marginBottom: 6,
+                marginBottom: isMobile ? 4 : 6,
               }}
             >
               Also for this patient
             </div>
-            <div className="vx-hscroll" style={{ display: "flex", gap: 7 }}>
+            <div className="vx-hscroll" style={{ display: "flex", gap: isMobile ? 6 : 7 }}>
               {related.map((r) => (
                 <button
                   key={r.id}
@@ -221,28 +227,28 @@ export default function Thread({ t, onBack, onDetail, onVideo, embedded, onSend,
                     flexShrink: 0,
                     display: "inline-flex",
                     alignItems: "center",
-                    gap: 7,
-                    fontSize: 12.5,
+                    gap: isMobile ? 5 : 7,
+                    fontSize: isMobile ? 11.5 : 12.5,
                     fontWeight: 600,
                     color: T.ink,
                     background: "#fff",
                     border: "1px solid " + T.line,
-                    borderRadius: 18,
-                    padding: "7px 13px",
+                    borderRadius: isMobile ? 16 : 18,
+                    padding: isMobile ? "5px 10px" : "7px 13px",
                   }}
                 >
-                  <Glyph level={r.acuity} size={8} gap={1.5} w={3.2} />
+                  <Glyph level={r.acuity} size={isMobile ? 7 : 8} gap={1.5} w={3.2} />
                   {r.team ? r.members : r.context}
                   {r.newCount > 0 && (
                     <span
                       style={{
-                        minWidth: 18,
-                        height: 18,
-                        borderRadius: 9,
+                        minWidth: isMobile ? 16 : 18,
+                        height: isMobile ? 16 : 18,
+                        borderRadius: isMobile ? 8 : 9,
                         padding: "0 5px",
                         background: "linear-gradient(135deg,#2E5CFF,#1E3FCC)",
                         color: "#fff",
-                        fontSize: 10.5,
+                        fontSize: isMobile ? 9.5 : 10.5,
                         fontWeight: 700,
                         display: "inline-flex",
                         alignItems: "center",
