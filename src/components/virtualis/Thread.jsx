@@ -444,10 +444,10 @@ export default function Thread({ t, onBack, onDetail, onVideo, embedded, onSend,
         style={{
           flex: 1,
           overflowY: "auto",
-          padding: "12px 14px",
+          padding: isMobile ? "8px 10px" : "12px 14px",
           display: "flex",
           flexDirection: "column",
-          gap: 11,
+          gap: isMobile ? 8 : 11,
         }}
       >
         <div
@@ -457,7 +457,7 @@ export default function Thread({ t, onBack, onDetail, onVideo, embedded, onSend,
             margin: "0 auto",
             display: "flex",
             flexDirection: "column",
-            gap: 11,
+            gap: isMobile ? 8 : 11,
           }}
         >
           {msgs.map((m, i) => (
