@@ -465,14 +465,14 @@ export default function Inbox({
             </button>
           )}
         </div>
-        {compact ? (
-          viewToggle
-        ) : (
-          <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 8 }}>
-            <div
-              className="vx-hscroll"
-              style={{ display: "flex", gap: 6, flex: 1, minWidth: 0, paddingBottom: 2 }}
-            >
+        {viewToggle}
+        {!compact && (
+          <div
+            className="vx-hscroll"
+            style={{ gridColumn: "1 / -1", display: "flex", gap: 6, minWidth: 0, marginTop: 2, paddingBottom: 2 }}
+          >
+            {(() => null)()}
+
               {pills.map((p) => {
                 const active = filter === p.k,
                   dark = p.k === "all";
