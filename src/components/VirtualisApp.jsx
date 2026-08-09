@@ -443,8 +443,9 @@ function VFab({ onConsult, onAlis, onPage, onTelehealth, float }) {
 
   /* Symmetric upward fan so the V sits in the centre of the messaging pane
      and actions bloom above it without drifting toward either edge. */
-  const angles = float ? [160, 130, 100, 70] : [150, 120, 75, 45];
-  const radius = float ? 150 : 146;
+  const angles = float ? [176, 148, 120, 92] : [150, 120, 75, 45];
+  const radius = float ? 148 : 146;
+
 
 
   return (
@@ -459,10 +460,11 @@ function VFab({ onConsult, onAlis, onPage, onTelehealth, float }) {
         style={{
           position: "absolute",
           zIndex: 41,
-          bottom: float ? 26 : "calc(14px + env(safe-area-inset-bottom))",
-          left: float ? "50%" : 0,
-          right: float ? "auto" : 0,
-          transform: float ? "translateX(-50%)" : "none",
+          bottom: float ? 76 : "calc(14px + env(safe-area-inset-bottom))",
+          left: float ? "auto" : 0,
+          right: float ? 22 : 0,
+          transform: "none",
+
           display: "flex",
           justifyContent: "center",
           pointerEvents: "none",
