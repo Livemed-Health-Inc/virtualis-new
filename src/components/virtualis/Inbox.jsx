@@ -164,8 +164,9 @@ function Row({ t, ack, unreadCount, onOpen, selected, i, compact }) {
           : ack
             ? "#fff"
             : "linear-gradient(135deg,#FFFFFF 30%,#F2F7FF 78%,#EBF2FF 100%)",
-        borderRadius: compact ? 12 : 20,
-        padding: compact ? "8px 10px" : 15,
+        borderRadius: compact ? 12 : 16,
+        padding: compact ? "8px 10px" : "11px 13px",
+
         border: "1px solid " + (selected ? "#B9D0FF" : ack ? T.line : "#CFE0FF"),
         boxShadow:
           ack && !selected
@@ -198,13 +199,14 @@ function Row({ t, ack, unreadCount, onOpen, selected, i, compact }) {
           />
         </span>
       )}
-      <div style={{ display: "flex", gap: compact ? 8 : 12, flex: 1, minWidth: 0 }}>
-        <Avatar initials={initialsOf(t.name)} team={t.team} size={compact ? 32 : undefined} />
+      <div style={{ display: "flex", gap: compact ? 8 : 11, flex: 1, minWidth: 0 }}>
+        <Avatar initials={initialsOf(t.name)} team={t.team} size={compact ? 32 : 36} />
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
             <span
               style={{
-                fontSize: compact ? 13.5 : 16,
+                fontSize: compact ? 13.5 : 14.5,
+
                 fontWeight: ack ? 600 : 680,
                 color: T.ink,
                 whiteSpace: "nowrap",
@@ -245,33 +247,8 @@ function Row({ t, ack, unreadCount, onOpen, selected, i, compact }) {
               >
                 {t.time}
               </span>
-              {ack ? (
-                <span
-                  style={{
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: 3,
-                    fontSize: 10.5,
-                    fontWeight: 560,
-                    color: T.faint,
-                  }}
-                >
-                  <svg
-                    width="14"
-                    height="10"
-                    viewBox="0 0 20 14"
-                    fill="none"
-                    stroke={T.faint}
-                    strokeWidth="2.2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <path d="M1.5 7.5 L5.5 11.5 L12 4" />
-                    <path d="M9 10 L10.5 11.5 L18 3.5" />
-                  </svg>
-                  Read
-                </span>
-              ) : (
+              {!ack && (
+
                 <span
                   style={{
                     minWidth: 20,
@@ -293,64 +270,43 @@ function Row({ t, ack, unreadCount, onOpen, selected, i, compact }) {
               )}
             </span>
           </div>
-          {!compact && <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 7,
-              marginTop: 5,
-              flexWrap: "wrap",
-            }}
-          >
-            <FacilityChip id={t.facility} showEmr />
-            <span
+          {!compact && (
+            <div
               style={{
-                fontSize: 12.5,
-                color: T.blue,
-                fontWeight: 530,
+                display: "flex",
+                alignItems: "center",
+                gap: 6,
+                marginTop: 4,
+                fontSize: 12,
+                color: T.sub,
                 minWidth: 0,
-                overflow: "hidden",
-                textOverflow: "ellipsis",
                 whiteSpace: "nowrap",
+                overflow: "hidden",
               }}
             >
-              {t.team ? t.members : t.context}
-            </span>
-          </div>}
-          {!compact && <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 6,
-              fontSize: 12,
-              color: T.sub,
-              marginTop: 5,
-              flexWrap: "wrap",
-            }}
-          >
-            <span style={{ display: "inline-flex", alignItems: "center", gap: 4 }}>
-              <PersonIcon /> {t.patient}
-            </span>
-            {t.room !== "—" && (
-              <>
-                <span style={{ color: T.line }}>|</span>
-                <span style={{ display: "inline-flex", alignItems: "center", gap: 4 }}>
-                  <DoorIcon /> Room {t.room}
-                </span>
-              </>
-            )}
-            
-          </div>}
+              <FacilityChip id={t.facility} />
+              <span style={{ color: T.blue, fontWeight: 530, flexShrink: 0 }}>
+                {t.team ? t.members : t.context}
+              </span>
+              <span style={{ color: T.line }}>·</span>
+              <span style={{ overflow: "hidden", textOverflow: "ellipsis" }}>
+                {t.patient}
+                {t.room !== "—" ? ` · Rm ${t.room}` : ""}
+              </span>
+            </div>
+          )}
+
           <div
             style={{
-              fontSize: compact ? 11.5 : 13.5,
-              marginTop: compact ? 3 : 6,
+              fontSize: compact ? 11.5 : 12.5,
+              marginTop: compact ? 3 : 4,
               color: ack ? T.sub : T.ink,
               fontWeight: ack ? 400 : 530,
-              lineHeight: compact ? 1.25 : 1.4,
+              lineHeight: compact ? 1.25 : 1.35,
               letterSpacing: -0.1,
               display: "-webkit-box",
-              WebkitLineClamp: compact ? 1 : 2,
+              WebkitLineClamp: 1,
+
               WebkitBoxOrient: "vertical",
               overflow: "hidden",
             }}
@@ -419,11 +375,49 @@ export default function Inbox({
     .map((k) => [k, shown.filter((t) => t.acuity === k)])
     .filter(([, l]) => l.length);
 
+  const viewToggle = (
+    <div
+      style={{
+        display: "flex",
+        gap: 3,
+        flexShrink: 0,
+        padding: compact ? 2 : 3,
+        background: "#EEF0F4",
+        borderRadius: 999,
+      }}
+    >
+      {[
+        ["acuity", "Acuity"],
+        ["patient", "Patient"],
+      ].map(([k, label]) => (
+        <button
+          key={k}
+          onClick={() => setView(k)}
+          style={{
+            all: "unset",
+            cursor: "pointer",
+            textAlign: "center",
+            padding: compact ? "5px 10px" : "6px 14px",
+            borderRadius: 999,
+            fontSize: compact ? 10.5 : 12.5,
+            fontWeight: 620,
+            color: view === k ? "#fff" : T.sub,
+            background: view === k ? "linear-gradient(135deg,#2E5CFF,#1E3FCC)" : "transparent",
+            transition: "all .2s ease",
+          }}
+        >
+          {label}
+        </button>
+      ))}
+    </div>
+  );
+
+
   return (
     <>
       <div style={{ padding: compact ? "7px 10px 6px" : "14px clamp(14px,2.2vw,22px) 12px", position: "relative", zIndex: 1 }}>
         {header}
-        <div style={{ display: "grid", gridTemplateColumns: compact ? "minmax(0,1fr) auto" : "1fr", gap: compact ? 6 : 0, alignItems: "center" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "minmax(0,1fr) auto", gap: compact ? 6 : 10, alignItems: "center" }}>
         <div
           style={{
             background: "rgba(255,255,255,.85)",
@@ -471,80 +465,51 @@ export default function Inbox({
             </button>
           )}
         </div>
-        {!compact && <div
-          className="vx-hscroll"
-          style={{ display: "flex", gap: 8, marginTop: 13, paddingBottom: 2 }}
-        >
+        {viewToggle}
+        {!compact && (
+          <div
+            className="vx-hscroll"
+            style={{ gridColumn: "1 / -1", display: "flex", gap: 6, minWidth: 0, marginTop: 2, paddingBottom: 2 }}
+          >
+            {pills.map((p) => {
+              const active = filter === p.k,
+                dark = p.k === "all";
+              return (
+                <button
+                  key={p.k}
+                  onClick={() => setFilter(p.k)}
+                  style={{
+                    all: "unset",
+                    cursor: "pointer",
+                    flexShrink: 0,
+                    fontSize: 12.5,
+                    fontWeight: 600,
+                    padding: "7px 13px",
+                    borderRadius: 999,
+                    color: active ? (dark ? "#fff" : p.c) : dark ? T.ink : p.c,
+                    background: active
+                      ? dark
+                        ? "linear-gradient(135deg,#1B3FA0,#12275E)"
+                        : p.bg
+                      : "#fff",
+                    border: "1px solid " + (active ? (dark ? "#12275E" : p.bd) : T.line),
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: 6,
+                    transition: "all .2s ease",
+                  }}
+                >
+                  {p.c && (
+                    <span style={{ width: 6, height: 6, borderRadius: 3, background: p.c }} />
+                  )}
+                  {p.label}
+                </button>
+              );
+            })}
+          </div>
+        )}
 
-          {pills.map((p) => {
-            const active = filter === p.k,
-              dark = p.k === "all";
-            return (
-              <button
-                key={p.k}
-                onClick={() => setFilter(p.k)}
-                style={{
-                  all: "unset",
-                  cursor: "pointer",
-                  flexShrink: 0,
-                  fontSize: 13,
-                  fontWeight: 600,
-                  padding: "8px 15px",
-                  borderRadius: 22,
-                  color: active ? (dark ? "#fff" : p.c) : dark ? T.ink : p.c,
-                  background: active
-                    ? dark
-                      ? "linear-gradient(135deg,#1B3FA0,#12275E)"
-                      : p.bg
-                    : "#fff",
-                  border: "1px solid " + (active ? (dark ? "#12275E" : p.bd) : T.line),
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: 6,
-                  transition: "all .2s ease",
-                }}
-              >
-                {p.c && <span style={{ width: 7, height: 7, borderRadius: 4, background: p.c }} />}
-                {p.label}
-              </button>
-            );
-          })}
-        </div>}
-        <div
-          style={{
-            display: "flex",
-            gap: 4,
-            marginTop: compact ? 0 : 11,
-            padding: compact ? 2 : 4,
-            background: "#EEF0F4",
-            borderRadius: compact ? 10 : 14,
-          }}
-        >
-          {[
-            ["acuity", "Acuity"],
-            ["patient", "Patient"],
-          ].map(([k, label]) => (
-            <button
-              key={k}
-              onClick={() => setView(k)}
-              style={{
-                all: "unset",
-                cursor: "pointer",
-                flex: 1,
-                textAlign: "center",
-                padding: compact ? "6px 8px" : "7px 0",
-                borderRadius: 10,
-                fontSize: compact ? 10.5 : 13,
-                fontWeight: 620,
-                color: view === k ? "#fff" : T.sub,
-                background: view === k ? "linear-gradient(135deg,#2E5CFF,#1E3FCC)" : "transparent",
-                transition: "all .2s ease",
-              }}
-            >
-              {label}
-            </button>
-          ))}
-        </div>
+
         </div>
       </div>
 
