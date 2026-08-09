@@ -29,15 +29,15 @@ function PatientCard({ g, openThread, selectedId }) {
       style={{
         background: "#fff",
         border: "1px solid " + (g.threads.some((t) => t.id === selectedId) ? "#C9DBFF" : T.line),
-        borderRadius: 20,
-        padding: 14,
+        borderRadius: 16,
+        padding: 12,
         display: "flex",
         flexDirection: "column",
-        gap: 11,
+        gap: 12,
       }}
     >
-      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-        <Avatar initials={initialsOf(g.patient)} size={38} />
+      <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+        <Avatar initials={initialsOf(g.patient)} size={36} />
         <div style={{ flex: 1, minWidth: 0 }}>
           <div
             style={{
@@ -56,16 +56,18 @@ function PatientCard({ g, openThread, selectedId }) {
             style={{
               display: "flex",
               alignItems: "center",
-              gap: 7,
-              marginTop: 3,
-              fontSize: 11.5,
+              gap: 8,
+              marginTop: 4,
+              fontSize: 12.5,
               color: T.sub,
             }}
           >
             <FacilityChip id={g.facility} />
-            {g.mrn && <span style={{ fontFamily: mono, fontSize: 10.5 }}>MRN {g.mrn}</span>}
+            {g.mrn && <span style={{ fontFamily: mono, fontSize: 11 }}>MRN {g.mrn}</span>}
             <span>· Room {g.room}</span>
           </div>
+        </div>
+
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
           <Glyph level={g.acuity} size={13} gap={2.5} w={4.5} />
