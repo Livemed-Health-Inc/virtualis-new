@@ -454,12 +454,13 @@ export default function Thread({ t, onBack, onDetail, onVideo, embedded, onSend,
           style={{
             width: "100%",
             maxWidth: 820,
-            margin: "0 auto",
+            margin: "auto auto 0",
             display: "flex",
             flexDirection: "column",
             gap: isMobile ? 8 : 11,
           }}
         >
+
           {msgs.map((m, i) => (
             <div
               key={i}
@@ -719,8 +720,10 @@ export default function Thread({ t, onBack, onDetail, onVideo, embedded, onSend,
               cursor: "pointer",
               width: isMobile ? 36 : 42,
               height: isMobile ? 36 : 42,
-              borderRadius: isMobile ? 12 : 14,
-              background: "#EDF0F4",
+              borderRadius: 999,
+              background: "#fff",
+              border: "1px solid " + T.line,
+              boxSizing: "border-box",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
@@ -744,8 +747,17 @@ export default function Thread({ t, onBack, onDetail, onVideo, embedded, onSend,
             onChange={(e) => setDraft(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && send()}
             placeholder="Message"
-            style={{ ...inputStyle, borderRadius: 24, flex: 1, minWidth: 0, height: isMobile ? 36 : 42 }}
+            style={{
+              ...inputStyle,
+              borderRadius: 999,
+              flex: 1,
+              minWidth: 0,
+              height: isMobile ? 36 : 42,
+              padding: isMobile ? "0 14px" : "0 16px",
+              fontSize: isMobile ? 13.5 : 14.5,
+            }}
           />
+
           <button
             onClick={send}
             style={{
