@@ -765,12 +765,15 @@ export default function Thread({ t, onBack, onDetail, onVideo, embedded, onSend,
               cursor: "pointer",
               width: isMobile ? 36 : 42,
               height: isMobile ? 36 : 42,
-              borderRadius: isMobile ? 18 : 21,
-              background: draft.trim() ? "linear-gradient(135deg,#2E5CFF,#1E3FCC)" : T.ghost,
+              borderRadius: 999,
+              background: draft.trim() ? "linear-gradient(135deg,#2E5CFF,#1E3FCC)" : "#fff",
+              border: draft.trim() ? "1px solid transparent" : "1px solid " + T.line,
+              boxSizing: "border-box",
+              boxShadow: draft.trim() ? "0 6px 16px rgba(41,112,255,.26)" : "none",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              transition: "background .2s ease",
+              transition: "all .2s ease",
               flexShrink: 0,
             }}
           >
@@ -779,7 +782,8 @@ export default function Thread({ t, onBack, onDetail, onVideo, embedded, onSend,
               height={isMobile ? 14 : 16}
               viewBox="0 0 24 24"
               fill="none"
-              stroke="#fff"
+              stroke={draft.trim() ? "#fff" : T.faint}
+
               strokeWidth="2.4"
               strokeLinecap="round"
               strokeLinejoin="round"
