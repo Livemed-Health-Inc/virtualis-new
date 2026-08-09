@@ -298,14 +298,15 @@ function Row({ t, ack, unreadCount, onOpen, selected, i, compact }) {
 
           <div
             style={{
-              fontSize: compact ? 11.5 : 13.5,
-              marginTop: compact ? 3 : 6,
+              fontSize: compact ? 11.5 : 12.5,
+              marginTop: compact ? 3 : 4,
               color: ack ? T.sub : T.ink,
               fontWeight: ack ? 400 : 530,
-              lineHeight: compact ? 1.25 : 1.4,
+              lineHeight: compact ? 1.25 : 1.35,
               letterSpacing: -0.1,
               display: "-webkit-box",
-              WebkitLineClamp: compact ? 1 : 2,
+              WebkitLineClamp: 1,
+
               WebkitBoxOrient: "vertical",
               overflow: "hidden",
             }}
