@@ -29,6 +29,8 @@ export default function Thread({ t, onBack, onDetail, onVideo, embedded, onSend,
   const [ackd, setAckd] = useState(false);
   const endRef = useRef(null);
   const isMobile = useMediaQuery("(max-width: 639px)");
+  const isShortViewport = useMediaQuery("(max-height: 700px)");
+  const compactHeader = isMobile || isShortViewport;
   const [relOpen, setRelOpen] = useState(false);
   /* Persisted messages arrive on `t.msgs`; `extra` only holds the optimistic
      echo for the split second before the insert round-trips. */
@@ -62,19 +64,19 @@ export default function Thread({ t, onBack, onDetail, onVideo, embedded, onSend,
         background: T.bg,
       }}
     >
-      {isMobile ? (
+      {compactHeader ? (
         <div
           style={{
             background: "rgba(255,255,255,.92)",
             backdropFilter: "blur(18px)",
             borderBottom: "1px solid " + T.line,
-            padding: "4px 8px",
+            padding: isMobile ? "4px 8px" : "6px 10px",
             position: "sticky",
             top: 0,
             zIndex: 10,
           }}
         >
-          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: isMobile ? 6 : 8 }}>
             {!embedded && (
               <button
                 onClick={onBack}
@@ -82,9 +84,9 @@ export default function Thread({ t, onBack, onDetail, onVideo, embedded, onSend,
                 style={{
                   all: "unset",
                   cursor: "pointer",
-                  width: 28,
-                  height: 28,
-                  borderRadius: 14,
+                  width: isMobile ? 28 : 32,
+                  height: isMobile ? 28 : 32,
+                  borderRadius: 16,
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
@@ -112,7 +114,7 @@ export default function Thread({ t, onBack, onDetail, onVideo, embedded, onSend,
                   display: "flex",
                   alignItems: "center",
                   gap: 5,
-                  fontSize: 13,
+                  fontSize: isMobile ? 13 : 14,
                   fontWeight: 660,
                   color: T.ink,
                   letterSpacing: -0.25,
@@ -127,7 +129,7 @@ export default function Thread({ t, onBack, onDetail, onVideo, embedded, onSend,
               </div>
               <div
                 style={{
-                  fontSize: 10,
+                  fontSize: isMobile ? 10 : 11,
                   color: T.sub,
                   whiteSpace: "nowrap",
                   overflow: "hidden",
@@ -147,10 +149,10 @@ export default function Thread({ t, onBack, onDetail, onVideo, embedded, onSend,
                   all: "unset",
                   cursor: "pointer",
                   flexShrink: 0,
-                  height: 26,
-                  minWidth: 26,
+                  height: isMobile ? 26 : 30,
+                  minWidth: isMobile ? 26 : 30,
                   padding: "0 6px",
-                  borderRadius: 13,
+                  borderRadius: 15,
                   background: relOpen ? T.blueSoft : "#fff",
                   border: "1px solid " + T.line,
                   color: T.blueDeep,
@@ -172,8 +174,8 @@ export default function Thread({ t, onBack, onDetail, onVideo, embedded, onSend,
                 cursor: "pointer",
                 background: "linear-gradient(135deg,#2E5CFF,#1E3FCC)",
                 borderRadius: 14,
-                width: 28,
-                height: 28,
+                  width: isMobile ? 28 : 32,
+                  height: isMobile ? 28 : 32,
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
