@@ -417,7 +417,7 @@ export default function Inbox({
     <>
       <div style={{ padding: compact ? "7px 10px 6px" : "14px clamp(14px,2.2vw,22px) 12px", position: "relative", zIndex: 1 }}>
         {header}
-        <div style={{ display: "grid", gridTemplateColumns: compact ? "minmax(0,1fr) auto" : "1fr", gap: compact ? 6 : 0, alignItems: "center" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "minmax(0,1fr) auto", gap: compact ? 6 : 10, alignItems: "center" }}>
         <div
           style={{
             background: "rgba(255,255,255,.85)",
