@@ -80,6 +80,11 @@ export function VirtualisProvider({ children }) {
 
   const load = useCallback(async () => {
     if (!userId) return;
+    // A fresh sign-in resets read state so every thread returns as unread.
+    if (freshLogin) {
+      await supabase.from("thread_reads").delete().eq("user_id", userId);
+      setFreshLogin(false);
+    }
     const [p, c, ct, sh, th, rd] = await Promise.all([
       supabase.from("profiles").select("*").eq("id", userId).maybeSingle(),
       supabase.from("provider_credentials").select("*"),
