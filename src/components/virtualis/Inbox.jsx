@@ -164,8 +164,9 @@ function Row({ t, ack, unreadCount, onOpen, selected, i, compact }) {
           : ack
             ? "#fff"
             : "linear-gradient(135deg,#FFFFFF 30%,#F2F7FF 78%,#EBF2FF 100%)",
-        borderRadius: compact ? 12 : 20,
-        padding: compact ? "8px 10px" : 15,
+        borderRadius: compact ? 12 : 16,
+        padding: compact ? "8px 10px" : "11px 13px",
+
         border: "1px solid " + (selected ? "#B9D0FF" : ack ? T.line : "#CFE0FF"),
         boxShadow:
           ack && !selected
@@ -198,13 +199,14 @@ function Row({ t, ack, unreadCount, onOpen, selected, i, compact }) {
           />
         </span>
       )}
-      <div style={{ display: "flex", gap: compact ? 8 : 12, flex: 1, minWidth: 0 }}>
-        <Avatar initials={initialsOf(t.name)} team={t.team} size={compact ? 32 : undefined} />
+      <div style={{ display: "flex", gap: compact ? 8 : 11, flex: 1, minWidth: 0 }}>
+        <Avatar initials={initialsOf(t.name)} team={t.team} size={compact ? 32 : 36} />
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
             <span
               style={{
-                fontSize: compact ? 13.5 : 16,
+                fontSize: compact ? 13.5 : 14.5,
+
                 fontWeight: ack ? 600 : 680,
                 color: T.ink,
                 whiteSpace: "nowrap",
