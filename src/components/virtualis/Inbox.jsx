@@ -245,33 +245,8 @@ function Row({ t, ack, unreadCount, onOpen, selected, i, compact }) {
               >
                 {t.time}
               </span>
-              {ack ? (
-                <span
-                  style={{
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: 3,
-                    fontSize: 10.5,
-                    fontWeight: 560,
-                    color: T.faint,
-                  }}
-                >
-                  <svg
-                    width="14"
-                    height="10"
-                    viewBox="0 0 20 14"
-                    fill="none"
-                    stroke={T.faint}
-                    strokeWidth="2.2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <path d="M1.5 7.5 L5.5 11.5 L12 4" />
-                    <path d="M9 10 L10.5 11.5 L18 3.5" />
-                  </svg>
-                  Read
-                </span>
-              ) : (
+              {!ack && (
+
                 <span
                   style={{
                     minWidth: 20,
@@ -293,54 +268,32 @@ function Row({ t, ack, unreadCount, onOpen, selected, i, compact }) {
               )}
             </span>
           </div>
-          {!compact && <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 7,
-              marginTop: 5,
-              flexWrap: "wrap",
-            }}
-          >
-            <FacilityChip id={t.facility} showEmr />
-            <span
+          {!compact && (
+            <div
               style={{
-                fontSize: 12.5,
-                color: T.blue,
-                fontWeight: 530,
+                display: "flex",
+                alignItems: "center",
+                gap: 6,
+                marginTop: 4,
+                fontSize: 12,
+                color: T.sub,
                 minWidth: 0,
-                overflow: "hidden",
-                textOverflow: "ellipsis",
                 whiteSpace: "nowrap",
+                overflow: "hidden",
               }}
             >
-              {t.team ? t.members : t.context}
-            </span>
-          </div>}
-          {!compact && <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 6,
-              fontSize: 12,
-              color: T.sub,
-              marginTop: 5,
-              flexWrap: "wrap",
-            }}
-          >
-            <span style={{ display: "inline-flex", alignItems: "center", gap: 4 }}>
-              <PersonIcon /> {t.patient}
-            </span>
-            {t.room !== "—" && (
-              <>
-                <span style={{ color: T.line }}>|</span>
-                <span style={{ display: "inline-flex", alignItems: "center", gap: 4 }}>
-                  <DoorIcon /> Room {t.room}
-                </span>
-              </>
-            )}
-            
-          </div>}
+              <FacilityChip id={t.facility} />
+              <span style={{ color: T.blue, fontWeight: 530, flexShrink: 0 }}>
+                {t.team ? t.members : t.context}
+              </span>
+              <span style={{ color: T.line }}>·</span>
+              <span style={{ overflow: "hidden", textOverflow: "ellipsis" }}>
+                {t.patient}
+                {t.room !== "—" ? ` · Rm ${t.room}` : ""}
+              </span>
+            </div>
+          )}
+
           <div
             style={{
               fontSize: compact ? 11.5 : 13.5,
@@ -418,6 +371,44 @@ export default function Inbox({
   const bands = ["critical", "urgent", "routine"]
     .map((k) => [k, shown.filter((t) => t.acuity === k)])
     .filter(([, l]) => l.length);
+
+  const viewToggle = (
+    <div
+      style={{
+        display: "flex",
+        gap: 3,
+        flexShrink: 0,
+        padding: compact ? 2 : 3,
+        background: "#EEF0F4",
+        borderRadius: 999,
+      }}
+    >
+      {[
+        ["acuity", "Acuity"],
+        ["patient", "Patient"],
+      ].map(([k, label]) => (
+        <button
+          key={k}
+          onClick={() => setView(k)}
+          style={{
+            all: "unset",
+            cursor: "pointer",
+            textAlign: "center",
+            padding: compact ? "5px 10px" : "6px 14px",
+            borderRadius: 999,
+            fontSize: compact ? 10.5 : 12.5,
+            fontWeight: 620,
+            color: view === k ? "#fff" : T.sub,
+            background: view === k ? "linear-gradient(135deg,#2E5CFF,#1E3FCC)" : "transparent",
+            transition: "all .2s ease",
+          }}
+        >
+          {label}
+        </button>
+      ))}
+    </div>
+  );
+
 
   return (
     <>
