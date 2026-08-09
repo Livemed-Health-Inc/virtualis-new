@@ -62,8 +62,13 @@ export function VirtualisProvider({ children }) {
   const [messages, setMessages] = useState([]);
   const [reads, setReads] = useState({});
 
+  const [freshLogin, setFreshLogin] = useState(false);
+
   useEffect(() => {
-    const { data: sub } = supabase.auth.onAuthStateChange((_e, s) => setSession(s));
+    const { data: sub } = supabase.auth.onAuthStateChange((e, s) => {
+      if (e === "SIGNED_IN") setFreshLogin(true);
+      setSession(s);
+    });
     supabase.auth.getSession().then(({ data }) => {
       setSession(data.session);
       setReady(true);
