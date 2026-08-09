@@ -462,80 +462,54 @@ export default function Inbox({
             </button>
           )}
         </div>
-        {!compact && <div
-          className="vx-hscroll"
-          style={{ display: "flex", gap: 8, marginTop: 13, paddingBottom: 2 }}
-        >
-
-          {pills.map((p) => {
-            const active = filter === p.k,
-              dark = p.k === "all";
-            return (
-              <button
-                key={p.k}
-                onClick={() => setFilter(p.k)}
-                style={{
-                  all: "unset",
-                  cursor: "pointer",
-                  flexShrink: 0,
-                  fontSize: 13,
-                  fontWeight: 600,
-                  padding: "8px 15px",
-                  borderRadius: 22,
-                  color: active ? (dark ? "#fff" : p.c) : dark ? T.ink : p.c,
-                  background: active
-                    ? dark
-                      ? "linear-gradient(135deg,#1B3FA0,#12275E)"
-                      : p.bg
-                    : "#fff",
-                  border: "1px solid " + (active ? (dark ? "#12275E" : p.bd) : T.line),
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: 6,
-                  transition: "all .2s ease",
-                }}
-              >
-                {p.c && <span style={{ width: 7, height: 7, borderRadius: 4, background: p.c }} />}
-                {p.label}
-              </button>
-            );
-          })}
-        </div>}
-        <div
-          style={{
-            display: "flex",
-            gap: 4,
-            marginTop: compact ? 0 : 11,
-            padding: compact ? 2 : 4,
-            background: "#EEF0F4",
-            borderRadius: compact ? 10 : 14,
-          }}
-        >
-          {[
-            ["acuity", "Acuity"],
-            ["patient", "Patient"],
-          ].map(([k, label]) => (
-            <button
-              key={k}
-              onClick={() => setView(k)}
-              style={{
-                all: "unset",
-                cursor: "pointer",
-                flex: 1,
-                textAlign: "center",
-                padding: compact ? "6px 8px" : "7px 0",
-                borderRadius: 10,
-                fontSize: compact ? 10.5 : 13,
-                fontWeight: 620,
-                color: view === k ? "#fff" : T.sub,
-                background: view === k ? "linear-gradient(135deg,#2E5CFF,#1E3FCC)" : "transparent",
-                transition: "all .2s ease",
-              }}
+        {compact ? (
+          viewToggle
+        ) : (
+          <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 8 }}>
+            <div
+              className="vx-hscroll"
+              style={{ display: "flex", gap: 6, flex: 1, minWidth: 0, paddingBottom: 2 }}
             >
-              {label}
-            </button>
-          ))}
-        </div>
+              {pills.map((p) => {
+                const active = filter === p.k,
+                  dark = p.k === "all";
+                return (
+                  <button
+                    key={p.k}
+                    onClick={() => setFilter(p.k)}
+                    style={{
+                      all: "unset",
+                      cursor: "pointer",
+                      flexShrink: 0,
+                      fontSize: 12.5,
+                      fontWeight: 600,
+                      padding: "7px 13px",
+                      borderRadius: 999,
+                      color: active ? (dark ? "#fff" : p.c) : dark ? T.ink : p.c,
+                      background: active
+                        ? dark
+                          ? "linear-gradient(135deg,#1B3FA0,#12275E)"
+                          : p.bg
+                        : "#fff",
+                      border: "1px solid " + (active ? (dark ? "#12275E" : p.bd) : T.line),
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: 6,
+                      transition: "all .2s ease",
+                    }}
+                  >
+                    {p.c && (
+                      <span style={{ width: 6, height: 6, borderRadius: 3, background: p.c }} />
+                    )}
+                    {p.label}
+                  </button>
+                );
+              })}
+            </div>
+            {viewToggle}
+          </div>
+        )}
+
         </div>
       </div>
 
