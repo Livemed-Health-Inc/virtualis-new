@@ -471,47 +471,44 @@ export default function Inbox({
             className="vx-hscroll"
             style={{ gridColumn: "1 / -1", display: "flex", gap: 6, minWidth: 0, marginTop: 2, paddingBottom: 2 }}
           >
-            {(() => null)()}
-
-              {pills.map((p) => {
-                const active = filter === p.k,
-                  dark = p.k === "all";
-                return (
-                  <button
-                    key={p.k}
-                    onClick={() => setFilter(p.k)}
-                    style={{
-                      all: "unset",
-                      cursor: "pointer",
-                      flexShrink: 0,
-                      fontSize: 12.5,
-                      fontWeight: 600,
-                      padding: "7px 13px",
-                      borderRadius: 999,
-                      color: active ? (dark ? "#fff" : p.c) : dark ? T.ink : p.c,
-                      background: active
-                        ? dark
-                          ? "linear-gradient(135deg,#1B3FA0,#12275E)"
-                          : p.bg
-                        : "#fff",
-                      border: "1px solid " + (active ? (dark ? "#12275E" : p.bd) : T.line),
-                      display: "inline-flex",
-                      alignItems: "center",
-                      gap: 6,
-                      transition: "all .2s ease",
-                    }}
-                  >
-                    {p.c && (
-                      <span style={{ width: 6, height: 6, borderRadius: 3, background: p.c }} />
-                    )}
-                    {p.label}
-                  </button>
-                );
-              })}
-            </div>
-            {viewToggle}
+            {pills.map((p) => {
+              const active = filter === p.k,
+                dark = p.k === "all";
+              return (
+                <button
+                  key={p.k}
+                  onClick={() => setFilter(p.k)}
+                  style={{
+                    all: "unset",
+                    cursor: "pointer",
+                    flexShrink: 0,
+                    fontSize: 12.5,
+                    fontWeight: 600,
+                    padding: "7px 13px",
+                    borderRadius: 999,
+                    color: active ? (dark ? "#fff" : p.c) : dark ? T.ink : p.c,
+                    background: active
+                      ? dark
+                        ? "linear-gradient(135deg,#1B3FA0,#12275E)"
+                        : p.bg
+                      : "#fff",
+                    border: "1px solid " + (active ? (dark ? "#12275E" : p.bd) : T.line),
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: 6,
+                    transition: "all .2s ease",
+                  }}
+                >
+                  {p.c && (
+                    <span style={{ width: 6, height: 6, borderRadius: 3, background: p.c }} />
+                  )}
+                  {p.label}
+                </button>
+              );
+            })}
           </div>
         )}
+
 
         </div>
       </div>
