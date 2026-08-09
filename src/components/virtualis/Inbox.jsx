@@ -29,15 +29,15 @@ function PatientCard({ g, openThread, selectedId }) {
       style={{
         background: "#fff",
         border: "1px solid " + (g.threads.some((t) => t.id === selectedId) ? "#C9DBFF" : T.line),
-        borderRadius: 16,
-        padding: 12,
+        borderRadius: 20,
+        padding: 14,
         display: "flex",
         flexDirection: "column",
-        gap: 12,
+        gap: 11,
       }}
     >
-      <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-        <Avatar initials={initialsOf(g.patient)} size={36} />
+      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+        <Avatar initials={initialsOf(g.patient)} size={38} />
         <div style={{ flex: 1, minWidth: 0 }}>
           <div
             style={{
@@ -56,18 +56,16 @@ function PatientCard({ g, openThread, selectedId }) {
             style={{
               display: "flex",
               alignItems: "center",
-              gap: 8,
-              marginTop: 4,
-              fontSize: 12.5,
+              gap: 7,
+              marginTop: 3,
+              fontSize: 11.5,
               color: T.sub,
             }}
           >
             <FacilityChip id={g.facility} />
-            {g.mrn && <span style={{ fontFamily: mono, fontSize: 11 }}>MRN {g.mrn}</span>}
+            {g.mrn && <span style={{ fontFamily: mono, fontSize: 10.5 }}>MRN {g.mrn}</span>}
             <span>· Room {g.room}</span>
           </div>
-        </div>
-
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
           <Glyph level={g.acuity} size={13} gap={2.5} w={4.5} />
@@ -150,7 +148,7 @@ function PatientCard({ g, openThread, selectedId }) {
   );
 }
 
-function Row({ t, ack, unreadCount, onOpen, selected, i, compact }) {
+function Row({ t, ack, unreadCount, onOpen, selected, i }) {
   const last = (t.msgs || [])[(t.msgs || []).length - 1] || { text: t.reason || "", kind: null };
   return (
     <button
@@ -166,9 +164,8 @@ function Row({ t, ack, unreadCount, onOpen, selected, i, compact }) {
           : ack
             ? "#fff"
             : "linear-gradient(135deg,#FFFFFF 30%,#F2F7FF 78%,#EBF2FF 100%)",
-        borderRadius: compact ? 12 : 16,
-        padding: compact ? "8px 10px" : "11px 13px",
-
+        borderRadius: 20,
+        padding: 15,
         border: "1px solid " + (selected ? "#B9D0FF" : ack ? T.line : "#CFE0FF"),
         boxShadow:
           ack && !selected
@@ -185,8 +182,8 @@ function Row({ t, ack, unreadCount, onOpen, selected, i, compact }) {
             flexDirection: "column",
             alignItems: "center",
             justifyContent: "center",
-            gap: compact ? 4 : 7,
-            marginRight: compact ? 7 : 13,
+            gap: 7,
+            marginRight: 13,
           }}
         >
           <Glyph level={t.acuity} pulse={t.acuity === "critical"} />
@@ -201,14 +198,13 @@ function Row({ t, ack, unreadCount, onOpen, selected, i, compact }) {
           />
         </span>
       )}
-      <div style={{ display: "flex", gap: compact ? 8 : 11, flex: 1, minWidth: 0 }}>
-        <Avatar initials={initialsOf(t.name)} team={t.team} size={compact ? 32 : 36} />
+      <div style={{ display: "flex", gap: 12, flex: 1, minWidth: 0 }}>
+        <Avatar initials={initialsOf(t.name)} team={t.team} />
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
             <span
               style={{
-                fontSize: compact ? 13.5 : 14.5,
-
+                fontSize: 16,
                 fontWeight: ack ? 600 : 680,
                 color: T.ink,
                 whiteSpace: "nowrap",
@@ -222,13 +218,13 @@ function Row({ t, ack, unreadCount, onOpen, selected, i, compact }) {
             {t.team && (
               <span
                 style={{
-                  fontSize: compact ? 9 : 10.5,
+                  fontSize: 10.5,
                   fontWeight: 620,
                   color: T.blue,
                   background: T.blueSoft,
                   border: "1px solid #D6E4FF",
                   borderRadius: 20,
-                  padding: compact ? "1px 5px" : "2px 8px",
+                  padding: "2px 8px",
                   flexShrink: 0,
                 }}
               >
@@ -245,12 +241,37 @@ function Row({ t, ack, unreadCount, onOpen, selected, i, compact }) {
               }}
             >
               <span
-                style={{ fontSize: compact ? 10 : 12, color: ack ? T.faint : T.blue, fontWeight: ack ? 400 : 620 }}
+                style={{ fontSize: 12, color: ack ? T.faint : T.blue, fontWeight: ack ? 400 : 620 }}
               >
                 {t.time}
               </span>
-              {!ack && (
-
+              {ack ? (
+                <span
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: 3,
+                    fontSize: 10.5,
+                    fontWeight: 560,
+                    color: T.faint,
+                  }}
+                >
+                  <svg
+                    width="14"
+                    height="10"
+                    viewBox="0 0 20 14"
+                    fill="none"
+                    stroke={T.faint}
+                    strokeWidth="2.2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M1.5 7.5 L5.5 11.5 L12 4" />
+                    <path d="M9 10 L10.5 11.5 L18 3.5" />
+                  </svg>
+                  Read
+                </span>
+              ) : (
                 <span
                   style={{
                     minWidth: 20,
@@ -272,43 +293,64 @@ function Row({ t, ack, unreadCount, onOpen, selected, i, compact }) {
               )}
             </span>
           </div>
-          {!compact && (
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 6,
-                marginTop: 4,
-                fontSize: 12,
-                color: T.sub,
-                minWidth: 0,
-                whiteSpace: "nowrap",
-                overflow: "hidden",
-              }}
-            >
-              <FacilityChip id={t.facility} />
-              <span style={{ color: T.blue, fontWeight: 530, flexShrink: 0 }}>
-                {t.team ? t.members : t.context}
-              </span>
-              <span style={{ color: T.line }}>·</span>
-              <span style={{ overflow: "hidden", textOverflow: "ellipsis" }}>
-                {t.patient}
-                {t.room !== "—" ? ` · Rm ${t.room}` : ""}
-              </span>
-            </div>
-          )}
-
           <div
             style={{
-              fontSize: compact ? 11.5 : 12.5,
-              marginTop: compact ? 3 : 4,
+              display: "flex",
+              alignItems: "center",
+              gap: 7,
+              marginTop: 5,
+              flexWrap: "wrap",
+            }}
+          >
+            <FacilityChip id={t.facility} showEmr />
+            <span
+              style={{
+                fontSize: 12.5,
+                color: T.blue,
+                fontWeight: 530,
+                minWidth: 0,
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+              }}
+            >
+              {t.team ? t.members : t.context}
+            </span>
+          </div>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 6,
+              fontSize: 12,
+              color: T.sub,
+              marginTop: 5,
+              flexWrap: "wrap",
+            }}
+          >
+            <span style={{ display: "inline-flex", alignItems: "center", gap: 4 }}>
+              <PersonIcon /> {t.patient}
+            </span>
+            {t.room !== "—" && (
+              <>
+                <span style={{ color: T.line }}>|</span>
+                <span style={{ display: "inline-flex", alignItems: "center", gap: 4 }}>
+                  <DoorIcon /> Room {t.room}
+                </span>
+              </>
+            )}
+            
+          </div>
+          <div
+            style={{
+              fontSize: 13.5,
+              marginTop: 6,
               color: ack ? T.sub : T.ink,
               fontWeight: ack ? 400 : 530,
-              lineHeight: compact ? 1.25 : 1.35,
+              lineHeight: 1.4,
               letterSpacing: -0.1,
               display: "-webkit-box",
-              WebkitLineClamp: 1,
-
+              WebkitLineClamp: 2,
               WebkitBoxOrient: "vertical",
               overflow: "hidden",
             }}
@@ -333,7 +375,6 @@ export default function Inbox({
   setQuery,
   selectedId,
   header,
-  compact = false,
 }) {
   const counts = {
     all: threads.length,
@@ -377,58 +418,19 @@ export default function Inbox({
     .map((k) => [k, shown.filter((t) => t.acuity === k)])
     .filter(([, l]) => l.length);
 
-  const viewToggle = (
-    <div
-      style={{
-        display: "flex",
-        gap: 3,
-        flexShrink: 0,
-        padding: compact ? 2 : 3,
-        background: "#EEF0F4",
-        borderRadius: 999,
-      }}
-    >
-      {[
-        ["acuity", "Acuity"],
-        ["patient", "Patient"],
-      ].map(([k, label]) => (
-        <button
-          key={k}
-          onClick={() => setView(k)}
-          style={{
-            all: "unset",
-            cursor: "pointer",
-            textAlign: "center",
-            padding: compact ? "5px 10px" : "6px 14px",
-            borderRadius: 999,
-            fontSize: compact ? 10.5 : 12.5,
-            fontWeight: 620,
-            color: view === k ? "#fff" : T.sub,
-            background: view === k ? "linear-gradient(135deg,#2E5CFF,#1E3FCC)" : "transparent",
-            transition: "all .2s ease",
-          }}
-        >
-          {label}
-        </button>
-      ))}
-    </div>
-  );
-
-
   return (
     <>
-      <div style={{ padding: compact ? "7px 10px 6px" : "14px clamp(14px,2.2vw,22px) 12px", position: "relative", zIndex: 1 }}>
+      <div style={{ padding: "14px clamp(14px,2.2vw,22px) 12px", position: "relative", zIndex: 1 }}>
         {header}
-        <div style={{ display: "grid", gridTemplateColumns: "minmax(0,1fr) auto", gap: compact ? 6 : 10, alignItems: "center" }}>
         <div
           style={{
             background: "rgba(255,255,255,.85)",
-            borderRadius: compact ? 12 : 24,
+            borderRadius: 24,
             border: "1px solid " + T.line,
             display: "flex",
             alignItems: "center",
             gap: 9,
-            padding: compact ? "7px 10px" : "11px 16px",
+            padding: "11px 16px",
           }}
         >
           <svg
@@ -451,7 +453,7 @@ export default function Inbox({
               border: "none",
               background: "transparent",
               outline: "none",
-              fontSize: compact ? 12.5 : 14.5,
+              fontSize: 14.5,
               fontFamily: font,
               flex: 1,
               minWidth: 0,
@@ -467,51 +469,79 @@ export default function Inbox({
             </button>
           )}
         </div>
-        {viewToggle}
-        {!compact && (
-          <div
-            className="vx-hscroll"
-            style={{ gridColumn: "1 / -1", display: "flex", gap: 6, minWidth: 0, marginTop: 2, paddingBottom: 2 }}
-          >
-            {pills.map((p) => {
-              const active = filter === p.k,
-                dark = p.k === "all";
-              return (
-                <button
-                  key={p.k}
-                  onClick={() => setFilter(p.k)}
-                  style={{
-                    all: "unset",
-                    cursor: "pointer",
-                    flexShrink: 0,
-                    fontSize: 12.5,
-                    fontWeight: 600,
-                    padding: "7px 13px",
-                    borderRadius: 999,
-                    color: active ? (dark ? "#fff" : p.c) : dark ? T.ink : p.c,
-                    background: active
-                      ? dark
-                        ? "linear-gradient(135deg,#1B3FA0,#12275E)"
-                        : p.bg
-                      : "#fff",
-                    border: "1px solid " + (active ? (dark ? "#12275E" : p.bd) : T.line),
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: 6,
-                    transition: "all .2s ease",
-                  }}
-                >
-                  {p.c && (
-                    <span style={{ width: 6, height: 6, borderRadius: 3, background: p.c }} />
-                  )}
-                  {p.label}
-                </button>
-              );
-            })}
-          </div>
-        )}
+        <div
+          className="vx-hscroll"
+          style={{ display: "flex", gap: 8, marginTop: 13, paddingBottom: 2 }}
+        >
 
-
+          {pills.map((p) => {
+            const active = filter === p.k,
+              dark = p.k === "all";
+            return (
+              <button
+                key={p.k}
+                onClick={() => setFilter(p.k)}
+                style={{
+                  all: "unset",
+                  cursor: "pointer",
+                  flexShrink: 0,
+                  fontSize: 13,
+                  fontWeight: 600,
+                  padding: "8px 15px",
+                  borderRadius: 22,
+                  color: active ? (dark ? "#fff" : p.c) : dark ? T.ink : p.c,
+                  background: active
+                    ? dark
+                      ? "linear-gradient(135deg,#1B3FA0,#12275E)"
+                      : p.bg
+                    : "#fff",
+                  border: "1px solid " + (active ? (dark ? "#12275E" : p.bd) : T.line),
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 6,
+                  transition: "all .2s ease",
+                }}
+              >
+                {p.c && <span style={{ width: 7, height: 7, borderRadius: 4, background: p.c }} />}
+                {p.label}
+              </button>
+            );
+          })}
+        </div>
+        <div
+          style={{
+            display: "flex",
+            gap: 4,
+            marginTop: 11,
+            padding: 4,
+            background: "#EEF0F4",
+            borderRadius: 14,
+          }}
+        >
+          {[
+            ["acuity", "Acuity"],
+            ["patient", "Patient"],
+          ].map(([k, label]) => (
+            <button
+              key={k}
+              onClick={() => setView(k)}
+              style={{
+                all: "unset",
+                cursor: "pointer",
+                flex: 1,
+                textAlign: "center",
+                padding: "7px 0",
+                borderRadius: 10,
+                fontSize: 13,
+                fontWeight: 620,
+                color: view === k ? "#fff" : T.sub,
+                background: view === k ? "linear-gradient(135deg,#2E5CFF,#1E3FCC)" : "transparent",
+                transition: "all .2s ease",
+              }}
+            >
+              {label}
+            </button>
+          ))}
         </div>
       </div>
 
@@ -519,10 +549,10 @@ export default function Inbox({
         style={{
           flex: 1,
           overflowY: "auto",
-          padding: compact ? "2px 8px 10px" : "2px clamp(12px,2vw,20px) 20px",
+          padding: "2px clamp(12px,2vw,20px) 20px",
           display: "flex",
           flexDirection: "column",
-          gap: compact ? 5 : 10,
+          gap: 10,
         }}
       >
         {shown.length === 0 && (
@@ -541,7 +571,7 @@ export default function Inbox({
           ))}
         {view === "acuity" &&
           bands.map(([band, list]) => (
-          <div key={band} style={{ display: "flex", flexDirection: "column", gap: compact ? 5 : 10 }}>
+          <div key={band} style={{ display: "flex", flexDirection: "column", gap: 10 }}>
             <div
               style={{
                 position: "sticky",
@@ -550,7 +580,7 @@ export default function Inbox({
                 display: "flex",
                 alignItems: "center",
                 gap: 8,
-                padding: compact ? "2px 4px" : "6px 4px",
+                padding: "6px 4px",
                 background: "linear-gradient(180deg, rgba(244,245,247,.96), rgba(244,245,247,.7))",
                 backdropFilter: "blur(6px)",
               }}
@@ -579,7 +609,6 @@ export default function Inbox({
                 unreadCount={liveCounts[t.id] ?? t.newCount}
                 selected={selectedId === t.id}
                 onOpen={() => openThread(t.id)}
-                compact={compact}
               />
             ))}
           </div>

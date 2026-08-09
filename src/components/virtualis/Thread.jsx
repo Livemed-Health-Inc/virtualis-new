@@ -454,13 +454,12 @@ export default function Thread({ t, onBack, onDetail, onVideo, embedded, onSend,
           style={{
             width: "100%",
             maxWidth: 820,
-            margin: "auto auto 0",
+            margin: "0 auto",
             display: "flex",
             flexDirection: "column",
             gap: isMobile ? 8 : 11,
           }}
         >
-
           {msgs.map((m, i) => (
             <div
               key={i}
@@ -720,10 +719,8 @@ export default function Thread({ t, onBack, onDetail, onVideo, embedded, onSend,
               cursor: "pointer",
               width: isMobile ? 36 : 42,
               height: isMobile ? 36 : 42,
-              borderRadius: 999,
-              background: "#fff",
-              border: "1px solid " + T.line,
-              boxSizing: "border-box",
+              borderRadius: isMobile ? 12 : 14,
+              background: "#EDF0F4",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
@@ -747,17 +744,8 @@ export default function Thread({ t, onBack, onDetail, onVideo, embedded, onSend,
             onChange={(e) => setDraft(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && send()}
             placeholder="Message"
-            style={{
-              ...inputStyle,
-              borderRadius: 999,
-              flex: 1,
-              minWidth: 0,
-              height: isMobile ? 36 : 42,
-              padding: isMobile ? "0 14px" : "0 16px",
-              fontSize: isMobile ? 13.5 : 14.5,
-            }}
+            style={{ ...inputStyle, borderRadius: 24, flex: 1, minWidth: 0, height: isMobile ? 36 : 42 }}
           />
-
           <button
             onClick={send}
             style={{
@@ -765,15 +753,12 @@ export default function Thread({ t, onBack, onDetail, onVideo, embedded, onSend,
               cursor: "pointer",
               width: isMobile ? 36 : 42,
               height: isMobile ? 36 : 42,
-              borderRadius: 999,
-              background: draft.trim() ? "linear-gradient(135deg,#2E5CFF,#1E3FCC)" : "#fff",
-              border: draft.trim() ? "1px solid transparent" : "1px solid " + T.line,
-              boxSizing: "border-box",
-              boxShadow: draft.trim() ? "0 6px 16px rgba(41,112,255,.26)" : "none",
+              borderRadius: isMobile ? 18 : 21,
+              background: draft.trim() ? "linear-gradient(135deg,#2E5CFF,#1E3FCC)" : T.ghost,
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              transition: "all .2s ease",
+              transition: "background .2s ease",
               flexShrink: 0,
             }}
           >
@@ -782,8 +767,7 @@ export default function Thread({ t, onBack, onDetail, onVideo, embedded, onSend,
               height={isMobile ? 14 : 16}
               viewBox="0 0 24 24"
               fill="none"
-              stroke={draft.trim() ? "#fff" : T.faint}
-
+              stroke="#fff"
               strokeWidth="2.4"
               strokeLinecap="round"
               strokeLinejoin="round"

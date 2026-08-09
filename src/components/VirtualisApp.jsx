@@ -443,9 +443,8 @@ function VFab({ onConsult, onAlis, onPage, onTelehealth, float }) {
 
   /* Symmetric upward fan so the V sits in the centre of the messaging pane
      and actions bloom above it without drifting toward either edge. */
-  const angles = float ? [176, 148, 120, 92] : [150, 120, 75, 45];
-  const radius = float ? 148 : 146;
-
+  const angles = float ? [160, 130, 100, 70] : [150, 120, 75, 45];
+  const radius = float ? 150 : 146;
 
 
   return (
@@ -460,11 +459,10 @@ function VFab({ onConsult, onAlis, onPage, onTelehealth, float }) {
         style={{
           position: "absolute",
           zIndex: 41,
-          bottom: float ? 76 : "calc(14px + env(safe-area-inset-bottom))",
-          left: float ? "auto" : 0,
-          right: float ? 22 : 0,
-          transform: "none",
-
+          bottom: float ? 26 : "calc(14px + env(safe-area-inset-bottom))",
+          left: float ? "50%" : 0,
+          right: float ? "auto" : 0,
+          transform: float ? "translateX(-50%)" : "none",
           display: "flex",
           justifyContent: "center",
           pointerEvents: "none",
@@ -716,9 +714,9 @@ function Workstation() {
   };
 
   const inboxHeader = (
-    <div style={{ marginBottom: multiPane ? 12 : 6 }}>
+    <div style={{ marginBottom: 12 }}>
       <div style={{ display: "flex", alignItems: "center", gap: 11 }}>
-        {!multiPane && <VMark size={26} />}
+        {!multiPane && <VMark size={32} />}
         <div style={{ minWidth: 0 }}>
           <div
             style={{
@@ -727,7 +725,7 @@ function Workstation() {
               fontWeight: 600,
               letterSpacing: 2.2,
               color: T.blue,
-              display: multiPane ? "flex" : "none",
+              display: "flex",
               alignItems: "center",
               gap: 6,
             }}
@@ -737,17 +735,17 @@ function Workstation() {
           </div>
           <div
             style={{
-              fontSize: multiPane ? 21 : 15,
+              fontSize: 21,
               fontWeight: 730,
               letterSpacing: -0.6,
               color: T.ink,
-              marginTop: multiPane ? 3 : 0,
+              marginTop: 3,
             }}
           >
-            {multiPane ? "Hello, " : ""}{me.name.replace(/^Dr\.\s*/, "Dr. ")}
+            Hello, {me.name.replace(/^Dr\.\s*/, "Dr. ")}
           </div>
-          <div style={{ fontSize: multiPane ? 12.5 : 10.5, color: T.sub, marginTop: 1 }}>
-            {multiPane && <>Tuesday, Aug 4 ·{" "}</>}
+          <div style={{ fontSize: 12.5, color: T.sub, marginTop: 1 }}>
+            Tuesday, Aug 4 ·{" "}
             {criticalUnread > 0 ? (
               <span style={{ color: T.red, fontWeight: 600 }}>
                 {criticalUnread} critical unread
@@ -764,11 +762,11 @@ function Workstation() {
             onClick={() => setCreds(true)}
             style={{ all: "unset", cursor: "pointer", marginLeft: "auto" }}
           >
-            <Avatar initials={me.initials} team size={32} />
+            <Avatar initials={me.initials} team size={40} />
           </button>
         )}
       </div>
-      <div style={{ marginTop: multiPane ? 13 : 5 }}>
+      <div style={{ marginTop: 13 }}>
         <FacilityBar scope={scope} active={facility} setActive={setFacility} counts={perFacility} />
       </div>
     </div>
@@ -786,7 +784,6 @@ function Workstation() {
       setQuery={setQuery}
       selectedId={multiPane ? openId : null}
       header={inboxHeader}
-      compact={!multiPane}
     />
   );
 

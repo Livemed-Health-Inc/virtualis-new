@@ -47,18 +47,7 @@ export const FACILITIES = {
   },
 };
 
-/* One shared scale: radii, spacing steps, type ramp. */
-export const R = { pill: 999, card: 16, input: 14, chip: 12 };
-export const SP = { xs: 4, sm: 8, md: 12, lg: 16 };
-export const TY = {
-  name: { m: 14, d: 15 },
-  body: { m: 13.5, d: 15 },
-  meta: { m: 11.5, d: 12.5 },
-  caption: { m: 10.5, d: 11 },
-};
-
 export const inputStyle = {
-
   width: "100%",
   boxSizing: "border-box",
   border: "1px solid " + T.line,
