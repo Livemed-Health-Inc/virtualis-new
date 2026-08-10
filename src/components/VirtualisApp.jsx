@@ -110,11 +110,13 @@ function TabBar({ tab, setTab, unread }) {
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
-        gap: 3,
-        padding: "9px 0 7px",
+        gap: 2,
+        padding: "5px 0 4px",
+        minHeight: 44,
+        justifyContent: "center",
       }}
     >
-      <span style={{ position: "relative" }}>
+      <span style={{ position: "relative", display: "inline-flex", transform: "scale(.9)" }}>
         {item.icon(tab === item.k ? T.blue : T.faint)}
         {item.k === "inbox" && unread > 0 && (
           <span
@@ -155,17 +157,17 @@ function TabBar({ tab, setTab, unread }) {
     <div
       style={{
         display: "flex",
-        alignItems: "flex-end",
+        alignItems: "center",
         background: "rgba(255,255,255,.92)",
         backdropFilter: "blur(20px)",
         borderTop: "1px solid " + T.line,
-        paddingBottom: "max(6px, env(safe-area-inset-bottom))",
+        paddingBottom: "max(2px, env(safe-area-inset-bottom))",
       }}
     >
       <Item t={TABS[0]} />
       <Item t={TABS[1]} />
       {/* Space for the floating V trigger, which overlays this slot. */}
-      <span style={{ width: 54, margin: "0 8px 12px", flexShrink: 0 }} aria-hidden />
+      <span style={{ width: 54, margin: "0 8px", flexShrink: 0 }} aria-hidden />
 
       <Item t={TABS[2]} />
       <Item t={TABS[3]} />
