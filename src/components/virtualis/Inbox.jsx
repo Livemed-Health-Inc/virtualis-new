@@ -478,9 +478,8 @@ export default function Inbox({
         </div>
         <div
           className="vx-hscroll"
-          style={{ display: "flex", gap: 8, marginTop: 13, paddingBottom: 2 }}
+          style={{ display: "flex", gap: 8, marginTop: compact ? 7 : 13, paddingBottom: 2 }}
         >
-
           {pills.map((p) => {
             const active = filter === p.k,
               dark = p.k === "all";
@@ -492,9 +491,9 @@ export default function Inbox({
                   all: "unset",
                   cursor: "pointer",
                   flexShrink: 0,
-                  fontSize: 13,
+                  fontSize: compact ? 12 : 13,
                   fontWeight: 600,
-                  padding: "8px 15px",
+                  padding: compact ? "5px 12px" : "8px 15px",
                   borderRadius: 22,
                   color: active ? (dark ? "#fff" : p.c) : dark ? T.ink : p.c,
                   background: active
@@ -519,8 +518,8 @@ export default function Inbox({
           style={{
             display: "flex",
             gap: 4,
-            marginTop: 11,
-            padding: 4,
+            marginTop: compact ? 7 : 11,
+            padding: compact ? 3 : 4,
             background: "#EEF0F4",
             borderRadius: 14,
           }}
@@ -537,9 +536,9 @@ export default function Inbox({
                 cursor: "pointer",
                 flex: 1,
                 textAlign: "center",
-                padding: "7px 0",
+                padding: compact ? "4px 0" : "7px 0",
                 borderRadius: 10,
-                fontSize: 13,
+                fontSize: compact ? 12 : 13,
                 fontWeight: 620,
                 color: view === k ? "#fff" : T.sub,
                 background: view === k ? "linear-gradient(135deg,#2E5CFF,#1E3FCC)" : "transparent",
@@ -550,6 +549,7 @@ export default function Inbox({
             </button>
           ))}
         </div>
+
       </div>
 
       <div
