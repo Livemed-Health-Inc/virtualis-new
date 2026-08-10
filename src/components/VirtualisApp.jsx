@@ -105,13 +105,15 @@ function TabBar({ tab, setTab, unread }) {
       onClick={() => setTab(item.k)}
       style={{
         all: "unset",
+         boxSizing: "border-box",
         cursor: "pointer",
         flex: 1,
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
         gap: 2,
-        padding: "5px 0 4px",
+         padding: 0,
+         height: 44,
         minHeight: 44,
         justifyContent: "center",
       }}
@@ -161,7 +163,9 @@ function TabBar({ tab, setTab, unread }) {
         background: "rgba(255,255,255,.92)",
         backdropFilter: "blur(20px)",
         borderTop: "1px solid " + T.line,
-        paddingBottom: "max(2px, env(safe-area-inset-bottom))",
+         minHeight: 44,
+         paddingBottom: "env(safe-area-inset-bottom, 0px)",
+         boxSizing: "content-box",
       }}
     >
       <Item t={TABS[0]} />
@@ -461,7 +465,7 @@ function VFab({ onConsult, onAlis, onPage, onTelehealth, float }) {
         style={{
           position: "absolute",
           zIndex: 41,
-          bottom: float ? 26 : "calc(14px + env(safe-area-inset-bottom))",
+           bottom: float ? 26 : "env(safe-area-inset-bottom, 0px)",
           left: float ? "auto" : 0,
           right: float ? 26 : 0,
           transform: "none",
