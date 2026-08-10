@@ -558,7 +558,7 @@ export default function Inbox({
         style={{
           flex: 1,
           overflowY: "auto",
-          padding: "2px clamp(12px,2vw,20px) 20px",
+          padding: compact ? "2px 12px 10px" : "2px clamp(12px,2vw,20px) 20px",
           display: "flex",
           flexDirection: "column",
           gap: 10,
