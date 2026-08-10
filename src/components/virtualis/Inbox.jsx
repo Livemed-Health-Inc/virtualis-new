@@ -420,7 +420,13 @@ export default function Inbox({
 
   return (
     <>
-      <div style={{ padding: "14px clamp(14px,2.2vw,22px) 12px", position: "relative", zIndex: 1 }}>
+      <div
+        style={{
+          padding: compact ? "8px 14px 6px" : "14px clamp(14px,2.2vw,22px) 12px",
+          position: "relative",
+          zIndex: 1,
+        }}
+      >
         {header}
         <div
           style={{
@@ -430,9 +436,10 @@ export default function Inbox({
             display: "flex",
             alignItems: "center",
             gap: 9,
-            padding: "11px 16px",
+            padding: compact ? "7px 13px" : "11px 16px",
           }}
         >
+
           <svg
             width="15"
             height="15"
