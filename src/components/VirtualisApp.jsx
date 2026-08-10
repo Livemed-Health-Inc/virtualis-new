@@ -315,13 +315,13 @@ function Rail({ tab, setTab, unread, onNew, onProfile, wide, me }) {
   );
 }
 
-function FacilityBar({ scope, active, setActive, counts }) {
+function FacilityBar({ scope, active, setActive, counts, compact }) {
   const items = [
     { id: "all", name: "All facilities", short: "ALL", hue: T.blueDeep },
     ...scope.map((id) => FACILITIES[id]),
   ];
   return (
-    <div className="vx-hscroll" style={{ display: "flex", gap: 8, paddingBottom: 10 }}>
+    <div className="vx-hscroll" style={{ display: "flex", gap: 8, paddingBottom: compact ? 4 : 10 }}>
       {items.map((f) => {
         const on = active === f.id;
         const n = counts[f.id] || 0;
@@ -337,11 +337,11 @@ function FacilityBar({ scope, active, setActive, counts }) {
               alignItems: "center",
               gap: 7,
               borderRadius: 20,
-              padding: "8px 14px",
+              padding: compact ? "5px 11px" : "8px 14px",
               background: on ? f.hue : "#fff",
               border: `1px solid ${on ? f.hue : T.line}`,
               color: on ? "#fff" : T.ink,
-              fontSize: 13,
+              fontSize: compact ? 12 : 13,
               fontWeight: 620,
               transition: "all .2s ease",
             }}
@@ -714,38 +714,42 @@ function Workstation() {
   };
 
   const inboxHeader = (
-    <div style={{ marginBottom: 12 }}>
-      <div style={{ display: "flex", alignItems: "center", gap: 11 }}>
-        {!multiPane && <VMark size={32} />}
+    <div style={{ marginBottom: multiPane ? 12 : 7 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: multiPane ? 11 : 9 }}>
+        {!multiPane && <VMark size={26} />}
         <div style={{ minWidth: 0 }}>
+          {multiPane && (
+            <div
+              style={{
+                fontFamily: mono,
+                fontSize: 9.5,
+                fontWeight: 600,
+                letterSpacing: 2.2,
+                color: T.blue,
+                display: "flex",
+                alignItems: "center",
+                gap: 6,
+              }}
+            >
+              <span style={{ width: 6, height: 6, borderRadius: 3, background: T.blue }} /> LIVE ·
+              ACUITY INBOX
+            </div>
+          )}
           <div
             style={{
-              fontFamily: mono,
-              fontSize: 9.5,
-              fontWeight: 600,
-              letterSpacing: 2.2,
-              color: T.blue,
-              display: "flex",
-              alignItems: "center",
-              gap: 6,
-            }}
-          >
-            <span style={{ width: 6, height: 6, borderRadius: 3, background: T.blue }} /> LIVE ·
-            ACUITY INBOX
-          </div>
-          <div
-            style={{
-              fontSize: 21,
+              fontSize: multiPane ? 21 : 16,
               fontWeight: 730,
               letterSpacing: -0.6,
               color: T.ink,
-              marginTop: 3,
+              marginTop: multiPane ? 3 : 0,
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
             }}
           >
             Hello, {me.name.replace(/^Dr\.\s*/, "Dr. ")}
           </div>
-          <div style={{ fontSize: 12.5, color: T.sub, marginTop: 1 }}>
-            Tuesday, Aug 4 ·{" "}
+          <div style={{ fontSize: multiPane ? 12.5 : 11.5, color: T.sub, marginTop: 1 }}>
             {criticalUnread > 0 ? (
               <span style={{ color: T.red, fontWeight: 600 }}>
                 {criticalUnread} critical unread
@@ -762,15 +766,22 @@ function Workstation() {
             onClick={() => setCreds(true)}
             style={{ all: "unset", cursor: "pointer", marginLeft: "auto" }}
           >
-            <Avatar initials={me.initials} team size={40} />
+            <Avatar initials={me.initials} team size={32} />
           </button>
         )}
       </div>
-      <div style={{ marginTop: 13 }}>
-        <FacilityBar scope={scope} active={facility} setActive={setFacility} counts={perFacility} />
+      <div style={{ marginTop: multiPane ? 13 : 8 }}>
+        <FacilityBar
+          scope={scope}
+          active={facility}
+          setActive={setFacility}
+          counts={perFacility}
+          compact={!multiPane}
+        />
       </div>
     </div>
   );
+
 
   const inboxPane = (
     <Inbox

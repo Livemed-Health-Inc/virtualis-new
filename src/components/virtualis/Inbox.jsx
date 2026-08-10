@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useMediaQuery } from "./theme";
 import {
   T,
   mono,
@@ -382,6 +383,7 @@ export default function Inbox({
     urgent: threads.filter((t) => t.acuity === "urgent").length,
     routine: threads.filter((t) => t.acuity === "routine").length,
   };
+  const compact = useMediaQuery("(max-width: 639px)");
   const [view, setView] = useState("acuity");
   const q = query.trim().toLowerCase();
   const shown = threads
@@ -420,7 +422,13 @@ export default function Inbox({
 
   return (
     <>
-      <div style={{ padding: "14px clamp(14px,2.2vw,22px) 12px", position: "relative", zIndex: 1 }}>
+      <div
+        style={{
+          padding: compact ? "8px 14px 6px" : "14px clamp(14px,2.2vw,22px) 12px",
+          position: "relative",
+          zIndex: 1,
+        }}
+      >
         {header}
         <div
           style={{
@@ -430,9 +438,10 @@ export default function Inbox({
             display: "flex",
             alignItems: "center",
             gap: 9,
-            padding: "11px 16px",
+            padding: compact ? "7px 13px" : "11px 16px",
           }}
         >
+
           <svg
             width="15"
             height="15"
@@ -453,7 +462,7 @@ export default function Inbox({
               border: "none",
               background: "transparent",
               outline: "none",
-              fontSize: 14.5,
+              fontSize: compact ? 13.5 : 14.5,
               fontFamily: font,
               flex: 1,
               minWidth: 0,
@@ -471,9 +480,8 @@ export default function Inbox({
         </div>
         <div
           className="vx-hscroll"
-          style={{ display: "flex", gap: 8, marginTop: 13, paddingBottom: 2 }}
+          style={{ display: "flex", gap: 8, marginTop: compact ? 7 : 13, paddingBottom: 2 }}
         >
-
           {pills.map((p) => {
             const active = filter === p.k,
               dark = p.k === "all";
@@ -485,9 +493,9 @@ export default function Inbox({
                   all: "unset",
                   cursor: "pointer",
                   flexShrink: 0,
-                  fontSize: 13,
+                  fontSize: compact ? 12 : 13,
                   fontWeight: 600,
-                  padding: "8px 15px",
+                  padding: compact ? "5px 12px" : "8px 15px",
                   borderRadius: 22,
                   color: active ? (dark ? "#fff" : p.c) : dark ? T.ink : p.c,
                   background: active
@@ -512,8 +520,8 @@ export default function Inbox({
           style={{
             display: "flex",
             gap: 4,
-            marginTop: 11,
-            padding: 4,
+            marginTop: compact ? 7 : 11,
+            padding: compact ? 3 : 4,
             background: "#EEF0F4",
             borderRadius: 14,
           }}
@@ -530,9 +538,9 @@ export default function Inbox({
                 cursor: "pointer",
                 flex: 1,
                 textAlign: "center",
-                padding: "7px 0",
+                padding: compact ? "4px 0" : "7px 0",
                 borderRadius: 10,
-                fontSize: 13,
+                fontSize: compact ? 12 : 13,
                 fontWeight: 620,
                 color: view === k ? "#fff" : T.sub,
                 background: view === k ? "linear-gradient(135deg,#2E5CFF,#1E3FCC)" : "transparent",
@@ -543,6 +551,7 @@ export default function Inbox({
             </button>
           ))}
         </div>
+
       </div>
 
       <div
