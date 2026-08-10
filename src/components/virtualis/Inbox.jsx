@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useMediaQuery } from "./theme";
 import {
   T,
   mono,
@@ -382,6 +383,7 @@ export default function Inbox({
     urgent: threads.filter((t) => t.acuity === "urgent").length,
     routine: threads.filter((t) => t.acuity === "routine").length,
   };
+  const compact = useMediaQuery("(max-width: 639px)");
   const [view, setView] = useState("acuity");
   const q = query.trim().toLowerCase();
   const shown = threads
@@ -460,7 +462,7 @@ export default function Inbox({
               border: "none",
               background: "transparent",
               outline: "none",
-              fontSize: 14.5,
+              fontSize: compact ? 13.5 : 14.5,
               fontFamily: font,
               flex: 1,
               minWidth: 0,
