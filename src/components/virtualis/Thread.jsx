@@ -70,13 +70,13 @@ export default function Thread({ t, onBack, onDetail, onVideo, embedded, onSend,
             background: "rgba(255,255,255,.92)",
             backdropFilter: "blur(18px)",
             borderBottom: "1px solid " + T.line,
-            padding: isMobile ? "4px 8px" : "6px 10px",
+            padding: "2px 8px",
             position: "sticky",
             top: 0,
             zIndex: 10,
           }}
         >
-          <div style={{ display: "flex", alignItems: "center", gap: isMobile ? 6 : 8 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 2 }}>
             {!embedded && (
               <button
                 onClick={onBack}
@@ -84,9 +84,9 @@ export default function Thread({ t, onBack, onDetail, onVideo, embedded, onSend,
                 style={{
                   all: "unset",
                   cursor: "pointer",
-                  width: isMobile ? 28 : 32,
-                  height: isMobile ? 28 : 32,
-                  borderRadius: 16,
+                  width: 44,
+                  height: 44,
+                  borderRadius: 22,
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
@@ -94,7 +94,7 @@ export default function Thread({ t, onBack, onDetail, onVideo, embedded, onSend,
                   color: T.sub,
                 }}
               >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M19 12H5M12 19l-7-7 7-7" />
                 </svg>
               </button>
@@ -107,6 +107,7 @@ export default function Thread({ t, onBack, onDetail, onVideo, embedded, onSend,
                 flex: 1,
                 minWidth: 0,
                 display: "block",
+                padding: "0 2px",
               }}
             >
               <div
@@ -127,43 +128,41 @@ export default function Thread({ t, onBack, onDetail, onVideo, embedded, onSend,
                 <Glyph level={t.acuity} size={6} gap={1.2} w={2.6} />
                 {t.name}
               </div>
-              <div
-                style={{
-                  fontSize: isMobile ? 10 : 11,
-                  color: T.sub,
-                  whiteSpace: "nowrap",
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                  lineHeight: 1.25,
-                  marginTop: 1,
-                }}
-              >
-                {t.patient !== "—" ? `${t.patient} · ${t.room}` : t.team ? t.members : t.context}
-              </div>
             </button>
             {related.length > 0 && (
               <button
                 onClick={() => setRelOpen((v) => !v)}
-                title="Other consults"
+                title={`${related.length} other consult${related.length === 1 ? "" : "s"}`}
                 style={{
                   all: "unset",
                   cursor: "pointer",
                   flexShrink: 0,
-                  height: isMobile ? 26 : 30,
-                  minWidth: isMobile ? 26 : 30,
-                  padding: "0 6px",
-                  borderRadius: 15,
-                  background: relOpen ? T.blueSoft : "#fff",
-                  border: "1px solid " + T.line,
-                  color: T.blueDeep,
-                  fontSize: 10.5,
-                  fontWeight: 700,
+                  width: 44,
+                  height: 44,
+                  borderRadius: 22,
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
                 }}
               >
-                +{related.length}
+                <span
+                  style={{
+                    height: 22,
+                    minWidth: 22,
+                    padding: "0 6px",
+                    borderRadius: 11,
+                    background: relOpen ? T.blueSoft : "#fff",
+                    border: "1px solid " + T.line,
+                    color: T.blueDeep,
+                    fontSize: 10,
+                    fontWeight: 700,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  +{related.length}
+                </span>
               </button>
             )}
             <button
@@ -172,68 +171,118 @@ export default function Thread({ t, onBack, onDetail, onVideo, embedded, onSend,
               style={{
                 all: "unset",
                 cursor: "pointer",
-                background: "linear-gradient(135deg,#2E5CFF,#1E3FCC)",
-                borderRadius: 14,
-                  width: isMobile ? 28 : 32,
-                  height: isMobile ? 28 : 32,
+                width: 44,
+                height: 44,
+                borderRadius: 22,
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
                 flexShrink: 0,
-                boxShadow: "0 3px 10px rgba(41,112,255,.28)",
               }}
             >
-              <VideoIcon />
+              <span
+                style={{
+                  width: 24,
+                  height: 24,
+                  borderRadius: 12,
+                  background: "linear-gradient(135deg,#2E5CFF,#1E3FCC)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  boxShadow: "0 3px 10px rgba(41,112,255,.28)",
+                }}
+              >
+                <VideoIcon />
+              </span>
             </button>
           </div>
           {relOpen && related.length > 0 && (
-            <div className="vx-hscroll" style={{ display: "flex", gap: 5, marginTop: 5, paddingBottom: 2 }}>
-              {related.map((r) => (
-                <button
-                  key={r.id}
-                  onClick={() => {
-                    setRelOpen(false);
-                    onOpenThread?.(r.id);
-                  }}
-                  style={{
-                    all: "unset",
-                    cursor: "pointer",
-                    flexShrink: 0,
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: 4,
-                    fontSize: 10.5,
-                    fontWeight: 600,
-                    color: T.ink,
-                    background: "#fff",
-                    border: "1px solid " + T.line,
-                    borderRadius: 14,
-                    padding: "4px 8px",
-                  }}
-                >
-                  <Glyph level={r.acuity} size={6} gap={1.2} w={2.8} />
-                  {r.team ? r.members : r.context}
-                  {r.newCount > 0 && (
+            <div
+              style={{
+                position: "absolute",
+                top: "calc(100% + 6px)",
+                left: 8,
+                right: 8,
+                zIndex: 20,
+                background: "rgba(255,255,255,.96)",
+                backdropFilter: "blur(16px)",
+                border: "1px solid " + T.line,
+                borderRadius: 16,
+                padding: "8px",
+                boxShadow: "0 14px 34px rgba(16,24,40,.14)",
+              }}
+            >
+              <div
+                style={{
+                  fontFamily: mono,
+                  fontSize: 9,
+                  letterSpacing: 1.4,
+                  color: T.faint,
+                  textTransform: "uppercase",
+                  marginBottom: 6,
+                  padding: "0 4px",
+                }}
+              >
+                Also for this patient
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                {related.map((r) => (
+                  <button
+                    key={r.id}
+                    onClick={() => {
+                      setRelOpen(false);
+                      onOpenThread?.(r.id);
+                    }}
+                    style={{
+                      all: "unset",
+                      cursor: "pointer",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 8,
+                      padding: "6px 8px",
+                      borderRadius: 12,
+                      background: "#fff",
+                      border: "1px solid " + T.line,
+                    }}
+                  >
+                    <Glyph level={r.acuity} size={6} gap={1.2} w={2.8} />
                     <span
                       style={{
-                        minWidth: 14,
-                        height: 14,
-                        borderRadius: 7,
-                        padding: "0 4px",
-                        background: "linear-gradient(135deg,#2E5CFF,#1E3FCC)",
-                        color: "#fff",
-                        fontSize: 9,
-                        fontWeight: 700,
-                        display: "inline-flex",
-                        alignItems: "center",
-                        justifyContent: "center",
+                        flex: 1,
+                        minWidth: 0,
+                        fontSize: 12,
+                        fontWeight: 600,
+                        color: T.ink,
+                        whiteSpace: "nowrap",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        textAlign: "left",
                       }}
                     >
-                      {r.newCount}
+                      {r.team ? r.members : r.context}
                     </span>
-                  )}
-                </button>
-              ))}
+                    {r.newCount > 0 && (
+                      <span
+                        style={{
+                          minWidth: 16,
+                          height: 16,
+                          borderRadius: 8,
+                          padding: "0 4px",
+                          background: "linear-gradient(135deg,#2E5CFF,#1E3FCC)",
+                          color: "#fff",
+                          fontSize: 9,
+                          fontWeight: 700,
+                          display: "inline-flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                        }}
+                      >
+                        {r.newCount}
+                      </span>
+                    )}
+                  </button>
+                ))}
+              </div>
             </div>
           )}
         </div>
