@@ -315,13 +315,13 @@ function Rail({ tab, setTab, unread, onNew, onProfile, wide, me }) {
   );
 }
 
-function FacilityBar({ scope, active, setActive, counts }) {
+function FacilityBar({ scope, active, setActive, counts, compact }) {
   const items = [
     { id: "all", name: "All facilities", short: "ALL", hue: T.blueDeep },
     ...scope.map((id) => FACILITIES[id]),
   ];
   return (
-    <div className="vx-hscroll" style={{ display: "flex", gap: 8, paddingBottom: 10 }}>
+    <div className="vx-hscroll" style={{ display: "flex", gap: 8, paddingBottom: compact ? 4 : 10 }}>
       {items.map((f) => {
         const on = active === f.id;
         const n = counts[f.id] || 0;
@@ -337,11 +337,11 @@ function FacilityBar({ scope, active, setActive, counts }) {
               alignItems: "center",
               gap: 7,
               borderRadius: 20,
-              padding: "8px 14px",
+              padding: compact ? "5px 11px" : "8px 14px",
               background: on ? f.hue : "#fff",
               border: `1px solid ${on ? f.hue : T.line}`,
               color: on ? "#fff" : T.ink,
-              fontSize: 13,
+              fontSize: compact ? 12 : 13,
               fontWeight: 620,
               transition: "all .2s ease",
             }}
@@ -771,7 +771,13 @@ function Workstation() {
         )}
       </div>
       <div style={{ marginTop: multiPane ? 13 : 8 }}>
-        <FacilityBar scope={scope} active={facility} setActive={setFacility} counts={perFacility} />
+        <FacilityBar
+          scope={scope}
+          active={facility}
+          setActive={setFacility}
+          counts={perFacility}
+          compact={!multiPane}
+        />
       </div>
     </div>
   );
