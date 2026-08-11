@@ -481,7 +481,8 @@ export default function Inbox({
         </div>
         <div
           className="vx-hscroll"
-          style={{ display: "flex", gap: 8, marginTop: compact ? 7 : 13, paddingBottom: 2 }}
+          style={{ display: "flex", gap: 8, marginTop: 7, paddingBottom: 2 }}
+
         >
           {pills.map((p) => {
             const active = filter === p.k,
