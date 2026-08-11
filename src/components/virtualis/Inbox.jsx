@@ -495,9 +495,10 @@ export default function Inbox({
                   all: "unset",
                   cursor: "pointer",
                   flexShrink: 0,
-                  fontSize: compact ? 12 : 13,
+                  fontSize: 12,
                   fontWeight: 600,
-                  padding: compact ? "5px 12px" : "8px 15px",
+                  padding: compact ? "5px 12px" : "5px 13px",
+
                   borderRadius: 22,
                   color: active ? (dark ? "#fff" : p.c) : dark ? T.ink : p.c,
                   background: active
