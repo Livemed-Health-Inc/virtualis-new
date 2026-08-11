@@ -101,7 +101,8 @@ function PatientCard({ g, openThread, selectedId }) {
             </span>
           )}
         </div>
-      </div>
+      </button>
+
       <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
         {g.threads.map((t) => (
           <button
