@@ -720,34 +720,16 @@ function Workstation() {
   };
 
   const inboxHeader = (
-    <div style={{ marginBottom: multiPane ? 12 : 7 }}>
-      <div style={{ display: "flex", alignItems: "center", gap: multiPane ? 11 : 9 }}>
+    <div style={{ marginBottom: multiPane ? 6 : 7 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 9 }}>
         {!multiPane && <VMark size={26} />}
-        <div style={{ minWidth: 0 }}>
-          {multiPane && (
-            <div
-              style={{
-                fontFamily: mono,
-                fontSize: 9.5,
-                fontWeight: 600,
-                letterSpacing: 2.2,
-                color: T.blue,
-                display: "flex",
-                alignItems: "center",
-                gap: 6,
-              }}
-            >
-              <span style={{ width: 6, height: 6, borderRadius: 3, background: T.blue }} /> LIVE ·
-              ACUITY INBOX
-            </div>
-          )}
+        <div style={{ minWidth: 0, display: "flex", alignItems: "baseline", gap: 8, flexWrap: "wrap" }}>
           <div
             style={{
-              fontSize: multiPane ? 21 : 16,
+              fontSize: multiPane ? 16 : 16,
               fontWeight: 730,
-              letterSpacing: -0.6,
+              letterSpacing: -0.5,
               color: T.ink,
-              marginTop: multiPane ? 3 : 0,
               whiteSpace: "nowrap",
               overflow: "hidden",
               textOverflow: "ellipsis",
@@ -755,7 +737,7 @@ function Workstation() {
           >
             Hello, {me.name.replace(/^Dr\.\s*/, "Dr. ")}
           </div>
-          <div style={{ fontSize: multiPane ? 12.5 : 11.5, color: T.sub, marginTop: 1 }}>
+          <div style={{ fontSize: 11.5, color: T.sub }}>
             {criticalUnread > 0 ? (
               <span style={{ color: T.red, fontWeight: 600 }}>
                 {criticalUnread} critical unread
@@ -776,17 +758,18 @@ function Workstation() {
           </button>
         )}
       </div>
-      <div style={{ marginTop: multiPane ? 13 : 8 }}>
+      <div style={{ marginTop: multiPane ? 7 : 8 }}>
         <FacilityBar
           scope={scope}
           active={facility}
           setActive={setFacility}
           counts={perFacility}
-          compact={!multiPane}
+          compact
         />
       </div>
     </div>
   );
+
 
 
   const inboxPane = (
