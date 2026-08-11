@@ -424,7 +424,7 @@ export default function Inbox({
     <>
       <div
         style={{
-          padding: compact ? "8px 14px 6px" : "14px clamp(14px,2.2vw,22px) 12px",
+          padding: compact ? "8px 14px 6px" : "8px clamp(14px,2.2vw,20px) 6px",
           position: "relative",
           zIndex: 1,
         }}
@@ -438,9 +438,10 @@ export default function Inbox({
             display: "flex",
             alignItems: "center",
             gap: 9,
-            padding: compact ? "7px 13px" : "11px 16px",
+            padding: compact ? "7px 13px" : "7px 14px",
           }}
         >
+
 
           <svg
             width="15"
