@@ -25,6 +25,8 @@ const initialsOf = (n) =>
 
 /* One patient, every specialty consult opened on them. */
 function PatientCard({ g, openThread, selectedId }) {
+  const primary =
+    g.threads.find((t) => t.newCount > 0) || g.threads[0];
   return (
     <div
       style={{
@@ -37,8 +39,20 @@ function PatientCard({ g, openThread, selectedId }) {
         gap: 11,
       }}
     >
-      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+      <button
+        onClick={() => primary && openThread(primary.id)}
+        style={{
+          all: "unset",
+          boxSizing: "border-box",
+          cursor: "pointer",
+          width: "100%",
+          display: "flex",
+          alignItems: "center",
+          gap: 10,
+        }}
+      >
         <Avatar initials={initialsOf(g.patient)} size={38} />
+
         <div style={{ flex: 1, minWidth: 0 }}>
           <div
             style={{
