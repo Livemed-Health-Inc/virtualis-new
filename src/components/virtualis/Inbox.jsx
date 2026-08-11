@@ -25,6 +25,8 @@ const initialsOf = (n) =>
 
 /* One patient, every specialty consult opened on them. */
 function PatientCard({ g, openThread, selectedId }) {
+  const primary =
+    g.threads.find((t) => t.newCount > 0) || g.threads[0];
   return (
     <div
       style={{
@@ -37,8 +39,20 @@ function PatientCard({ g, openThread, selectedId }) {
         gap: 11,
       }}
     >
-      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+      <button
+        onClick={() => primary && openThread(primary.id)}
+        style={{
+          all: "unset",
+          boxSizing: "border-box",
+          cursor: "pointer",
+          width: "100%",
+          display: "flex",
+          alignItems: "center",
+          gap: 10,
+        }}
+      >
         <Avatar initials={initialsOf(g.patient)} size={38} />
+
         <div style={{ flex: 1, minWidth: 0 }}>
           <div
             style={{
@@ -87,7 +101,8 @@ function PatientCard({ g, openThread, selectedId }) {
             </span>
           )}
         </div>
-      </div>
+      </button>
+
       <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
         {g.threads.map((t) => (
           <button
@@ -424,7 +439,7 @@ export default function Inbox({
     <>
       <div
         style={{
-          padding: compact ? "8px 14px 6px" : "14px clamp(14px,2.2vw,22px) 12px",
+          padding: compact ? "8px 14px 6px" : "8px clamp(14px,2.2vw,20px) 6px",
           position: "relative",
           zIndex: 1,
         }}
@@ -438,9 +453,10 @@ export default function Inbox({
             display: "flex",
             alignItems: "center",
             gap: 9,
-            padding: compact ? "7px 13px" : "11px 16px",
+            padding: compact ? "7px 13px" : "7px 14px",
           }}
         >
+
 
           <svg
             width="15"
@@ -462,7 +478,7 @@ export default function Inbox({
               border: "none",
               background: "transparent",
               outline: "none",
-              fontSize: compact ? 13.5 : 14.5,
+              fontSize: compact ? 13.5 : 13.5,
               fontFamily: font,
               flex: 1,
               minWidth: 0,
@@ -480,7 +496,8 @@ export default function Inbox({
         </div>
         <div
           className="vx-hscroll"
-          style={{ display: "flex", gap: 8, marginTop: compact ? 7 : 13, paddingBottom: 2 }}
+          style={{ display: "flex", gap: 8, marginTop: 7, paddingBottom: 2 }}
+
         >
           {pills.map((p) => {
             const active = filter === p.k,
@@ -493,9 +510,10 @@ export default function Inbox({
                   all: "unset",
                   cursor: "pointer",
                   flexShrink: 0,
-                  fontSize: compact ? 12 : 13,
+                  fontSize: 12,
                   fontWeight: 600,
-                  padding: compact ? "5px 12px" : "8px 15px",
+                  padding: compact ? "5px 12px" : "5px 13px",
+
                   borderRadius: 22,
                   color: active ? (dark ? "#fff" : p.c) : dark ? T.ink : p.c,
                   background: active
@@ -520,8 +538,9 @@ export default function Inbox({
           style={{
             display: "flex",
             gap: 4,
-            marginTop: compact ? 7 : 11,
-            padding: compact ? 3 : 4,
+            marginTop: 7,
+            padding: 3,
+
             background: "#EEF0F4",
             borderRadius: 14,
           }}
@@ -538,9 +557,10 @@ export default function Inbox({
                 cursor: "pointer",
                 flex: 1,
                 textAlign: "center",
-                padding: compact ? "4px 0" : "7px 0",
+                padding: "4px 0",
                 borderRadius: 10,
-                fontSize: compact ? 12 : 13,
+                fontSize: 12,
+
                 fontWeight: 620,
                 color: view === k ? "#fff" : T.sub,
                 background: view === k ? "linear-gradient(135deg,#2E5CFF,#1E3FCC)" : "transparent",
