@@ -463,7 +463,7 @@ export default function Inbox({
               border: "none",
               background: "transparent",
               outline: "none",
-              fontSize: compact ? 13.5 : 14.5,
+              fontSize: compact ? 13.5 : 13.5,
               fontFamily: font,
               flex: 1,
               minWidth: 0,
