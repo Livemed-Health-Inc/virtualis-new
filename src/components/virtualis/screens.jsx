@@ -327,6 +327,19 @@ export function Login() {
           <div style={{ textAlign: "center", fontSize: 11, color: T.faint, marginTop: 18 }}>
             Virtualis®
           </div>
+          <div
+            style={{
+              textAlign: "center",
+              fontFamily: mono,
+              fontSize: 9.5,
+              letterSpacing: 0.9,
+              color: T.faint,
+              opacity: 0.72,
+              marginTop: 6,
+            }}
+          >
+            Patented · U.S. Pat. No. 12,694,994
+          </div>
         </div>
         </div>
       </div>

@@ -269,6 +269,83 @@ export function Account({ onClose, onSchedule, onSignOut }) {
         <Row label="Terms of Service" onClick={() => setView("terms")} />
         <Row label="Data Management" hint="Export or delete your data" onClick={() => setView("data")} />
         <Row label="Help & Support" onClick={() => setView("support")} />
+        <Row label="Patents" hint="Intellectual property notice" onClick={() => setView("patents")} />
+      </>
+    ),
+    patents: (
+      <>
+        <Back title="Patents" />
+        <p style={{ fontSize: 13, color: T.sub, margin: "2px 0 0" }}>
+          Intellectual property notice for the Virtualis platform
+        </p>
+
+        <Label>PATENT NOTICE</Label>
+        <div
+          style={{
+            display: "flex",
+            gap: 12,
+            background: T.blueSoft,
+            border: "1px solid #DCE6FF",
+            borderRadius: 18,
+            padding: "14px 15px",
+          }}
+        >
+          <span style={{ width: 4, borderRadius: 2, background: T.blue, flexShrink: 0 }} />
+          <p style={{ fontSize: 13, lineHeight: 1.62, color: T.blueDeep, margin: 0 }}>
+            The Virtualis platform and the Livemed acuity engine — including the Virtualis mobile and
+            web applications — are protected by one or more United States patents listed below, and by
+            additional patent applications pending in the United States and other jurisdictions. This
+            page is provided as virtual patent marking under 35 U.S.C. § 287(a).
+          </p>
+        </div>
+
+        <Label>ISSUED PATENTS</Label>
+        <div style={{ border: "1px solid " + T.line, borderRadius: 18, padding: "15px 16px" }}>
+          <div style={{ fontFamily: mono, fontSize: 14.5, fontWeight: 680, color: T.ink }}>
+            U.S. Patent No. 12,694,994 B2
+          </div>
+          <div style={{ fontSize: 13.5, fontStyle: "italic", color: T.sub, margin: "6px 0 12px" }}>
+            Systems, Methods, and Devices for Message Control
+          </div>
+          {[
+            ["Issued", "July 28, 2026"],
+            ["Inventors", "Saamer Siddiqi; Marc Anguiano"],
+            ["Assignee", "Livemed Health Inc."],
+          ].map(([k, v]) => (
+            <div key={k} style={{ display: "flex", gap: 10, padding: "5px 0" }}>
+              <div style={{ fontSize: 12.5, color: T.faint, width: 78, flexShrink: 0 }}>{k}</div>
+              <div style={{ fontSize: 13, color: T.ink, fontWeight: 560 }}>{v}</div>
+            </div>
+          ))}
+          <div style={{ borderTop: "1px solid " + T.line, marginTop: 11, paddingTop: 11 }}>
+            <div style={{ fontSize: 12.5, color: T.faint, marginBottom: 4 }}>
+              Representative coverage
+            </div>
+            <p style={{ fontSize: 13, lineHeight: 1.6, color: T.sub, margin: 0 }}>
+              AI acuity scoring of clinical messages and consults, acuity-ordered message
+              notifications and push alerts, acuity color/indicator presentation, recommendation
+              (next-best-action) generation, and the human-feedback optimization loop.
+            </p>
+          </div>
+        </div>
+
+        <div
+          style={{
+            marginTop: 14,
+            background: "#F7F8FA",
+            border: "1px solid " + T.line,
+            borderRadius: 16,
+            padding: "13px 14px",
+          }}
+        >
+          <p style={{ fontSize: 11.5, lineHeight: 1.6, color: T.faint, margin: 0 }}>
+            The listing of a patent above is for notice purposes and does not constitute an admission
+            that any particular product or feature is covered by, or limited to, that patent. Products
+            may be covered by patents in addition to those listed. This notice does not grant any
+            license, express or implied, to any patent or other intellectual property right. © 2026
+            Livemed Health Inc. All rights reserved.
+          </p>
+        </div>
       </>
     ),
     profile: (
