@@ -542,9 +542,10 @@ export default function Inbox({
                 cursor: "pointer",
                 flex: 1,
                 textAlign: "center",
-                padding: compact ? "4px 0" : "7px 0",
+                padding: "4px 0",
                 borderRadius: 10,
-                fontSize: compact ? 12 : 13,
+                fontSize: 12,
+
                 fontWeight: 620,
                 color: view === k ? "#fff" : T.sub,
                 background: view === k ? "linear-gradient(135deg,#2E5CFF,#1E3FCC)" : "transparent",
