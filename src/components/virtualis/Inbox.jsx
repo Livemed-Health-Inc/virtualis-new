@@ -523,8 +523,9 @@ export default function Inbox({
           style={{
             display: "flex",
             gap: 4,
-            marginTop: compact ? 7 : 11,
-            padding: compact ? 3 : 4,
+            marginTop: 7,
+            padding: 3,
+
             background: "#EEF0F4",
             borderRadius: 14,
           }}
