@@ -72,6 +72,7 @@ function PatientCard({ g, openThread, selectedId }) {
               display: "flex",
               alignItems: "center",
               gap: 7,
+              flexWrap: "wrap",
               marginTop: 3,
               fontSize: 11.5,
               color: T.sub,
