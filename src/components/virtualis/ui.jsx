@@ -253,7 +253,7 @@ export function FacilityChip({ id, showEmr, full }) {
       }}
     >
       <span style={{ width: 6, height: 6, borderRadius: 3, background: f.hue }} />
-      {f.short}
+      {full ? f.name : f.short}
       {showEmr && <span style={{ color: T.faint, fontWeight: 500 }}>· {f.emr}</span>}
     </span>
   );
