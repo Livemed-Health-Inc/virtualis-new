@@ -233,7 +233,7 @@ export function AcuityBadge({ level }) {
   );
 }
 
-export function FacilityChip({ id, showEmr }) {
+export function FacilityChip({ id, showEmr, full }) {
   const f = FACILITIES[id];
   if (!f) return null;
   return (
@@ -253,7 +253,7 @@ export function FacilityChip({ id, showEmr }) {
       }}
     >
       <span style={{ width: 6, height: 6, borderRadius: 3, background: f.hue }} />
-      {f.short}
+      {full ? f.name : f.short}
       {showEmr && <span style={{ color: T.faint, fontWeight: 500 }}>· {f.emr}</span>}
     </span>
   );

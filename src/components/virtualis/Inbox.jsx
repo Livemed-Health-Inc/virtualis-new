@@ -72,14 +72,15 @@ function PatientCard({ g, openThread, selectedId }) {
               display: "flex",
               alignItems: "center",
               gap: 7,
+              flexWrap: "wrap",
               marginTop: 3,
               fontSize: 11.5,
               color: T.sub,
             }}
           >
-            <FacilityChip id={g.facility} />
+            <FacilityChip id={g.facility} full />
             {g.mrn && <span style={{ fontFamily: mono, fontSize: 10.5 }}>MRN {g.mrn}</span>}
-            <span>· Room {g.room}</span>
+            {g.room !== "—" && <span>· Room {g.room}</span>}
           </div>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
@@ -318,13 +319,17 @@ function Row({ t, ack, unreadCount, onOpen, selected, i }) {
               flexWrap: "wrap",
             }}
           >
-            <FacilityChip id={t.facility} showEmr />
+            <FacilityChip id={t.facility} showEmr full />
             <span
               style={{
-                fontSize: 12.5,
-                color: T.blue,
-                fontWeight: 530,
-                minWidth: 0,
+                fontSize: 11.5,
+                fontWeight: 620,
+                color: T.blueDeep,
+                background: T.blueSoft,
+                border: "1px solid #D6E4FF",
+                borderRadius: 14,
+                padding: "2.5px 9px",
+                maxWidth: "100%",
                 overflow: "hidden",
                 textOverflow: "ellipsis",
                 whiteSpace: "nowrap",
@@ -355,7 +360,12 @@ function Row({ t, ack, unreadCount, onOpen, selected, i }) {
                 </span>
               </>
             )}
-            
+            {t.mrn && (
+              <>
+                <span style={{ color: T.line }}>|</span>
+                <span style={{ fontFamily: mono, fontSize: 11 }}>MRN {t.mrn}</span>
+              </>
+            )}
           </div>
           <div
             style={{
