@@ -61,6 +61,16 @@ export default function Thread({ t, onBack, onDetail, onVideo, embedded, onSend,
     setEmojiOpen(false);
   }, [t.id]);
   useEffect(() => {
+    const onKey = (e) => {
+      if (e.key !== "Escape") return;
+      if (sheet !== null) setSheet(null);
+      else if (replyTo !== null) setReplyTo(null);
+      else onBack?.();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [sheet, replyTo, onBack]);
+  useEffect(() => {
     if (!typing) return;
     const id = setTimeout(() => setTyping(false), 2600);
     return () => clearTimeout(id);
@@ -115,7 +125,7 @@ export default function Thread({ t, onBack, onDetail, onVideo, embedded, onSend,
           }}
         >
           <div style={{ display: "flex", alignItems: "center", gap: 2 }}>
-            {!embedded && (
+            {onBack && (
               <button
                 onClick={onBack}
                 title="Back"
@@ -337,7 +347,7 @@ export default function Thread({ t, onBack, onDetail, onVideo, embedded, onSend,
           }}
         >
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            {!embedded && <Back onClick={onBack} label="" />}
+            {onBack && <Back onClick={onBack} label="" />}
             <Avatar initials={initialsOf(t.name)} team={t.team} size={38} />
             <div style={{ flex: 1, minWidth: 0 }}>
               <div
