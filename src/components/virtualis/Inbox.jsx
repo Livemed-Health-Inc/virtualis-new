@@ -77,9 +77,9 @@ function PatientCard({ g, openThread, selectedId }) {
               color: T.sub,
             }}
           >
-            <FacilityChip id={g.facility} />
+            <FacilityChip id={g.facility} full />
             {g.mrn && <span style={{ fontFamily: mono, fontSize: 10.5 }}>MRN {g.mrn}</span>}
-            <span>· Room {g.room}</span>
+            {g.room !== "—" && <span>· Room {g.room}</span>}
           </div>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
