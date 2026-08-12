@@ -318,13 +318,17 @@ function Row({ t, ack, unreadCount, onOpen, selected, i }) {
               flexWrap: "wrap",
             }}
           >
-            <FacilityChip id={t.facility} showEmr />
+            <FacilityChip id={t.facility} showEmr full />
             <span
               style={{
-                fontSize: 12.5,
-                color: T.blue,
-                fontWeight: 530,
-                minWidth: 0,
+                fontSize: 11.5,
+                fontWeight: 620,
+                color: T.blueDeep,
+                background: T.blueSoft,
+                border: "1px solid #D6E4FF",
+                borderRadius: 14,
+                padding: "2.5px 9px",
+                maxWidth: "100%",
                 overflow: "hidden",
                 textOverflow: "ellipsis",
                 whiteSpace: "nowrap",
