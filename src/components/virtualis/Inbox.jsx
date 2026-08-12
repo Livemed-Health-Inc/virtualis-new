@@ -359,7 +359,12 @@ function Row({ t, ack, unreadCount, onOpen, selected, i }) {
                 </span>
               </>
             )}
-            
+            {t.mrn && (
+              <>
+                <span style={{ color: T.line }}>|</span>
+                <span style={{ fontFamily: mono, fontSize: 11 }}>MRN {t.mrn}</span>
+              </>
+            )}
           </div>
           <div
             style={{
