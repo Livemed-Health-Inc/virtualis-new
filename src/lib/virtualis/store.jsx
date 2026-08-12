@@ -1,4 +1,12 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { supabase } from "@/integrations/supabase/client";
 
 /* Live clinical data layer. Everything here is scoped by the signed-in
@@ -62,11 +70,12 @@ export function VirtualisProvider({ children }) {
   const [messages, setMessages] = useState([]);
   const [reads, setReads] = useState({});
 
-  const [freshLogin, setFreshLogin] = useState(false);
+  // One read-state reset per session start, so the acuity picture is always
+  // visible when a clinician opens or signs back into the workstation.
+  const resetDone = useRef(null);
 
   useEffect(() => {
-    const { data: sub } = supabase.auth.onAuthStateChange((e, s) => {
-      if (e === "SIGNED_IN") setFreshLogin(true);
+    const { data: sub } = supabase.auth.onAuthStateChange((_e, s) => {
       setSession(s);
     });
     supabase.auth.getSession().then(({ data }) => {
@@ -80,10 +89,11 @@ export function VirtualisProvider({ children }) {
 
   const load = useCallback(async () => {
     if (!userId) return;
-    // A fresh sign-in resets read state so every thread returns as unread.
-    if (freshLogin) {
+    // Every session start resets read state so every thread returns as unread.
+    if (resetDone.current !== userId) {
+      resetDone.current = userId;
       await supabase.from("thread_reads").delete().eq("user_id", userId);
-      setFreshLogin(false);
+      setReads({});
     }
     const [p, c, ct, sh, th, rd] = await Promise.all([
       supabase.from("profiles").select("*").eq("id", userId).maybeSingle(),
@@ -117,7 +127,7 @@ export function VirtualisProvider({ children }) {
         .order("created_at");
       setMessages(data ?? []);
     } else setMessages([]);
-  }, [userId, freshLogin]);
+  }, [userId]);
 
   useEffect(() => {
     load();
@@ -248,6 +258,7 @@ export function VirtualisProvider({ children }) {
   );
 
   const signOut = useCallback(async () => {
+    resetDone.current = null;
     await supabase.auth.signOut();
     setProfile(null);
     setCredentials([]);
