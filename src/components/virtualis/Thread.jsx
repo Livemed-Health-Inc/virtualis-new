@@ -32,6 +32,16 @@ export default function Thread({ t, onBack, onDetail, onVideo, embedded, onSend,
   const isShortViewport = useMediaQuery("(max-height: 700px)");
   const compactHeader = isMobile || isShortViewport;
   const [relOpen, setRelOpen] = useState(false);
+  const scrollRef = useRef(null);
+  const [atBottom, setAtBottom] = useState(true);
+  const [reactions, setReactions] = useState({});
+  const [replies, setReplies] = useState({});
+  const [replyTo, setReplyTo] = useState(null);
+  const [deleted, setDeleted] = useState([]);
+  const [typing, setTyping] = useState(false);
+  const [attachOpen, setAttachOpen] = useState(false);
+  const [emojiOpen, setEmojiOpen] = useState(false);
+  const [recording, setRecording] = useState(false);
   /* Persisted messages arrive on `t.msgs`; `extra` only holds the optimistic
      echo for the split second before the insert round-trips. */
   const msgs = onSend ? t.msgs : [...t.msgs, ...extra];
@@ -42,15 +52,43 @@ export default function Thread({ t, onBack, onDetail, onVideo, embedded, onSend,
     setExtra([]);
     setAckd(false);
     setSheet(null);
+    setReactions({});
+    setReplies({});
+    setReplyTo(null);
+    setDeleted([]);
+    setTyping(false);
+    setAttachOpen(false);
+    setEmojiOpen(false);
   }, [t.id]);
+  useEffect(() => {
+    if (!typing) return;
+    const id = setTimeout(() => setTyping(false), 2600);
+    return () => clearTimeout(id);
+  }, [typing]);
+
+  const react = (i, e) =>
+    setReactions((r) => {
+      const cur = r[i] || [];
+      return { ...r, [i]: cur.includes(e) ? cur.filter((x) => x !== e) : [...cur, e] };
+    });
+
+  const push = (text) => {
+    if (replyTo != null) setReplies((r) => ({ ...r, [msgs.length]: replyTo }));
+    setReplyTo(null);
+    if (onSend) onSend(text);
+    else setExtra((e) => [...e, { me: true, who: "You", text, t: "Now" }]);
+    setTyping(true);
+  };
 
   const send = () => {
     const text = draft.trim();
     if (!text) return;
-    if (onSend) onSend(text);
-    else setExtra((e) => [...e, { me: true, who: "You", text, t: "Now" }]);
+    push(text);
     setDraft("");
+    setEmojiOpen(false);
+    setAttachOpen(false);
   };
+
 
   return (
     <div
