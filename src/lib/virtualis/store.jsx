@@ -62,11 +62,12 @@ export function VirtualisProvider({ children }) {
   const [messages, setMessages] = useState([]);
   const [reads, setReads] = useState({});
 
-  const [freshLogin, setFreshLogin] = useState(false);
+  // One read-state reset per session start, so the acuity picture is always
+  // visible when a clinician opens or signs back into the workstation.
+  const resetDone = useRef(null);
 
   useEffect(() => {
-    const { data: sub } = supabase.auth.onAuthStateChange((e, s) => {
-      if (e === "SIGNED_IN") setFreshLogin(true);
+    const { data: sub } = supabase.auth.onAuthStateChange((_e, s) => {
       setSession(s);
     });
     supabase.auth.getSession().then(({ data }) => {
