@@ -258,6 +258,7 @@ export function VirtualisProvider({ children }) {
   );
 
   const signOut = useCallback(async () => {
+    resetDone.current = null;
     await supabase.auth.signOut();
     setProfile(null);
     setCredentials([]);
