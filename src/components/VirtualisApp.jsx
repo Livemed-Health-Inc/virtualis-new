@@ -15,6 +15,7 @@ import {
   RoutingScreen,
 } from "./virtualis/screens";
 import { Account } from "./virtualis/Account";
+import NewMessage from "./virtualis/NewMessage";
 
 /* ═══ VIRTUALIS® · intelligent medicine ════════════════════════════
    Responsive clinical workstation. Mobile: tab shell with push
@@ -179,7 +180,7 @@ function TabBar({ tab, setTab, unread }) {
   );
 }
 
-function Rail({ tab, setTab, unread, onNew, onProfile, wide, me }) {
+function Rail({ tab, setTab, unread, onNew, onNewMessage, onProfile, wide, me }) {
   return (
     <div
       style={{
@@ -296,6 +297,30 @@ function Rail({ tab, setTab, unread, onNew, onProfile, wide, me }) {
         {wide && <span style={{ fontSize: 14, fontWeight: 650 }}>New consult</span>}
       </button>
       <button
+        onClick={onNewMessage}
+        title="New message"
+        style={{
+          all: "unset",
+          cursor: "pointer",
+          marginTop: 8,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: 8,
+          background: "rgba(255,255,255,.12)",
+          border: "1px solid rgba(255,255,255,.16)",
+          borderRadius: 16,
+          padding: "10px 0",
+          width: wide ? "100%" : 46,
+          boxSizing: "border-box",
+        }}
+      >
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#DCE7FF" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M21 11.5a8.5 8.5 0 0 1-12.6 7.4L3 20.5l1.6-5.2A8.5 8.5 0 1 1 21 11.5Z" />
+        </svg>
+        {wide && <span style={{ fontSize: 13.5, fontWeight: 620, color: "#DCE7FF" }}>New message</span>}
+      </button>
+      <button
         onClick={onProfile}
         style={{
           all: "unset",
@@ -377,7 +402,7 @@ function FacilityBar({ scope, active, setActive, counts, compact }) {
   );
 }
 
-function VFab({ onConsult, onAlis, onPage, onTelehealth, float }) {
+function VFab({ onConsult, onAlis, onMessage, onTelehealth, float }) {
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
@@ -417,14 +442,13 @@ function VFab({ onConsult, onAlis, onPage, onTelehealth, float }) {
       run: onConsult,
     },
     {
-      label: "Page",
+      label: "Message",
       icon: (
         <Icon>
-          <rect x="4" y="6" width="16" height="12" rx="3" />
-          <path d="M8 10h8M8 13.5h5" />
+          <path d="M21 11.5a8.5 8.5 0 0 1-12.6 7.4L3 20.5l1.6-5.2A8.5 8.5 0 1 1 21 11.5Z" />
         </Icon>
       ),
-      run: () => onPage("routine"),
+      run: onMessage,
     },
     {
       label: "Video",
@@ -625,6 +649,7 @@ function Workstation() {
   const [detailId, setDetailId] = useState(null);
   const [videoId, setVideoId] = useState(null);
   const [consulting, setConsulting] = useState(false);
+  const [composing, setComposing] = useState(false);
   const [routing, setRouting] = useState(null);
   const [creds, setCreds] = useState(false);
   const [toast, setToast] = useState(null);
@@ -644,6 +669,7 @@ function Workstation() {
     setDetailId(null);
     setVideoId(null);
     setConsulting(false);
+    setComposing(false);
     setRouting(null);
     setCreds(false);
     setListCollapsed(false);
@@ -689,6 +715,24 @@ function Workstation() {
     if (id) setOpenId(id);
     else flash("Could not open that conversation");
   };
+  const startMessage = async ({ recipients, group, name, text }) => {
+    setComposing(false);
+    const first = recipients[0];
+    const id = await createThread({
+      name,
+      context: group ? `${recipients.length} providers` : first.dept,
+      facility: first.facility,
+      acuity: "routine",
+      team: group,
+      members: recipients.map((r) => r.name).join(" · "),
+      reason: text || undefined,
+    });
+    if (!id) return flash("Could not start that conversation");
+    setTab("inbox");
+    setOpenId(id);
+    flash(group ? `Group started · ${recipients.length} providers` : `Chat started · ${first.name}`);
+  };
+
   const sendConsult = (payload) => {
     setConsulting(false);
     setRouting(payload);
@@ -751,8 +795,33 @@ function Workstation() {
         </div>
         {!multiPane && (
           <button
+            onClick={() => setComposing(true)}
+            title="New message"
+            aria-label="New message"
+            style={{
+              all: "unset",
+              cursor: "pointer",
+              marginLeft: "auto",
+              width: 32,
+              height: 32,
+              borderRadius: 16,
+              background: T.blueSoft,
+              border: "1px solid #D6E4FF",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke={T.blueDeep} strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21 11.5a8.5 8.5 0 0 1-12.6 7.4L3 20.5l1.6-5.2A8.5 8.5 0 1 1 21 11.5Z" />
+              <path d="M12 8.5v6M9 11.5h6" />
+            </svg>
+          </button>
+        )}
+        {!multiPane && (
+          <button
             onClick={() => setCreds(true)}
-            style={{ all: "unset", cursor: "pointer", marginLeft: "auto" }}
+            style={{ all: "unset", cursor: "pointer" }}
           >
             <Avatar initials={me.initials} team size={32} />
           </button>
@@ -826,7 +895,14 @@ function Workstation() {
 
 
 
-  const pushed = consulting ? (
+  const pushed = composing ? (
+    <NewMessage
+      onBack={() => setComposing(false)}
+      onStart={startMessage}
+      facilityScope={scope}
+      staff={staff}
+    />
+  ) : consulting ? (
     <NewConsult
       onBack={() => setConsulting(false)}
       onSend={sendConsult}
@@ -842,7 +918,7 @@ function Workstation() {
       float={float}
       onConsult={() => setConsulting(true)}
       onAlis={() => setTab("alis")}
-      onPage={() => flash("Page sent · on-call will call back")}
+      onMessage={() => setComposing(true)}
       onTelehealth={() => {
         const target = activeThread || visible[0];
         if (target) {
@@ -928,6 +1004,7 @@ function Workstation() {
           unread={unread}
           wide={isDesktop}
           onNew={() => setConsulting(true)}
+          onNewMessage={() => setComposing(true)}
           onProfile={() => setCreds(true)}
         />
         {showList && (
