@@ -127,7 +127,7 @@ export function VirtualisProvider({ children }) {
         .order("created_at");
       setMessages(data ?? []);
     } else setMessages([]);
-  }, [userId, freshLogin]);
+  }, [userId]);
 
   useEffect(() => {
     load();
