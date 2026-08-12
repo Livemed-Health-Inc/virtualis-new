@@ -233,7 +233,7 @@ export function AcuityBadge({ level }) {
   );
 }
 
-export function FacilityChip({ id, showEmr }) {
+export function FacilityChip({ id, showEmr, full }) {
   const f = FACILITIES[id];
   if (!f) return null;
   return (
