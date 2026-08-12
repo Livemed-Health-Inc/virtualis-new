@@ -492,6 +492,11 @@ export default function Thread({ t, onBack, onDetail, onVideo, embedded, onSend,
 
 
       <div
+        ref={scrollRef}
+        onScroll={(e) => {
+          const el = e.currentTarget;
+          setAtBottom(el.scrollHeight - el.scrollTop - el.clientHeight < 80);
+        }}
         style={{
           flex: 1,
           overflowY: "auto",
@@ -499,6 +504,7 @@ export default function Thread({ t, onBack, onDetail, onVideo, embedded, onSend,
           display: "flex",
           flexDirection: "column",
           gap: isMobile ? 8 : 11,
+          position: "relative",
         }}
       >
         <div
@@ -511,20 +517,67 @@ export default function Thread({ t, onBack, onDetail, onVideo, embedded, onSend,
             gap: isMobile ? 8 : 11,
           }}
         >
-          {msgs.map((m, i) => (
+          <div style={{ alignSelf: "center", marginBottom: 2 }}>
+            <span
+              style={{
+                fontFamily: mono,
+                fontSize: 9.5,
+                letterSpacing: 1.4,
+                textTransform: "uppercase",
+                color: T.faint,
+                background: "rgba(255,255,255,.8)",
+                border: "1px solid " + T.line,
+                borderRadius: 12,
+                padding: "3px 10px",
+              }}
+            >
+              Today
+            </span>
+          </div>
+
+          {msgs.map((m, i) => {
+            if (deleted.includes(i)) return null;
+            const prev = msgs[i - 1];
+            const grouped = prev && prev.me === m.me && prev.who === m.who;
+            const reacts = reactions[i] || [];
+            const quoted = replies[i] != null ? msgs[replies[i]] : null;
+            return (
             <div
               key={i}
-              style={{ alignSelf: m.me ? "flex-end" : "flex-start", maxWidth: "min(82%, 560px)" }}
+              style={{
+                alignSelf: m.me ? "flex-end" : "flex-start",
+                maxWidth: "min(82%, 560px)",
+                marginTop: grouped ? -(isMobile ? 4 : 6) : 0,
+              }}
             >
-              {!m.me && (
+              {!m.me && !grouped && (
                 <div
                   style={{ fontSize: 11, color: T.sub, margin: "0 0 3px 13px", fontWeight: 560 }}
                 >
                   {m.who}
                 </div>
               )}
+              {quoted && (
+                <div
+                  style={{
+                    borderLeft: "3px solid " + T.blue,
+                    background: m.me ? "rgba(46,92,255,.10)" : "#F3F5F9",
+                    borderRadius: 10,
+                    padding: "5px 9px",
+                    marginBottom: 3,
+                    fontSize: 11.5,
+                    color: T.sub,
+                    maxHeight: 42,
+                    overflow: "hidden",
+                  }}
+                >
+                  <b style={{ color: T.blueDeep }}>{quoted.me ? "You" : quoted.who}</b> ·{" "}
+                  {quoted.text}
+                </div>
+              )}
               <button
                 onClick={() => setSheet(sheet === i ? null : i)}
+                onDoubleClick={() => react(i, "👍")}
                 style={{ all: "unset", cursor: "pointer", display: "block", textAlign: "left" }}
               >
                 {m.kind === "attachment" ? (
@@ -617,31 +670,6 @@ export default function Thread({ t, onBack, onDetail, onVideo, embedded, onSend,
                     </div>
                     <div
                       style={{
-                        display: "flex",
-                        alignItems: "flex-end",
-                        gap: 2.5,
-                        marginTop: 11,
-                        height: 22,
-                      }}
-                    >
-                      {[6, 12, 8, 16, 10, 20, 14, 8, 12, 18, 9, 15, 7, 11, 17, 10, 6, 13, 8].map(
-                        (h, j) => (
-                          <span
-                            key={j}
-                            style={{
-                              width: 3,
-                              height: h,
-                              borderRadius: 2,
-                              background: "#2E5CFF",
-                              opacity: 0.9,
-                              animation: `eq 1.2s ${j * 0.05}s ease-in-out infinite alternate`,
-                            }}
-                          />
-                        ),
-                      )}
-                    </div>
-                    <div
-                      style={{
                         fontFamily: mono,
                         fontSize: 12.5,
                         color: "#D7DEF0",
@@ -653,24 +681,54 @@ export default function Thread({ t, onBack, onDetail, onVideo, embedded, onSend,
                     </div>
                   </div>
                 ) : (
-                <div
-                  style={{
-                    background: m.me ? "linear-gradient(135deg,#2E5CFF,#1E3FCC)" : "#fff",
-                    color: m.me ? "#fff" : T.ink,
-                    border: m.me ? "none" : "1px solid " + T.line,
-                    borderRadius: m.me ? "18px 18px 5px 18px" : "18px 18px 18px 5px",
-                    padding: isMobile ? "9px 12px" : "11px 15px",
-                    fontSize: isMobile ? 13.5 : 14.5,
-                    lineHeight: 1.4,
-                    boxShadow: m.me
-                      ? "0 6px 16px rgba(41,112,255,.22)"
-                      : "0 2px 6px rgba(16,24,40,.04)",
-                  }}
-                >
-                  {m.text}
-                </div>
+                  <div
+                    style={{
+                      background: m.me ? "linear-gradient(135deg,#2E5CFF,#1E3FCC)" : "#fff",
+                      color: m.me ? "#fff" : T.ink,
+                      border: m.me ? "none" : "1px solid " + T.line,
+                      borderRadius: m.me ? "18px 18px 5px 18px" : "18px 18px 18px 5px",
+                      padding: isMobile ? "9px 12px" : "11px 15px",
+                      fontSize: isMobile ? 13.5 : 14.5,
+                      lineHeight: 1.4,
+                      whiteSpace: "pre-wrap",
+                      boxShadow: m.me
+                        ? "0 6px 16px rgba(41,112,255,.22)"
+                        : "0 2px 6px rgba(16,24,40,.04)",
+                    }}
+                  >
+                    {m.text}
+                  </div>
                 )}
               </button>
+
+              {reacts.length > 0 && (
+                <div
+                  style={{
+                    display: "flex",
+                    gap: 3,
+                    marginTop: -6,
+                    justifyContent: m.me ? "flex-end" : "flex-start",
+                    padding: "0 6px",
+                  }}
+                >
+                  {reacts.map((e) => (
+                    <span
+                      key={e}
+                      style={{
+                        background: "#fff",
+                        border: "1px solid " + T.line,
+                        borderRadius: 12,
+                        padding: "1px 6px",
+                        fontSize: 12,
+                        boxShadow: "0 2px 6px rgba(16,24,40,.08)",
+                      }}
+                    >
+                      {e}
+                    </span>
+                  ))}
+                </div>
+              )}
+
               <div
                 style={{
                   fontSize: 10.5,
@@ -681,8 +739,9 @@ export default function Thread({ t, onBack, onDetail, onVideo, embedded, onSend,
                 }}
               >
                 {m.t}
-                {m.me && "  ✓✓"}
+                {m.me && <span style={{ color: T.blue, marginLeft: 4 }}>✓✓</span>}
               </div>
+
               {sheet === i && (
                 <div
                   style={{
@@ -699,42 +758,43 @@ export default function Thread({ t, onBack, onDetail, onVideo, embedded, onSend,
                     style={{
                       display: "flex",
                       gap: 6,
-                      padding: "10px 12px",
+                      padding: "9px 12px",
                       borderBottom: "1px solid " + T.line,
                       flexWrap: "wrap",
                     }}
                   >
-                    {[
-                      ["✓", "Acknowledge"],
-                      ["👍", "Agree"],
-                      
-                    ].map(([e, l]) => (
+                    {["👍", "❤️", "✅", "❗", "😮", "🙏"].map((e) => (
                       <button
-                        key={l}
+                        key={e}
                         onClick={() => {
+                          react(i, e);
                           setSheet(null);
-                          if (l === "Acknowledge") setAckd(true);
                         }}
                         style={{
                           all: "unset",
                           cursor: "pointer",
-                          fontSize: 12,
-                          fontWeight: 620,
-                          color: T.ink,
-                          background: "#F7F8FA",
-                          border: "1px solid " + T.line,
-                          borderRadius: 16,
-                          padding: "6px 12px",
+                          fontSize: 17,
+                          lineHeight: 1,
+                          padding: "5px 7px",
+                          borderRadius: 14,
                         }}
                       >
-                        {e} {l}
+                        {e}
                       </button>
                     ))}
                   </div>
-                  {["Reply", "Copy", "Info"].map((a) => (
+                  {[
+                    ["Reply", () => setReplyTo(i)],
+                    ["Copy", () => navigator.clipboard?.writeText(m.text || "")],
+                    ["Acknowledge", () => setAckd(true)],
+                    ["Delete for me", () => setDeleted((d) => [...d, i])],
+                  ].map(([label, fn], k, arr) => (
                     <button
-                      key={a}
-                      onClick={() => setSheet(null)}
+                      key={label}
+                      onClick={() => {
+                        fn();
+                        setSheet(null);
+                      }}
                       style={{
                         all: "unset",
                         boxSizing: "border-box",
@@ -744,88 +804,287 @@ export default function Thread({ t, onBack, onDetail, onVideo, embedded, onSend,
                         padding: "11px 16px",
                         fontSize: 14,
                         fontWeight: 550,
-                        color: T.ink,
-                        borderBottom: a !== "Info" ? "1px solid " + T.line : "none",
+                        color: label === "Delete for me" ? T.red : T.ink,
+                        borderBottom: k < arr.length - 1 ? "1px solid " + T.line : "none",
                       }}
                     >
-                      {a}
+                      {label}
                     </button>
                   ))}
                 </div>
               )}
             </div>
-          ))}
+            );
+          })}
+
+          {typing && (
+            <div
+              style={{
+                alignSelf: "flex-start",
+                display: "flex",
+                gap: 4,
+                background: "#fff",
+                border: "1px solid " + T.line,
+                borderRadius: "18px 18px 18px 5px",
+                padding: "10px 14px",
+              }}
+            >
+              {[0, 1, 2].map((d) => (
+                <span
+                  key={d}
+                  style={{
+                    width: 6,
+                    height: 6,
+                    borderRadius: 3,
+                    background: "#B7C2D6",
+                    animation: `eq .9s ${d * 0.15}s ease-in-out infinite alternate`,
+                  }}
+                />
+              ))}
+            </div>
+          )}
           <div ref={endRef} />
         </div>
       </div>
 
-      <div style={{ padding: isMobile ? "6px 10px 8px" : "8px 14px 12px" }}>
-        <div
-          style={{ maxWidth: 820, margin: "0 auto", display: "flex", gap: isMobile ? 6 : 8, alignItems: "center" }}
+      {!atBottom && (
+        <button
+          onClick={() => endRef.current?.scrollIntoView({ behavior: "smooth" })}
+          title="Jump to latest"
+          style={{
+            all: "unset",
+            cursor: "pointer",
+            position: "absolute",
+            right: 16,
+            bottom: 76,
+            width: 36,
+            height: 36,
+            borderRadius: 18,
+            background: "rgba(255,255,255,.94)",
+            border: "1px solid " + T.line,
+            boxShadow: "0 8px 20px rgba(16,24,40,.14)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 8,
+          }}
         >
-          <button
-            title="Attach"
-            style={{
-              all: "unset",
-              cursor: "pointer",
-              width: isMobile ? 36 : 42,
-              height: isMobile ? 36 : 42,
-              borderRadius: isMobile ? 12 : 14,
-              background: "#EDF0F4",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              flexShrink: 0,
-            }}
-          >
-            <svg
-              width={isMobile ? 15 : 17}
-              height={isMobile ? 15 : 17}
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke={T.sub}
-              strokeWidth="2.4"
-              strokeLinecap="round"
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={T.blueDeep} strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M12 5v14M6 13l6 6 6-6" />
+          </svg>
+        </button>
+      )}
+
+      <div style={{ padding: isMobile ? "6px 10px 8px" : "8px 14px 12px" }}>
+        <div style={{ maxWidth: 820, margin: "0 auto" }}>
+          {replyTo != null && msgs[replyTo] && (
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 8,
+                background: "#fff",
+                border: "1px solid " + T.line,
+                borderLeft: "3px solid " + T.blue,
+                borderRadius: 12,
+                padding: "6px 10px",
+                marginBottom: 6,
+              }}
             >
-              <path d="M12 5v14M5 12h14" />
-            </svg>
-          </button>
-          <input
-            value={draft}
-            onChange={(e) => setDraft(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && send()}
-            placeholder="Message"
-            style={{ ...inputStyle, borderRadius: 24, flex: 1, minWidth: 0, height: isMobile ? 36 : 42 }}
-          />
-          <button
-            onClick={send}
-            style={{
-              all: "unset",
-              cursor: "pointer",
-              width: isMobile ? 36 : 42,
-              height: isMobile ? 36 : 42,
-              borderRadius: isMobile ? 18 : 21,
-              background: draft.trim() ? "linear-gradient(135deg,#2E5CFF,#1E3FCC)" : T.ghost,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              transition: "background .2s ease",
-              flexShrink: 0,
-            }}
-          >
-            <svg
-              width={isMobile ? 14 : 16}
-              height={isMobile ? 14 : 16}
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="#fff"
-              strokeWidth="2.4"
-              strokeLinecap="round"
-              strokeLinejoin="round"
+              <div style={{ flex: 1, minWidth: 0, fontSize: 12, color: T.sub, overflow: "hidden", whiteSpace: "nowrap", textOverflow: "ellipsis" }}>
+                <b style={{ color: T.blueDeep }}>
+                  Replying to {msgs[replyTo].me ? "yourself" : msgs[replyTo].who}
+                </b>{" "}
+                · {msgs[replyTo].text}
+              </div>
+              <button onClick={() => setReplyTo(null)} style={{ all: "unset", cursor: "pointer", color: T.sub, fontSize: 16, padding: "0 4px" }}>
+                ×
+              </button>
+            </div>
+          )}
+
+          {attachOpen && (
+            <div style={{ display: "flex", gap: 7, marginBottom: 6, flexWrap: "wrap" }}>
+              {["Photo", "Document", "Camera", "Patient chart"].map((a) => (
+                <button
+                  key={a}
+                  onClick={() => {
+                    setAttachOpen(false);
+                    push(`📎 ${a} shared`);
+                  }}
+                  style={{
+                    all: "unset",
+                    cursor: "pointer",
+                    fontSize: 12.5,
+                    fontWeight: 620,
+                    color: T.blueDeep,
+                    background: T.blueSoft,
+                    border: "1px solid #D6E4FF",
+                    borderRadius: 16,
+                    padding: "7px 13px",
+                  }}
+                >
+                  {a}
+                </button>
+              ))}
+            </div>
+          )}
+
+          {emojiOpen && (
+            <div style={{ display: "flex", gap: 4, marginBottom: 6, flexWrap: "wrap" }}>
+              {["👍", "🙏", "✅", "❗", "😀", "😮", "❤️", "🩺", "💊", "🚑", "🧪", "📈"].map((e) => (
+                <button
+                  key={e}
+                  onClick={() => setDraft((d) => d + e)}
+                  style={{ all: "unset", cursor: "pointer", fontSize: 19, padding: "3px 5px" }}
+                >
+                  {e}
+                </button>
+              ))}
+            </div>
+          )}
+
+          <div style={{ display: "flex", gap: isMobile ? 6 : 8, alignItems: "flex-end" }}>
+            <button
+              title="Attach"
+              onClick={() => {
+                setEmojiOpen(false);
+                setAttachOpen((v) => !v);
+              }}
+              style={{
+                all: "unset",
+                cursor: "pointer",
+                width: isMobile ? 36 : 42,
+                height: isMobile ? 36 : 42,
+                borderRadius: isMobile ? 12 : 14,
+                background: attachOpen ? T.blueSoft : "#EDF0F4",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                flexShrink: 0,
+                transform: attachOpen ? "rotate(45deg)" : "none",
+                transition: "transform .2s ease",
+              }}
             >
-              <path d="M12 19 V5 M6 11 L12 5 L18 11" />
-            </svg>
-          </button>
+              <svg width={isMobile ? 15 : 17} height={isMobile ? 15 : 17} viewBox="0 0 24 24" fill="none" stroke={attachOpen ? T.blueDeep : T.sub} strokeWidth="2.4" strokeLinecap="round">
+                <path d="M12 5v14M5 12h14" />
+              </svg>
+            </button>
+
+            <div
+              style={{
+                flex: 1,
+                minWidth: 0,
+                display: "flex",
+                alignItems: "flex-end",
+                gap: 4,
+                background: "#fff",
+                border: "1px solid " + T.line,
+                borderRadius: 22,
+                padding: "0 6px 0 4px",
+              }}
+            >
+              <textarea
+                value={draft}
+                rows={1}
+                onChange={(e) => setDraft(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault();
+                    send();
+                  }
+                }}
+                placeholder="Message"
+                style={{
+                  ...inputStyle,
+                  border: "none",
+                  background: "transparent",
+                  boxShadow: "none",
+                  outline: "none",
+                  resize: "none",
+                  flex: 1,
+                  minWidth: 0,
+                  maxHeight: 120,
+                  height: "auto",
+                  padding: isMobile ? "9px 8px" : "11px 10px",
+                  lineHeight: 1.35,
+                  fontFamily: "inherit",
+                }}
+                onInput={(e) => {
+                  e.currentTarget.style.height = "auto";
+                  e.currentTarget.style.height = Math.min(e.currentTarget.scrollHeight, 120) + "px";
+                }}
+              />
+              <button
+                title="Emoji"
+                onClick={() => {
+                  setAttachOpen(false);
+                  setEmojiOpen((v) => !v);
+                }}
+                style={{
+                  all: "unset",
+                  cursor: "pointer",
+                  fontSize: 17,
+                  lineHeight: 1,
+                  padding: isMobile ? "9px 4px" : "11px 4px",
+                  opacity: emojiOpen ? 1 : 0.7,
+                }}
+              >
+                😊
+              </button>
+            </div>
+
+            {draft.trim() ? (
+              <button
+                onClick={send}
+                title="Send"
+                style={{
+                  all: "unset",
+                  cursor: "pointer",
+                  width: isMobile ? 36 : 42,
+                  height: isMobile ? 36 : 42,
+                  borderRadius: isMobile ? 18 : 21,
+                  background: "linear-gradient(135deg,#2E5CFF,#1E3FCC)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  flexShrink: 0,
+                }}
+              >
+                <svg width={isMobile ? 14 : 16} height={isMobile ? 14 : 16} viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M12 19 V5 M6 11 L12 5 L18 11" />
+                </svg>
+              </button>
+            ) : (
+              <button
+                onClick={() => {
+                  if (recording) {
+                    setRecording(false);
+                    push("🎤 Voice message · 0:06");
+                  } else setRecording(true);
+                }}
+                title={recording ? "Send voice message" : "Record voice message"}
+                style={{
+                  all: "unset",
+                  cursor: "pointer",
+                  width: isMobile ? 36 : 42,
+                  height: isMobile ? 36 : 42,
+                  borderRadius: isMobile ? 18 : 21,
+                  background: recording ? "linear-gradient(135deg,#FF4D4F,#C81E24)" : T.ghost,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  flexShrink: 0,
+                  transition: "background .2s ease",
+                }}
+              >
+                <svg width={isMobile ? 15 : 17} height={isMobile ? 15 : 17} viewBox="0 0 24 24" fill="none" stroke={recording ? "#fff" : T.sub} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="9" y="3" width="6" height="11" rx="3" />
+                  <path d="M5 11a7 7 0 0 0 14 0M12 18v3" />
+                </svg>
+              </button>
+            )}
+          </div>
         </div>
       </div>
     </div>
