@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { T, mono, FACILITIES, inputStyle, useMediaQuery } from "./theme";
 import { Avatar } from "./ui";
 import { useVirtualis } from "@/lib/virtualis/store";
+import { TeamAccess } from "./TeamAccess";
 
 /* ── Account panel — identity, preferences, policies, sign out ──── */
 
@@ -277,6 +278,7 @@ export function Account({ onClose, onSchedule, onSignOut }) {
         <Row label="Patents" hint="Intellectual property notice" onClick={() => setView("patents")} />
       </>
     ),
+    team: <TeamAccess onBack={() => setView("home")} />,
     patents: (
       <>
         <Back title="Patents" />
