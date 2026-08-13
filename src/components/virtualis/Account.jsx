@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { T, mono, FACILITIES, inputStyle, useMediaQuery } from "./theme";
 import { Avatar } from "./ui";
 import { useVirtualis } from "@/lib/virtualis/store";
+import { TeamAccess } from "./TeamAccess";
 
 /* ── Account panel — identity, preferences, policies, sign out ──── */
 
@@ -256,6 +257,11 @@ export function Account({ onClose, onSchedule, onSignOut }) {
         <Row label="Profile" hint="Name, role, department, home facility" onClick={() => setView("profile")} />
         <Row label="Notifications" hint="Acuity alerts and quiet hours" onClick={() => setView("notifications")} />
         <Row
+          label="Team Access"
+          hint="Invite only — provision clinician accounts"
+          onClick={() => setView("team")}
+        />
+        <Row
           label="My Schedule"
           hint="Shifts and coverage"
           onClick={() => {
@@ -272,6 +278,7 @@ export function Account({ onClose, onSchedule, onSignOut }) {
         <Row label="Patents" hint="Intellectual property notice" onClick={() => setView("patents")} />
       </>
     ),
+    team: <TeamAccess onBack={() => setView("home")} />,
     patents: (
       <>
         <Back title="Patents" />

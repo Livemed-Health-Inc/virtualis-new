@@ -8,6 +8,7 @@ import Alis from "./virtualis/Alis";
 import Telehealth from "./virtualis/Telehealth";
 import {
   Login,
+  SetPassword,
   Directory,
   Schedule,
   NewConsult,
@@ -657,6 +658,16 @@ function Workstation() {
 
   const authed = !!session;
 
+  // Invite links return here with an invite/recovery grant; the clinician sets
+  // their own password before the workstation opens.
+  const [needsPassword, setNeedsPassword] = useState(() =>
+    typeof window !== "undefined" && /type=(invite|recovery)/.test(window.location.hash),
+  );
+  useEffect(() => {
+    if (needsPassword && typeof window !== "undefined")
+      window.history.replaceState(null, "", window.location.pathname);
+  }, [needsPassword]);
+
   /* Signing out must leave nothing behind: every overlay and view
      selection resets the moment the session disappears. */
   useEffect(() => {
@@ -939,6 +950,8 @@ function Workstation() {
   let content;
   if (!authed) {
     content = ready ? <Login /> : null;
+  } else if (needsPassword) {
+    content = <SetPassword onDone={() => setNeedsPassword(false)} />;
   } else if (!multiPane) {
     content =
       pushed ||

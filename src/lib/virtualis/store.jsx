@@ -8,6 +8,7 @@ import {
   useState,
 } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { claimInvite } from "@/lib/invites.functions";
 
 /* Live clinical data layer. Everything here is scoped by the signed-in
    provider's credentials — RLS enforces it server-side, so no view can
@@ -94,6 +95,7 @@ export function VirtualisProvider({ children }) {
       resetDone.current = userId;
       await supabase.from("thread_reads").delete().eq("user_id", userId);
       setReads({});
+      claimInvite().catch(() => {});
     }
     const [p, c, ct, sh, th, rd] = await Promise.all([
       supabase.from("profiles").select("*").eq("id", userId).maybeSingle(),
