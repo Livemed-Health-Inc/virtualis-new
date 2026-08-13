@@ -145,7 +145,7 @@ export default function Alis({ compact }) {
             ALIS AI™
           </div>
           <div style={{ fontSize: 13, color: T.sub, marginTop: 2 }}>
-            Clinical AI assistant · Virtualis® patented
+            Clinical AI assistant · Officially patented
           </div>
         </div>
       )}
