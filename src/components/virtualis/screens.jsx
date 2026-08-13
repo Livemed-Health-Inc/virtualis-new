@@ -151,7 +151,7 @@ export function Login() {
               maxWidth: 460,
             }}
           >
-            Powered by patent-allowed AI technology.
+            Powered by patented AI technology.
           </p>
 
           <div
@@ -1864,7 +1864,7 @@ export function RoutingScreen({ payload }) {
           textAlign: "center",
         }}
       >
-        <VMark size={15} mono /> Virtualis® Acuity Routing™ · US patented
+        <VMark size={15} mono /> Virtualis® Acuity Routing™ · Officially patented
       </div>
     </div>
   );
