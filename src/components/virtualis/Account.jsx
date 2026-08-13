@@ -256,6 +256,11 @@ export function Account({ onClose, onSchedule, onSignOut }) {
         <Row label="Profile" hint="Name, role, department, home facility" onClick={() => setView("profile")} />
         <Row label="Notifications" hint="Acuity alerts and quiet hours" onClick={() => setView("notifications")} />
         <Row
+          label="Team Access"
+          hint="Invite only — provision clinician accounts"
+          onClick={() => setView("team")}
+        />
+        <Row
           label="My Schedule"
           hint="Shifts and coverage"
           onClick={() => {
