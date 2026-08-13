@@ -250,19 +250,8 @@ export function Login() {
             placeholder="Password"
             style={inputStyle}
           />
-          <div style={{ textAlign: "right", marginTop: 12 }}>
-            <button
-              onClick={() => setMode(mode === "in" ? "up" : "in")}
-              style={{
-                all: "unset",
-                cursor: "pointer",
-                fontSize: 13.5,
-                color: T.blue,
-                fontWeight: 570,
-              }}
-            >
-              {mode === "in" ? "Create an account" : "I already have an account"}
-            </button>
+          <div style={{ fontSize: 12.5, color: T.sub, marginTop: 12, textAlign: "right" }}>
+            Access is provisioned by your organization.
           </div>
           {err && (
             <div style={{ fontSize: 13, color: T.red, marginTop: 12, fontWeight: 560 }}>{err}</div>
