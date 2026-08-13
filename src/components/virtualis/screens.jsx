@@ -271,7 +271,7 @@ export function Login() {
               boxShadow: "0 8px 20px rgba(41,112,255,.3)",
             }}
           >
-            {busy ? "…" : mode === "in" ? "Sign in" : "Create account"}
+            {busy ? "…" : "Sign in"}
           </button>
 
 
