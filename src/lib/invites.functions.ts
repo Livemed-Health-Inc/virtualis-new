@@ -96,3 +96,18 @@ export const revokeInvite = createServerFn({ method: "POST" })
     }
     return { ok: true as const };
   });
+
+/* Called once per session: flips the caller's own pending invite to accepted. */
+export const claimInvite = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const email = (context.claims as any)?.email as string | undefined;
+    if (!email) return { ok: false as const };
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    await supabaseAdmin
+      .from("invites")
+      .update({ status: "accepted", accepted_at: new Date().toISOString() })
+      .eq("status", "pending")
+      .ilike("email", email);
+    return { ok: true as const };
+  });
