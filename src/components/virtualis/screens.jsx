@@ -30,7 +30,6 @@ export function Login() {
   const reload = useVirtualis()?.reload;
   const [email, setEmail] = useState("");
   const [pw, setPw] = useState("");
-  const [mode, setMode] = useState("in");
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState("");
   const [note, setNote] = useState("");
@@ -39,18 +38,9 @@ export function Login() {
     setErr("");
     setNote("");
     setBusy(true);
-    const fn =
-      mode === "in"
-        ? supabase.auth.signInWithPassword({ email, password: pw })
-        : supabase.auth.signUp({
-            email,
-            password: pw,
-            options: { emailRedirectTo: window.location.origin },
-          });
-    const { data, error } = await fn;
+    const { error } = await supabase.auth.signInWithPassword({ email, password: pw });
     setBusy(false);
     if (error) return setErr(error.message);
-    if (mode === "up" && !data.session) setNote("Check your email to confirm your account.");
   };
 
   const wide = useMediaQuery(
