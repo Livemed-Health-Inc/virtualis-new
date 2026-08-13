@@ -76,11 +76,23 @@ export const revokeInvite = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => z.object({ id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
-    const { error } = await context.supabase
+    const { data: row, error } = await context.supabase
       .from("invites")
       .update({ status: "revoked" })
       .eq("id", data.id)
-      .eq("status", "pending");
+      .eq("status", "pending")
+      .select("email")
+      .maybeSingle();
     if (error) return { ok: false as const, message: error.message };
+
+    // Remove the pending auth account so a stale invite link cannot be used.
+    if (row?.email) {
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+      const { data: list } = await supabaseAdmin.auth.admin.listUsers({ page: 1, perPage: 1000 });
+      const pending = list?.users.find(
+        (u) => u.email?.toLowerCase() === row.email.toLowerCase() && !u.last_sign_in_at,
+      );
+      if (pending) await supabaseAdmin.auth.admin.deleteUser(pending.id);
+    }
     return { ok: true as const };
   });
