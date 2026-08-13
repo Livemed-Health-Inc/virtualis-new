@@ -1871,3 +1871,82 @@ export function RoutingScreen({ payload }) {
 }
 
 export { credentialedFacilities, Wordmark };
+
+/* Invite acceptance — the link from an admin invitation lands here so the
+   clinician sets their own password before entering the workstation. */
+export function SetPassword({ onDone }) {
+  const [pw, setPw] = useState("");
+  const [pw2, setPw2] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState("");
+
+  const save = async () => {
+    setErr("");
+    if (pw.length < 10) return setErr("Use at least 10 characters.");
+    if (pw !== pw2) return setErr("Passwords do not match.");
+    setBusy(true);
+    const { error } = await supabase.auth.updateUser({ password: pw });
+    setBusy(false);
+    if (error) return setErr(error.message);
+    onDone?.();
+  };
+
+  return (
+    <div
+      style={{
+        flex: 1,
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        padding: "40px 20px",
+        overflowY: "auto",
+      }}
+    >
+      <div style={{ width: "100%", maxWidth: 380 }}>
+        <div style={{ fontSize: 22, fontWeight: 720, color: T.ink }}>Set your password</div>
+        <p style={{ fontSize: 13.5, color: T.sub, margin: "6px 0 18px", lineHeight: 1.6 }}>
+          Your Virtualis access has been provisioned. Choose a password to finish activating your
+          account.
+        </p>
+        <input
+          type="password"
+          value={pw}
+          onChange={(e) => setPw(e.target.value)}
+          placeholder="New password"
+          style={inputStyle}
+        />
+        <div style={{ height: 10 }} />
+        <input
+          type="password"
+          value={pw2}
+          onChange={(e) => setPw2(e.target.value)}
+          placeholder="Confirm password"
+          style={inputStyle}
+        />
+        {err && <div style={{ fontSize: 13, color: T.red, marginTop: 12 }}>{err}</div>}
+        <button
+          onClick={save}
+          disabled={busy || !pw || !pw2}
+          style={{
+            all: "unset",
+            boxSizing: "border-box",
+            cursor: busy ? "wait" : "pointer",
+            display: "block",
+            width: "100%",
+            textAlign: "center",
+            marginTop: 18,
+            padding: "14px 0",
+            borderRadius: 16,
+            fontSize: 15,
+            fontWeight: 680,
+            color: "#fff",
+            background: "linear-gradient(135deg,#2E5CFF,#1E3FCC)",
+            opacity: busy || !pw || !pw2 ? 0.55 : 1,
+          }}
+        >
+          {busy ? "Saving…" : "Activate account"}
+        </button>
+      </div>
+    </div>
+  );
+}
