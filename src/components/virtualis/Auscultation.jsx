@@ -16,16 +16,19 @@ const MODES = [
 const fmt = (sec) =>
   `${String(Math.floor(sec / 60)).padStart(2, "0")}:${String(sec % 60).padStart(2, "0")}`;
 
-const glass = {
-  background: "rgba(255,255,255,.05)",
-  border: "1px solid rgba(255,255,255,.1)",
+/* Standard Virtualis workspace card: white surface, hairline border. */
+const cardBox = {
+  background: "#fff",
+  border: "1px solid " + T.line,
   borderRadius: 18,
+  boxShadow: "0 2px 6px rgba(16,24,40,.04)",
 };
 
 function Chip({ on, onClick, children, wide }) {
   return (
     <button
       onClick={onClick}
+      aria-pressed={on}
       style={{
         all: "unset",
         cursor: "pointer",
@@ -41,9 +44,9 @@ function Chip({ on, onClick, children, wide }) {
         borderRadius: 14,
         fontSize: 13,
         fontWeight: 640,
-        color: on ? "#fff" : "#AFC6FF",
-        background: on ? T.blue : "rgba(255,255,255,.06)",
-        border: `1px solid ${on ? T.blue : "rgba(255,255,255,.12)"}`,
+        color: on ? "#fff" : T.ink,
+        background: on ? T.blue : "#fff",
+        border: `1px solid ${on ? T.blue : T.line}`,
       }}
     >
       {children}
@@ -59,11 +62,11 @@ function Slider({ label, value, min, max, step, onChange, suffix }) {
           display: "flex",
           justifyContent: "space-between",
           fontSize: 12.5,
-          color: "#AFC6FF",
+          color: T.sub,
           marginBottom: 6,
         }}
       >
-        <span style={{ fontWeight: 620 }}>{label}</span>
+        <span style={{ fontWeight: 620, color: T.ink }}>{label}</span>
         <span style={{ fontFamily: mono }}>{suffix}</span>
       </div>
       <input
@@ -94,16 +97,19 @@ function Toggle({ on, onChange, label }) {
         gap: 12,
         minHeight: 44,
         padding: "0 14px",
-        ...glass,
+        boxSizing: "border-box",
+        borderRadius: 14,
+        border: "1px solid " + T.line,
+        background: "#fff",
       }}
     >
-      <span style={{ fontSize: 13, fontWeight: 620, color: "#DCE6FF" }}>{label}</span>
+      <span style={{ fontSize: 13, fontWeight: 620, color: T.ink }}>{label}</span>
       <span
         style={{
           width: 40,
           height: 23,
           borderRadius: 12,
-          background: on ? T.blue : "rgba(255,255,255,.18)",
+          background: on ? T.blue : "#D7DCE5",
           position: "relative",
           transition: "background .18s",
           flexShrink: 0,
@@ -177,6 +183,7 @@ export default function Auscultation({ t, threads = [], onClose }) {
   }, [s.lastClip, s.mode, patient]);
 
   const gainPct = Math.round(((s.gain - 1) / 119) * 100);
+  const simulated = s.hostKind === "simulator";
   const live = s.connected ? (s.capturing ? "STREAMING" : "PAUSED") : s.status.toUpperCase();
   const hue = patient ? FACILITIES[patient.facility]?.hue || T.blue : T.blue;
 
@@ -185,15 +192,15 @@ export default function Auscultation({ t, threads = [], onClose }) {
       style={{
         position: "absolute",
         inset: 0,
-        zIndex: 75,
-        background: "#080C16",
-        color: "#fff",
+        zIndex: 79,
+        background: T.bg,
+        color: T.ink,
         display: "flex",
         flexDirection: "column",
         animation: "fadeIn .25s ease",
       }}
     >
-      {/* header */}
+      {/* header — navy for clinical legibility of the live state */}
       <div
         style={{
           display: "flex",
@@ -201,7 +208,8 @@ export default function Auscultation({ t, threads = [], onClose }) {
           gap: 10,
           padding: "12px 14px",
           flexWrap: "wrap",
-          borderBottom: "1px solid rgba(255,255,255,.07)",
+          background: "linear-gradient(180deg,#0E1A3E,#12275E)",
+          color: "#fff",
         }}
       >
         <button
@@ -213,7 +221,7 @@ export default function Auscultation({ t, threads = [], onClose }) {
             width: 36,
             height: 36,
             borderRadius: 18,
-            background: "rgba(255,255,255,.08)",
+            background: "rgba(255,255,255,.12)",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
@@ -232,12 +240,13 @@ export default function Auscultation({ t, threads = [], onClose }) {
               fontFamily: mono,
               fontSize: 10,
               letterSpacing: 1.4,
-              color: s.capturing ? "#6FE3B0" : "#8DA2CF",
+              color: s.capturing ? "#6FE3B0" : "#AFC6FF",
               marginTop: 2,
             }}
           >
             {live}
             {s.capturing ? ` · ${fmt(s.elapsed)}` : ""}
+            {simulated ? " · TEST ONLY (SIMULATED)" : ""}
           </div>
         </div>
         {patient && (
@@ -253,7 +262,7 @@ export default function Auscultation({ t, threads = [], onClose }) {
           style={{
             marginLeft: "auto",
             fontSize: 12,
-            color: "#8DA2CF",
+            color: "#AFC6FF",
             display: "flex",
             gap: 10,
             alignItems: "center",
@@ -283,17 +292,17 @@ export default function Auscultation({ t, threads = [], onClose }) {
           gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
           alignContent: "start",
           width: "100%",
-          maxWidth: 980,
+          maxWidth: 1080,
           margin: "0 auto",
         }}
       >
         {/* patient picker when no consult is open */}
         {!t && threads.length > 0 && (
-          <div style={{ ...glass, padding: 12, gridColumn: "1 / -1" }}>
-            <div style={{ fontSize: 12.5, color: "#AFC6FF", marginBottom: 8 }}>
+          <div style={{ ...cardBox, padding: 12, gridColumn: "1 / -1" }}>
+            <div style={{ fontSize: 12.5, color: T.sub, marginBottom: 8 }}>
               Attach this exam to a patient
             </div>
-            <div style={{ display: "flex", gap: 8, overflowX: "auto", paddingBottom: 2 }}>
+            <div className="vx-hscroll" style={{ display: "flex", gap: 8, paddingBottom: 2 }}>
               <Chip on={!picked} onClick={() => setPicked(null)}>
                 Unassigned
               </Chip>
@@ -308,7 +317,7 @@ export default function Auscultation({ t, threads = [], onClose }) {
 
         {/* stage */}
         <div style={{ display: "grid", gap: 12, alignContent: "start" }}>
-          <div style={{ ...glass, padding: 12 }}>
+          <div style={{ ...cardBox, padding: 12 }}>
             <div
               style={{
                 display: "flex",
@@ -317,15 +326,17 @@ export default function Auscultation({ t, threads = [], onClose }) {
                 marginBottom: 8,
               }}
             >
-              <span style={{ fontSize: 13.5, fontWeight: 660 }}>Live waveform</span>
-              <span style={{ fontSize: 12, color: "#8DA2CF" }}>{MODE_FILTERS[s.mode].hint}</span>
+              <span style={{ fontSize: 13.5, fontWeight: 660 }}>
+                {simulated ? "Simulated waveform" : "Live waveform"}
+              </span>
+              <span style={{ fontSize: 12, color: T.sub }}>{MODE_FILTERS[s.mode].hint}</span>
             </div>
             <div
               style={{
                 height: 170,
                 borderRadius: 14,
                 background: "linear-gradient(180deg,#0C1428,#0A101F)",
-                border: "1px solid rgba(255,255,255,.07)",
+                border: "1px solid rgba(16,24,40,.12)",
                 overflow: "hidden",
               }}
             >
@@ -336,7 +347,7 @@ export default function Auscultation({ t, threads = [], onClose }) {
                 height: 54,
                 marginTop: 8,
                 borderRadius: 12,
-                background: "rgba(255,255,255,.03)",
+                background: "#0A101F",
                 overflow: "hidden",
               }}
             >
@@ -349,10 +360,11 @@ export default function Auscultation({ t, threads = [], onClose }) {
                 display: "flex",
                 alignItems: "center",
                 gap: 10,
-                background: "rgba(46,92,214,.16)",
-                border: "1px solid rgba(143,182,255,.24)",
+                background: T.blueSoft,
+                border: "1px solid #D6E4FF",
                 borderRadius: 14,
                 padding: "10px 13px",
+                flexWrap: "wrap",
               }}
             >
               <span
@@ -369,9 +381,11 @@ export default function Auscultation({ t, threads = [], onClose }) {
               <span style={{ fontSize: 19, fontWeight: 720, fontFamily: mono }}>
                 {s.liveBpm ?? s.heartRate ?? "--"}
               </span>
-              <span style={{ fontSize: 12.5, color: "#AFC6FF" }}>BPM · live beat detection</span>
+              <span style={{ fontSize: 12.5, color: T.sub }}>
+                BPM · beat detection {simulated ? "(simulated signal)" : ""}
+              </span>
               {s.pressWarning && (
-                <span style={{ marginLeft: "auto", fontSize: 12, color: "#FFC46B" }}>
+                <span style={{ marginLeft: "auto", fontSize: 12, color: "#B54708", fontWeight: 620 }}>
                   Ease pressure
                 </span>
               )}
@@ -389,19 +403,31 @@ export default function Auscultation({ t, threads = [], onClose }) {
 
         {/* controls */}
         <div style={{ display: "grid", gap: 12, alignContent: "start" }}>
-          <div style={{ ...glass, padding: 12, display: "grid", gap: 10 }}>
+          <div style={{ ...cardBox, padding: 12, display: "grid", gap: 10 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
               <span style={{ fontSize: 13.5, fontWeight: 660, flex: 1 }}>
                 Mintti Smartho{s.version ? ` · ${s.version}` : ""}
               </span>
               <span
                 style={{
-                  width: 8,
-                  height: 8,
-                  borderRadius: 4,
-                  background: s.connected ? "#12B76A" : "#8DA2CF",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 6,
+                  fontSize: 11.5,
+                  fontWeight: 640,
+                  color: s.connected ? "#05603A" : T.sub,
                 }}
-              />
+              >
+                <span
+                  style={{
+                    width: 8,
+                    height: 8,
+                    borderRadius: 4,
+                    background: s.connected ? T.green : T.faint,
+                  }}
+                />
+                {s.connected ? (simulated ? "Test only" : "Connected") : "Not connected"}
+              </span>
             </div>
             <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
               {s.connected ? (
@@ -426,7 +452,7 @@ export default function Auscultation({ t, threads = [], onClose }) {
               )}
             </div>
             {s.devices.length > 1 && (
-              <div style={{ display: "flex", gap: 8, overflowX: "auto" }}>
+              <div className="vx-hscroll" style={{ display: "flex", gap: 8 }}>
                 {s.devices.map((d) => (
                   <Chip key={d.uuid} on={s.deviceId === d.uuid} onClick={() => s.connect(d.uuid)}>
                     {d.name || d.uuid} · {d.rssi}dBm
@@ -442,15 +468,15 @@ export default function Auscultation({ t, threads = [], onClose }) {
               ))}
             </div>
             {!s.webBleSupported && s.hostKind === "webble" && (
-              <div style={{ fontSize: 12.5, color: "#FFC46B" }}>
+              <div style={{ fontSize: 12.5, color: "#B54708" }}>
                 This browser can’t use Bluetooth. Use Chrome or Edge, the iOS app, or the simulator.
               </div>
             )}
-            {s.error && <div style={{ fontSize: 12.5, color: "#FF8C82" }}>{s.error}</div>}
-            {s.diag && <div style={{ fontSize: 12, color: "#8DA2CF" }}>{s.diag}</div>}
+            {s.error && <div style={{ fontSize: 12.5, color: T.red }}>{s.error}</div>}
+            {s.diag && <div style={{ fontSize: 12, color: T.sub }}>{s.diag}</div>}
           </div>
 
-          <div style={{ ...glass, padding: 12, display: "grid", gap: 12 }}>
+          <div style={{ ...cardBox, padding: 12, display: "grid", gap: 12 }}>
             <Slider
               label="Amplification"
               value={s.gain}
@@ -509,7 +535,7 @@ export default function Auscultation({ t, threads = [], onClose }) {
             </Chip>
           </div>
 
-          <div style={{ ...glass, padding: 12, display: "grid", gap: 10 }}>
+          <div style={{ ...cardBox, padding: 12, display: "grid", gap: 10 }}>
             <Chip
               wide
               on={s.recording}
@@ -527,21 +553,21 @@ export default function Auscultation({ t, threads = [], onClose }) {
               />
               {s.recording ? `Stop recording · ${fmt(s.elapsed)}` : "Record auscultation"}
             </Chip>
-            <div style={{ fontSize: 11.5, color: "#8DA2CF" }}>
+            <div style={{ fontSize: 11.5, color: T.sub }}>
               Recordings stay on this device only. Nothing is uploaded to the chart.
             </div>
             {clips.map((c) => (
               <div
                 key={c.url}
                 style={{
-                  background: "rgba(255,255,255,.04)",
-                  border: "1px solid rgba(255,255,255,.09)",
+                  background: "#FBFCFE",
+                  border: "1px solid " + T.line,
                   borderRadius: 14,
                   padding: 10,
                 }}
               >
                 <div style={{ fontSize: 12.5, fontWeight: 640 }}>{c.label}</div>
-                <div style={{ fontSize: 11.5, color: "#8DA2CF", marginTop: 2 }}>
+                <div style={{ fontSize: 11.5, color: T.sub, marginTop: 2 }}>
                   {c.mode} · {c.seconds}s · {c.at}
                 </div>
                 {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
@@ -549,7 +575,7 @@ export default function Auscultation({ t, threads = [], onClose }) {
                 <a
                   href={c.url}
                   download={c.file}
-                  style={{ fontSize: 12.5, color: "#8FB6FF", fontWeight: 620 }}
+                  style={{ fontSize: 12.5, color: T.blue, fontWeight: 620 }}
                 >
                   Download WAV
                 </a>

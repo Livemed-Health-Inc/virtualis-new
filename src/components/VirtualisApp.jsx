@@ -18,6 +18,12 @@ import {
 } from "./virtualis/screens";
 import { Account } from "./virtualis/Account";
 import NewMessage from "./virtualis/NewMessage";
+import Devices from "./virtualis/devices/Devices";
+import SessionWorkspace from "./virtualis/devices/SessionWorkspace";
+import { useDeviceFleet } from "./virtualis/devices/useDeviceFleet";
+import { hellocareConfig, buildLaunchUrl, newNonce, hellocareTrust } from "@/lib/telehealth/hellocare";
+import { minttiTrust } from "@/lib/telehealth/status";
+import { hasNativeHost } from "@/lib/stethoscope/mintti";
 
 /* ═══ VIRTUALIS® · intelligent medicine ════════════════════════════
    Responsive clinical workstation. Mobile: tab shell with push
@@ -100,12 +106,49 @@ const TABS = [
       </svg>
     ),
   },
+  {
+    k: "devices",
+    label: "Devices",
+    icon: (c) => (
+      <svg
+        width="22"
+        height="22"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke={c}
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <rect x="3" y="4.5" width="14" height="10" rx="2.5" />
+        <path d="M10 14.5V21M6.5 21h7M17 8h3.5v9H17" />
+      </svg>
+    ),
+  },
+  {
+    k: "more",
+    label: "More",
+    icon: (c) => (
+      <svg width="22" height="22" viewBox="0 0 24 24" fill={c}>
+        <circle cx="5" cy="12" r="1.9" />
+        <circle cx="12" cy="12" r="1.9" />
+        <circle cx="19" cy="12" r="1.9" />
+      </svg>
+    ),
+  },
 ];
 
-function TabBar({ tab, setTab, unread }) {
+const byKey = (k) => TABS.find((t) => t.k === k);
+
+/* Provider-like roles get the dedicated Devices tab; anything unrecognised
+   keeps access so the default "Virtual Provider" is never locked out. */
+const NON_PROVIDER = /nurse|rn\b|tech|admin|coordinator|clerk/i;
+export const canUseDevices = (role) => !NON_PROVIDER.test(role || "");
+
+function TabBar({ tab, setTab, unread, items, onMore }) {
   const Item = ({ t: item }) => (
     <button
-      onClick={() => setTab(item.k)}
+      onClick={() => (item.k === "more" ? onMore() : setTab(item.k))}
       style={{
         all: "unset",
         boxSizing: "border-box",
@@ -171,18 +214,109 @@ function TabBar({ tab, setTab, unread }) {
         boxSizing: "content-box",
       }}
     >
-      <Item t={TABS[0]} />
-      <Item t={TABS[1]} />
+      <Item t={items[0]} />
+      <Item t={items[1]} />
       {/* Space for the floating V trigger, which overlays this slot. */}
       <span style={{ width: 54, margin: "0 8px", flexShrink: 0 }} aria-hidden />
 
-      <Item t={TABS[2]} />
-      <Item t={TABS[3]} />
+      <Item t={items[2]} />
+      <Item t={items[3]} />
     </div>
   );
 }
 
-function Rail({ tab, setTab, unread, onNew, onNewMessage, onProfile, wide, me }) {
+/* Mobile "More": keeps Team, Schedule and Account one tap away while the
+   bottom bar surfaces Devices. */
+function MoreSheet({ onClose, onPick, onProfile, showDevices }) {
+  const rows = [
+    { k: "team", label: "Team directory" },
+    { k: "schedule", label: "Schedule" },
+    ...(showDevices ? [{ k: "devices", label: "Devices" }] : []),
+  ];
+  return (
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-label="More"
+      onClick={onClose}
+      style={{
+        position: "absolute",
+        inset: 0,
+        zIndex: 84,
+        background: "rgba(16,24,40,.35)",
+        display: "flex",
+        alignItems: "flex-end",
+      }}
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        style={{
+          background: "#fff",
+          width: "100%",
+          borderRadius: "22px 22px 0 0",
+          padding: "14px 14px calc(18px + env(safe-area-inset-bottom, 0px))",
+          display: "grid",
+          gap: 8,
+          animation: "rise .25s ease",
+        }}
+      >
+        {rows.map((r) => (
+          <button
+            key={r.k}
+            onClick={() => {
+              onPick(r.k);
+              onClose();
+            }}
+            style={{
+              all: "unset",
+              cursor: "pointer",
+              padding: "13px 14px",
+              borderRadius: 14,
+              border: "1px solid " + T.line,
+              fontSize: 14.5,
+              fontWeight: 620,
+            }}
+          >
+            {r.label}
+          </button>
+        ))}
+        <button
+          onClick={() => {
+            onProfile();
+            onClose();
+          }}
+          style={{
+            all: "unset",
+            cursor: "pointer",
+            padding: "13px 14px",
+            borderRadius: 14,
+            border: "1px solid " + T.line,
+            fontSize: 14.5,
+            fontWeight: 620,
+          }}
+        >
+          Account
+        </button>
+        <button
+          onClick={onClose}
+          style={{
+            all: "unset",
+            cursor: "pointer",
+            textAlign: "center",
+            padding: "12px 0",
+            fontSize: 13.5,
+            fontWeight: 620,
+            color: T.sub,
+          }}
+        >
+          Close
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function Rail({ tab, setTab, unread, onNew, onNewMessage, onProfile, wide, me, items }) {
   return (
     <div
       style={{
@@ -213,7 +347,7 @@ function Rail({ tab, setTab, unread, onNew, onNewMessage, onProfile, wide, me })
           </span>
         )}
       </div>
-      {TABS.map((item) => {
+      {items.map((item) => {
         const on = tab === item.k;
         return (
           <button
@@ -677,6 +811,19 @@ function Workstation() {
   const [creds, setCreds] = useState(false);
   const [toast, setToast] = useState(null);
   const [listCollapsed, setListCollapsed] = useState(false);
+  const [more, setMore] = useState(false);
+
+  const showDevices = canUseDevices(me?.role);
+  const railTabs = ["inbox", "team", ...(showDevices ? ["devices"] : []), "alis", "schedule"].map(
+    byKey,
+  );
+  const mobileTabs = [
+    byKey("inbox"),
+    showDevices ? byKey("devices") : byKey("team"),
+    byKey("alis"),
+    byKey("more"),
+  ];
+  const fleet = useDeviceFleet(scope);
 
   const authed = !!session;
 
@@ -976,6 +1123,40 @@ function Workstation() {
     ? visible.filter((t) => t.id !== activeThread.id && patientKey(t) === patientKey(activeThread))
     : [];
 
+  /* Devices workflow. Every transition below is local prototype state —
+     nothing is written to the backend by preparing or requesting a cart. */
+  const beamIn = (cart) => {
+    const { configured } = hellocareConfig();
+    const url = configured
+      ? buildLaunchUrl({ requestId: `req-${cart.id}`, deviceId: cart.id, nonce: newNonce() })
+      : null;
+    if (url) window.open(url, "_blank", "noopener");
+    fleet.beamIn(cart, url ? "live" : "preview");
+    flash(url ? `Session started · ${cart.name}` : `Preview session · ${cart.name}`);
+  };
+  const nurseAction = (action, cart) => {
+    if (action === "prepare") {
+      fleet.prepare(cart.id);
+      flash(`${cart.name} · preparing`);
+    } else if (action === "ready") {
+      fleet.markReady(cart.id);
+      flash(`${cart.name} · marked ready by nurse`);
+    } else {
+      fleet.requestClinician(cart.id, cart.acuity || "urgent");
+      flash(`${cart.name} · clinician requested (prototype)`);
+    }
+  };
+  const devicesPane = (
+    <Devices
+      carts={fleet.carts}
+      scope={scope}
+      embedded={multiPane}
+      onBeam={beamIn}
+      onNurse={nurseAction}
+      onMessage={() => setComposing(true)}
+    />
+  );
+
   let content;
   if (!authed) {
     content = ready ? <Login /> : null;
@@ -1002,10 +1183,17 @@ function Workstation() {
               <Directory onChat={openFromStaff} facilityScope={scope} staff={staff} />
             )}
             {tab === "alis" && <Alis />}
+            {tab === "devices" && showDevices && devicesPane}
             {tab === "schedule" && <Schedule facilityScope={scope} shifts={shifts} />}
           </div>
           {vfab(false)}
-          <TabBar tab={tab} setTab={setTab} unread={unread} />
+          <TabBar
+            tab={tab}
+            setTab={setTab}
+            unread={unread}
+            items={mobileTabs}
+            onMore={() => setMore(true)}
+          />
         </>
       ));
   } else {
@@ -1032,6 +1220,8 @@ function Workstation() {
       <Directory onChat={openFromStaff} facilityScope={scope} staff={staff} />
     ) : tab === "alis" ? (
       <Alis />
+    ) : tab === "devices" && showDevices ? (
+      devicesPane
     ) : (
       <Schedule facilityScope={scope} shifts={shifts} />
     );
@@ -1042,6 +1232,7 @@ function Workstation() {
           me={me}
           tab={tab}
           setTab={setTab}
+          items={railTabs}
           unread={unread}
           wide={isDesktop}
           onNew={() => setConsulting(true)}
@@ -1164,6 +1355,30 @@ function Workstation() {
             setVideoId(null);
             flash("Encounter note saved to " + (FACILITIES[videoThread.facility]?.emr || "chart"));
           }}
+        />
+      )}
+      {authed && fleet.session && (
+        <SessionWorkspace
+          session={fleet.session}
+          video={hellocareTrust(fleet.session.mode === "live")}
+          mintti={minttiTrust({
+            streaming: false,
+            nativeHost: typeof window !== "undefined" && hasNativeHost(),
+            webBluetooth: typeof navigator !== "undefined" && !!navigator.bluetooth,
+          })}
+          onAuscultate={() => setAuscultId(null)}
+          onEnd={() => {
+            fleet.endSession();
+            flash("Session ended · cart available");
+          }}
+        />
+      )}
+      {authed && more && (
+        <MoreSheet
+          showDevices={showDevices}
+          onClose={() => setMore(false)}
+          onPick={setTab}
+          onProfile={() => setCreds(true)}
         />
       )}
       {authed && auscultId !== undefined && (
