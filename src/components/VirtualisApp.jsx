@@ -341,7 +341,7 @@ function Rail({ tab, setTab, unread, onNew, onNewMessage, onProfile, wide, me, i
           </span>
         )}
       </div>
-      {TABS.map((item) => {
+      {items.map((item) => {
         const on = tab === item.k;
         return (
           <button
