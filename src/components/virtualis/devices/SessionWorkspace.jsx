@@ -14,21 +14,26 @@ export default function SessionWorkspace({ session, video, mintti, onEnd, onAusc
   const preview = mode !== "live";
 
   return (
-    <div style={{ position: "absolute", inset: 0, zIndex: 78 }}>
-      <Telehealth t={t} onEnd={onEnd} />
+    <div
+      style={{
+        position: "absolute",
+        inset: 0,
+        zIndex: 78,
+        display: "flex",
+        flexDirection: "column",
+        background: "#0A0F1E",
+      }}
+    >
       <div
         style={{
-          position: "absolute",
-          top: "calc(8px + env(safe-area-inset-top, 0px))",
-          left: "50%",
-          transform: "translateX(-50%)",
+          flexShrink: 0,
           zIndex: 82,
           display: "flex",
           alignItems: "center",
           gap: 8,
           flexWrap: "wrap",
           justifyContent: "center",
-          maxWidth: "94%",
+          padding: "calc(8px + env(safe-area-inset-top, 0px)) 12px 8px",
         }}
       >
         <span
