@@ -1157,6 +1157,7 @@ function Workstation() {
       carts={fleet.carts}
       scope={scope}
       embedded={multiPane}
+      nurse={nurseMode}
       onBeam={beamIn}
       onNurse={nurseAction}
       onMessage={() => setComposing(true)}
