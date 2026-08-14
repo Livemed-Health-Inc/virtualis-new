@@ -136,7 +136,7 @@ function Toggle({ on, onChange, label }) {
    in useStethoscope; this screen is the Virtualis-styled surface for it. */
 export default function Auscultation({ t, threads = [], onClose }) {
   const s = useStethoscope();
-  const { devices, deviceId, connect, connected, capturing, startCapture } = s;
+  const { devices, deviceId, connect, connected, capturing, startCapture, autoPair } = s;
   const [picked, setPicked] = useState(t?.id ?? null);
   const [advanced, setAdvanced] = useState(false);
   const [clips, setClips] = useState([]);
@@ -146,6 +146,12 @@ export default function Auscultation({ t, threads = [], onClose }) {
     () => t ?? threads.find((x) => x.id === picked) ?? null,
     [t, threads, picked],
   );
+
+  // Silently re-attach to a stethoscope this browser was already paired with.
+  // First-time Web Bluetooth permission still requires the explicit Pair action.
+  useEffect(() => {
+    void autoPair();
+  }, [autoPair]);
 
   // Auto-connect to the first discovered device, then start streaming.
   useEffect(() => {

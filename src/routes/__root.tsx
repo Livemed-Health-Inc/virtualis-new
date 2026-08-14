@@ -11,6 +11,7 @@ import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
+import { StethoscopeProvider } from "../lib/stethoscope/provider";
 
 function NotFoundComponent() {
   return (
@@ -137,8 +138,12 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-      <Outlet />
+      {/* One stethoscope session for the whole app (both / and /device), so
+          closing the auscultation overlay never drops the BLE link. */}
+      <StethoscopeProvider>
+        {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
+        <Outlet />
+      </StethoscopeProvider>
     </QueryClientProvider>
   );
 }

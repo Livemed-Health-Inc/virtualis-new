@@ -409,7 +409,7 @@ export class StethoscopeClient {
     });
   }
 
-  /** Swap between the iOS bridge, direct Web Bluetooth and the demo simulator. */
+  /** Swap between the native (iOS/Android) bridge, direct Web Bluetooth and the TEST ONLY simulator. */
   setTransport(kind: TransportKind) {
     this.transport?.dispose();
     this.transport = null;
