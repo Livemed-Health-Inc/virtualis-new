@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { T, FACILITIES, ACUITY, inputStyle } from "../theme";
 import { Glyph } from "../ui";
 import { SPECIALTIES } from "../data";
@@ -283,12 +283,15 @@ export default function DeviceStation() {
             {cart.name}
           </h1>
           <div style={{ fontSize: 12.5, color: T.sub }}>
-            {FACILITIES[cart.facility]?.name} · {cart.unit} · shared device, no sign-in
+            {cart.facilityName || FACILITIES[cart.facility]?.name} · {cart.unit} ·{" "}
+            {device ? "provisioned device, no sign-in" : "demo mode — not for clinical use"}
           </div>
         </div>
-        <button style={{ ...btn(false), minHeight: 40 }} onClick={() => setCartId(null)}>
-          Change cart
-        </button>
+        {!device && (
+          <button style={{ ...btn(false), minHeight: 40 }} onClick={() => setCartId(null)}>
+            Change cart
+          </button>
+        )}
       </header>
 
       <Card title="Patient context" hint="Optional, but it makes the consult far faster to answer.">
