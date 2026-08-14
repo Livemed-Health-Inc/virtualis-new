@@ -152,6 +152,7 @@ export default function Devices({ carts, scope, onBeam, onNurse, onMessage, embe
                   cart={c}
                   video={video}
                   mintti={mintti}
+                  nurse={nurse}
                   onPreflight={setFlight}
                   onBeam={onBeam}
                   onNurse={onNurse}
