@@ -281,6 +281,9 @@ export default function Auscultation({ t, threads = [], onClose }) {
           gap: 12,
           gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
           alignContent: "start",
+          width: "100%",
+          maxWidth: 980,
+          margin: "0 auto",
         }}
       >
         {/* patient picker when no consult is open */}
