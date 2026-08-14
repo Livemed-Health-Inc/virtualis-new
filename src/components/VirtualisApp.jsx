@@ -140,11 +140,10 @@ const TABS = [
 
 const byKey = (k) => TABS.find((t) => t.k === k);
 
-/* Providers and bedside nurses both get the Devices tab; nurses see the
-   on-site cart-setup actions instead of clinician beam-in. */
-const NON_DEVICE = /tech|coordinator|clerk/i;
-export const isNurseRole = (role) => /nurse|\brn\b/i.test(role || "");
-export const canUseDevices = (role) => isNurseRole(role) || !NON_DEVICE.test(role || "");
+/* Devices is the clinician fleet view. Bedside staff use the shared cart
+   station at /device, which has no sign-in. */
+const NON_DEVICE = /nurse|\brn\b|tech|coordinator|clerk/i;
+export const canUseDevices = (role) => !NON_DEVICE.test(role || "");
 
 function TabBar({ tab, setTab, unread, items, onMore }) {
   const Item = ({ t: item }) => (
@@ -814,7 +813,6 @@ function Workstation() {
   const [listCollapsed, setListCollapsed] = useState(false);
   const [more, setMore] = useState(false);
 
-  const nurseMode = isNurseRole(me?.role);
   const showDevices = canUseDevices(me?.role);
   const railTabs = ["inbox", "team", ...(showDevices ? ["devices"] : []), "alis", "schedule"].map(
     byKey,
@@ -1157,7 +1155,6 @@ function Workstation() {
       carts={fleet.carts}
       scope={scope}
       embedded={multiPane}
-      nurse={nurseMode}
       onBeam={beamIn}
       onNurse={nurseAction}
       onMessage={() => setComposing(true)}
