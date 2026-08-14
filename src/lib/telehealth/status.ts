@@ -3,13 +3,15 @@
 
 export type TrustLevel = "live" | "available" | "setup" | "test";
 
-export const TRUST: Record<TrustLevel, { label: string; tone: string; soft: string; mark: string }> =
-  {
-    live: { label: "Live", tone: "#12B76A", soft: "#E7F8F0", mark: "●" },
-    available: { label: "Available", tone: "#2E5CFF", soft: "#EFF4FF", mark: "◆" },
-    setup: { label: "Needs setup", tone: "#F79009", soft: "#FEF3E2", mark: "▲" },
-    test: { label: "Test only", tone: "#667085", soft: "#F1F2F4", mark: "◇" },
-  };
+export const TRUST: Record<
+  TrustLevel,
+  { label: string; tone: string; soft: string; mark: string }
+> = {
+  live: { label: "Live", tone: "#12B76A", soft: "#E7F8F0", mark: "●" },
+  available: { label: "Available", tone: "#2E5CFF", soft: "#EFF4FF", mark: "◆" },
+  setup: { label: "Needs setup", tone: "#F79009", soft: "#FEF3E2", mark: "▲" },
+  test: { label: "Test only", tone: "#667085", soft: "#F1F2F4", mark: "◇" },
+};
 
 export const CART_STATES = {
   available: { label: "Available", tone: "#12B76A" },
