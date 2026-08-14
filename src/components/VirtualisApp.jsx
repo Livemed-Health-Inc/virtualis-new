@@ -18,6 +18,12 @@ import {
 } from "./virtualis/screens";
 import { Account } from "./virtualis/Account";
 import NewMessage from "./virtualis/NewMessage";
+import Devices from "./virtualis/devices/Devices";
+import SessionWorkspace from "./virtualis/devices/SessionWorkspace";
+import { useDeviceFleet } from "./virtualis/devices/useDeviceFleet";
+import { hellocareConfig, buildLaunchUrl, newNonce, hellocareTrust } from "@/lib/telehealth/hellocare";
+import { minttiTrust } from "@/lib/telehealth/status";
+import { hasNativeHost } from "@/lib/stethoscope/mintti";
 
 /* ═══ VIRTUALIS® · intelligent medicine ════════════════════════════
    Responsive clinical workstation. Mobile: tab shell with push
