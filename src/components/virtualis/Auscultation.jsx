@@ -130,6 +130,7 @@ function Toggle({ on, onChange, label }) {
    in useStethoscope; this screen is the Virtualis-styled surface for it. */
 export default function Auscultation({ t, threads = [], onClose }) {
   const s = useStethoscope();
+  const { devices, deviceId, connect, connected, capturing, startCapture } = s;
   const [picked, setPicked] = useState(t?.id ?? null);
   const [advanced, setAdvanced] = useState(false);
   const [clips, setClips] = useState([]);
@@ -142,12 +143,12 @@ export default function Auscultation({ t, threads = [], onClose }) {
 
   // Auto-connect to the first discovered device, then start streaming.
   useEffect(() => {
-    if (!s.deviceId && s.devices.length > 0) void s.connect(s.devices[0].uuid);
-  }, [s.devices, s.deviceId, s]);
+    if (!deviceId && devices.length > 0) void connect(devices[0].uuid);
+  }, [devices, deviceId, connect]);
 
   useEffect(() => {
-    if (s.connected && !s.capturing) void s.startCapture();
-  }, [s.connected, s.capturing, s]);
+    if (connected && !capturing) void startCapture();
+  }, [connected, capturing, startCapture]);
 
   useEffect(() => {
     const onKey = (e) => e.key === "Escape" && onClose();
