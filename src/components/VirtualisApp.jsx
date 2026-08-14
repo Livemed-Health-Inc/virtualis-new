@@ -1357,6 +1357,30 @@ function Workstation() {
           }}
         />
       )}
+      {authed && fleet.session && (
+        <SessionWorkspace
+          session={fleet.session}
+          video={hellocareTrust(fleet.session.mode === "live")}
+          mintti={minttiTrust({
+            streaming: false,
+            nativeHost: typeof window !== "undefined" && hasNativeHost(),
+            webBluetooth: typeof navigator !== "undefined" && !!navigator.bluetooth,
+          })}
+          onAuscultate={() => setAuscultId(null)}
+          onEnd={() => {
+            fleet.endSession();
+            flash("Session ended · cart available");
+          }}
+        />
+      )}
+      {authed && more && (
+        <MoreSheet
+          showDevices={showDevices}
+          onClose={() => setMore(false)}
+          onPick={setTab}
+          onProfile={() => setCreds(true)}
+        />
+      )}
       {authed && auscultId !== undefined && (
         <Auscultation
           t={visible.find((t) => t.id === auscultId) || null}
