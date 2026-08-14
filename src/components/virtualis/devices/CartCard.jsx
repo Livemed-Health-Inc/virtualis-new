@@ -57,7 +57,16 @@ function Action({ label, primary, onClick, disabled }) {
   );
 }
 
-export default function CartCard({ cart, video, mintti, onPreflight, onBeam, onNurse, onMessage }) {
+export default function CartCard({
+  cart,
+  video,
+  mintti,
+  nurse,
+  onPreflight,
+  onBeam,
+  onNurse,
+  onMessage,
+}) {
   const st = CART_STATES[cart.state];
   const hue = FACILITIES[cart.facility]?.hue || T.blue;
   const m = MINTTI_FIELD[cart.mintti];
