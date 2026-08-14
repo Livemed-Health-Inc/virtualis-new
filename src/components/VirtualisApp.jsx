@@ -23,7 +23,7 @@ import SessionWorkspace from "./virtualis/devices/SessionWorkspace";
 import { useDeviceFleet } from "./virtualis/devices/useDeviceFleet";
 import { hellocareConfig, buildLaunchUrl, newNonce, hellocareTrust } from "@/lib/telehealth/hellocare";
 import { minttiTrust } from "@/lib/telehealth/status";
-import { hasNativeHost } from "@/lib/stethoscope/mintti";
+import { hasNativeHost } from "@/sdk/stethoscope";
 
 /* ═══ VIRTUALIS® · intelligent medicine ════════════════════════════
    Responsive clinical workstation. Mobile: tab shell with push

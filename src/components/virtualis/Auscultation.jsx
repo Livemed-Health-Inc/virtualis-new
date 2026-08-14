@@ -5,7 +5,7 @@ import { FacilityChip } from "./ui";
 import { useStethoscope } from "@/hooks/useStethoscope";
 import { Waveform } from "@/components/stethoscope/Waveform";
 import { Spectrum } from "@/components/stethoscope/Spectrum";
-import { MODE_FILTERS } from "@/lib/stethoscope/types";
+import { MODE_FILTERS } from "@/sdk/stethoscope";
 
 const MODES = [
   { id: "bell", label: "Heart" },
