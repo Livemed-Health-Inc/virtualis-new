@@ -1177,10 +1177,17 @@ function Workstation() {
               <Directory onChat={openFromStaff} facilityScope={scope} staff={staff} />
             )}
             {tab === "alis" && <Alis />}
+            {tab === "devices" && showDevices && devicesPane}
             {tab === "schedule" && <Schedule facilityScope={scope} shifts={shifts} />}
           </div>
           {vfab(false)}
-          <TabBar tab={tab} setTab={setTab} unread={unread} />
+          <TabBar
+            tab={tab}
+            setTab={setTab}
+            unread={unread}
+            items={mobileTabs}
+            onMore={() => setMore(true)}
+          />
         </>
       ));
   } else {
