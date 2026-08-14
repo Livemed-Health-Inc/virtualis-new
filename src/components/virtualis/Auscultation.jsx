@@ -5,7 +5,7 @@ import { FacilityChip } from "./ui";
 import { useStethoscope } from "@/hooks/useStethoscope";
 import { Waveform } from "@/components/stethoscope/Waveform";
 import { Spectrum } from "@/components/stethoscope/Spectrum";
-import { MODE_FILTERS } from "@/lib/stethoscope/types";
+import { MODE_FILTERS } from "@/sdk/stethoscope";
 
 const MODES = [
   { id: "bell", label: "Heart" },
@@ -136,7 +136,7 @@ function Toggle({ on, onChange, label }) {
    in useStethoscope; this screen is the Virtualis-styled surface for it. */
 export default function Auscultation({ t, threads = [], onClose }) {
   const s = useStethoscope();
-  const { devices, deviceId, connect, connected, capturing, startCapture } = s;
+  const { devices, deviceId, connect, connected, capturing, startCapture, autoPair } = s;
   const [picked, setPicked] = useState(t?.id ?? null);
   const [advanced, setAdvanced] = useState(false);
   const [clips, setClips] = useState([]);
@@ -146,6 +146,12 @@ export default function Auscultation({ t, threads = [], onClose }) {
     () => t ?? threads.find((x) => x.id === picked) ?? null,
     [t, threads, picked],
   );
+
+  // Silently re-attach to a stethoscope this browser was already paired with.
+  // First-time Web Bluetooth permission still requires the explicit Pair action.
+  useEffect(() => {
+    void autoPair();
+  }, [autoPair]);
 
   // Auto-connect to the first discovered device, then start streaming.
   useEffect(() => {
@@ -271,10 +277,10 @@ export default function Auscultation({ t, threads = [], onClose }) {
           {s.battery !== null && <span>{s.battery}%</span>}
           <span style={{ fontFamily: mono, fontSize: 10, letterSpacing: 1.2 }}>
             {s.hostKind === "native"
-              ? "iOS BRIDGE"
+              ? "NATIVE BRIDGE"
               : s.hostKind === "webble"
                 ? "BLUETOOTH"
-                : "SIMULATOR"}
+                : "SIMULATOR · TEST ONLY"}
           </span>
         </span>
       </div>
@@ -463,13 +469,18 @@ export default function Auscultation({ t, threads = [], onClose }) {
             <div style={{ display: "flex", gap: 8 }}>
               {["native", "webble", "simulator"].map((k) => (
                 <Chip key={k} wide on={s.hostKind === k} onClick={() => s.setTransport(k)}>
-                  {k === "native" ? "iOS" : k === "webble" ? "Bluetooth" : "Simulator"}
+                  {k === "native"
+                    ? "Native app (iOS/Android)"
+                    : k === "webble"
+                      ? "Bluetooth"
+                      : "Simulator · test only"}
                 </Chip>
               ))}
             </div>
             {!s.webBleSupported && s.hostKind === "webble" && (
               <div style={{ fontSize: 12.5, color: "#B54708" }}>
-                This browser can’t use Bluetooth. Use Chrome or Edge, the iOS app, or the simulator.
+                This browser can’t use Bluetooth. Use Chrome or Edge over HTTPS, the native iOS/Android
+                app, or the simulator (test only — never clinical).
               </div>
             )}
             {s.error && <div style={{ fontSize: 12.5, color: T.red }}>{s.error}</div>}

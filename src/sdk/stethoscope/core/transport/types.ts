@@ -21,7 +21,7 @@ export const MODE_FILTERS: Record<
   AuscultationMode,
   { low: number; high: number; label: string; hint: string }
 > = {
-  bell: { low: 20, high: 180, label: "Bell", hint: "20–180 Hz · heart sounds only" },
+  bell: { low: 20, high: 220, label: "Bell", hint: "20–220 Hz · heart sounds only" },
   diaphragm: { low: 100, high: 1000, label: "Diaphragm", hint: "100–1000 Hz · lungs, bowel" },
   wide: { low: 20, high: 2000, label: "Wide", hint: "20–2000 Hz · full spectrum" },
 };

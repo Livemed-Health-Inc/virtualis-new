@@ -1,10 +1,12 @@
 /**
  * Transport layer for the Mintti Smartho SDK (MinttiSmarthoSDK iOS framework v1.1.6).
  *
- * The vendor SDK is a native iOS BLE framework, so it cannot run inside a browser.
- * The web app talks to it through a thin host bridge: an iOS app embeds this site in
- * a WKWebView, forwards `MinttiBleManagerDelegate` callbacks into the page, and
- * executes commands coming back out. See `docs/mintti-ios-bridge.md`.
+ * The vendor SDK ships as native iOS and Android BLE libraries, so it cannot run
+ * inside a browser. The web app talks to whichever host it is embedded in through a
+ * thin bridge: an iOS app (WKWebView `webkit.messageHandlers.mintti`) or an Android
+ * app (WebView JS interface `window.MinttiHost`) forwards device callbacks into the
+ * page and executes commands coming back out. See `docs/mintti-ios-bridge.md` and
+ * `docs/stethoscope-integration.md`.
  *
  * Device audio: 8 kHz, 16-bit signed little-endian PCM, mono (SDK doc, section V).
  */
@@ -86,6 +88,7 @@ export type MinttiEvent =
 export type MinttiCommand =
   | { cmd: "startScan" }
   | { cmd: "stopScan" }
+  | { cmd: "autoPair" }
   | { cmd: "connect"; uuid: string }
   | { cmd: "disconnect" }
   | { cmd: "startAudio" }
@@ -98,7 +101,7 @@ export type MinttiCommand =
   | { cmd: "wake" };
 
 export interface MinttiTransport {
-  /** "native" = iOS host bridge, "webble" = direct Web Bluetooth, "simulator" = demo. */
+  /** "native" = iOS/Android host-app bridge, "webble" = direct Web Bluetooth, "simulator" = TEST ONLY demo. */
   kind: TransportKind;
   send(command: MinttiCommand): void;
   subscribe(listener: (event: MinttiEvent) => void): () => void;

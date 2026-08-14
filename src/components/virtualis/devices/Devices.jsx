@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { T, FACILITIES, inputStyle } from "../theme";
 import { CART_STATES, minttiTrust } from "@/lib/telehealth/status";
 import { hellocareTrust } from "@/lib/telehealth/hellocare";
-import { hasNativeHost } from "@/lib/stethoscope/mintti";
+import { hasNativeHost } from "@/sdk/stethoscope";
 import CartCard from "./CartCard";
 import Preflight from "./Preflight";
 

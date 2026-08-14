@@ -373,6 +373,24 @@ export function createWebBluetoothTransport(): MinttiTransport {
       case "connect":
         await connect();
         break;
+      case "autoPair": {
+        // Devices already granted permission can be reconnected without a click.
+        const bt = navigator.bluetooth as unknown as {
+          getDevices?: () => Promise<BluetoothDevice[]>;
+        };
+        if (!bt?.getDevices) return;
+        const known = await bt.getDevices();
+        const match = known.find((d) => /smartho|mintti/i.test(d.name ?? "")) ?? known[0] ?? null;
+        if (!match) return;
+        device = match;
+        emit({
+          type: "scanResult",
+          uuid: match.id,
+          name: match.name ?? "Bluetooth stethoscope",
+          rssi: 0,
+        });
+        break;
+      }
       case "disconnect":
         streaming = false;
         userStopped = true;
