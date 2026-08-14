@@ -9,12 +9,8 @@ import type { Database } from "@/integrations/supabase/types";
    admin role through their own RLS-scoped session before doing privileged
    work — the client is never trusted about who it is. */
 
-type AdminCtx = {
-  userId: string;
-  supabase: {
-    rpc: (fn: string, args: Record<string, unknown>) => Promise<{ data: unknown; error: unknown }>;
-  };
-};
+type AdminCtx = { userId: string; supabase: SupabaseClient<Database> };
+
 
 async function assertAdmin(context: AdminCtx) {
   const { data, error } = await context.supabase.rpc("has_role", {
