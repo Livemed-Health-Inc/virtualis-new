@@ -122,7 +122,7 @@ export const claimInvite = createServerFn({ method: "POST" })
           ? [invite.facility_id]
           : [];
       if (facilities.length) {
-        await supabaseAdmin.from("provider_credentials").upsert(
+        await supabaseAdmin.from("provider_credentials").insert(
           facilities.map((f) => ({
             user_id: context.userId,
             facility_id: f,
