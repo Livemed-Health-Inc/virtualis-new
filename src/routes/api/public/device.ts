@@ -1,5 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
+import type { Database } from "@/integrations/supabase/types";
+
+type DeviceRow = Database["public"]["Tables"]["devices"]["Row"];
+type FacilityRow = Database["public"]["Tables"]["facilities"]["Row"];
 
 /* Bedside kiosk provisioning. The tablet has no user account: it pairs once
    with a single-use admin code, then identifies itself with a long-lived
@@ -17,7 +21,7 @@ const body = z.discriminatedUnion("action", [
   z.object({ action: z.literal("sync"), token: z.string().trim().min(20).max(200) }),
 ]);
 
-const shape = (d: any, facility: any) => ({
+const shape = (d: DeviceRow, facility: FacilityRow | null) => ({
   id: d.id,
   label: d.label,
   unit: d.unit,

@@ -6,7 +6,14 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
    admin role through their own RLS-scoped session before doing privileged
    work — the client is never trusted about who it is. */
 
-async function assertAdmin(context: any) {
+type AdminCtx = {
+  userId: string;
+  supabase: {
+    rpc: (fn: string, args: Record<string, unknown>) => Promise<{ data: unknown; error: unknown }>;
+  };
+};
+
+async function assertAdmin(context: AdminCtx) {
   const { data, error } = await context.supabase.rpc("has_role", {
     _user_id: context.userId,
     _role: "admin",
@@ -47,12 +54,10 @@ export const getAdminData = createServerFn({ method: "GET" })
       context.supabase.from("provider_credentials").select("user_id,facility_id"),
     ]);
 
-    const people = (p.data ?? []).map((row: any) => ({
+    const people = (p.data ?? []).map((row) => ({
       ...row,
-      admin: (r.data ?? []).some((x: any) => x.user_id === row.id && x.role === "admin"),
-      facilities: (c.data ?? [])
-        .filter((x: any) => x.user_id === row.id)
-        .map((x: any) => x.facility_id),
+      admin: (r.data ?? []).some((x) => x.user_id === row.id && x.role === "admin"),
+      facilities: (c.data ?? []).filter((x) => x.user_id === row.id).map((x) => x.facility_id),
     }));
 
     return {
@@ -197,9 +202,7 @@ export const mintEnrollment = createServerFn({ method: "POST" })
 export const setDeviceStatus = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) =>
-    z
-      .object({ device_id: z.string().uuid(), status: z.enum(["registered", "revoked"]) })
-      .parse(d),
+    z.object({ device_id: z.string().uuid(), status: z.enum(["registered", "revoked"]) }).parse(d),
   )
   .handler(async ({ data, context }) => {
     await assertAdmin(context);

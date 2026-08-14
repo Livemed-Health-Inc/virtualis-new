@@ -148,4 +148,3 @@ export const claimInvite = createServerFn({ method: "POST" })
     }
     return { ok: true as const };
   });
-
