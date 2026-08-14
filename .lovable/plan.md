@@ -1,43 +1,94 @@
-# Auscultation: port the Stethoscope UI app into Virtualis
+# Hospital Devices / Telehealth Cart Workflow + Auscultation Restyle
 
-Bring the working Mintti Smartho digital stethoscope experience from the "Stethoscope UI" project into Virtualis as a first-class, authenticated clinical screen — without touching auth, invite-only access, messaging, telehealth, ALIS, schedules, database schema, or branding.
+Frontend-only prototype. No schema, auth, RLS, credential, or production data changes. No publish.
 
-## Product behavior
+## 1. What gets built
 
-- A new **Auscultation** action joins the V quick-action menu (Consult, Message, Video, ALIS, Auscultation). The fan geometry expands from 4 to 5 discs on both the mobile centered layout and the desktop bottom-right layout.
-- Tapping it opens a **full-screen overlay** rendered at the same layer as Telehealth, with a clear Back/Close control and Escape-to-close.
-- **Patient context:** it defaults to the currently open thread; if none is open it falls back to the first visible credentialed thread; if the clinician has several, a compact picker (patient, facility, room) appears before the session starts. No patient context is never a hard block — the exam can run unlabeled.
-- When context exists, the header shows **patient name, facility chip, room, MRN**, reusing the existing `FacilityChip` and header patterns from Thread/Telehealth.
-- **Recordings stay in the browser** for this pass: in-memory/blob list with playback, download as WAV, and a patient-context label on each item. Nothing is uploaded, no schema change, no new tables or policies.
+**A. Devices tab (fleet + work queue)**
+A first-class Devices surface, grouped by the facilities in the signed-in user's credential scope (`scope` from the store), styled in the normal Virtualis theme: `#F4F5F7` canvas, white cards, `T.line` borders, navy rail, `T.blue` primary action, facility hue accents, existing radii (14/20) and status vocabulary.
 
-## Functionality preserved from the source
+Each facility group lists cart/station cards with:
+- Cart name/ID, location (unit, room), cart state: `Available · Preparing · Requested · In session · Needs setup · Offline`
+- Patient/room context and assigned bedside nurse (from prototype data)
+- Request acuity glyph (existing 3/2/1 bars) + wait time
+- Channel chips: Virtualis request, HelloCare video handoff, Mintti stethoscope (state + battery), bedside nurse
+- Actions: `Preflight`, `Beam in`, `Message nurse`, and nurse-side `Prepare cart` / `Mark ready`
 
-Every device and audio capability is ported unchanged in behavior: native iOS WKWebView bridge, Web Bluetooth, simulator fallback for ordinary browsers, 8 kHz PCM decode (IMA-ADPCM), heart / lung / wide auscultation modes, live waveform, spectrum, BPM detection, amplification and filter controls, monitoring, recording, WAV encode + playback + download, battery and device state, reconnect and error states.
+Filters: facility, state, "My requests only", search. Empty and loading states included.
 
-## Files
+**B. Preflight / connection health view**
+A sheet listing the four channels with an explicit trust label per channel (see §4), a re-check action, and a plain-language reason line. Beam in is enabled only from an honest state and always announces which mode it opens in.
 
-Added (ported, mostly as-is):
-- `src/lib/stethoscope/types.ts`, `mintti.ts`, `webble.ts`, `pcm-stream.ts`, `ima-adpcm.ts`, `wav.ts`
-- `src/hooks/useStethoscope.ts`
-- `src/components/stethoscope/Waveform.tsx`, `Spectrum.tsx`
-- `docs/mintti-ios-bridge.md`
+**C. Beam-in session workspace**
+Opens the existing `Telehealth` overlay (video surface) with a session header carrying cart + patient + channel context, and a control to open the existing `Auscultation` overlay for the same patient. When no real HelloCare launch URL is configured, the workspace is explicitly badged **Preview session — not a live clinical call** and no network call is made. Ending the session returns the cart to `Available` and leaves the conversation intact.
 
-Added (new Virtualis surface):
-- `src/components/virtualis/Auscultation.jsx` — the overlay screen: header with patient context, connection/device state, mode switch, waveform + spectrum, BPM, gain/filter controls, monitor/record transport, local recording list. This is the Virtualis-styled rewrite of the source `src/routes/index.tsx` UI; the hook and lib layer do the work.
+**D. Nurse-side flow**
+Same Devices surface, nurse actions variant: `Prepare cart` (Available → Preparing), `Request clinician` (choose acuity + on-call specialty → creates a pending request card + a message in the patient thread via existing send path), `Message nurse/care team`, `Mark ready`.
 
-Changed:
-- `src/components/VirtualisApp.jsx` — add the fifth `VFab` action and its icon, widen the fan angle arrays, add `scopeId` state plus overlay render next to `<Telehealth>`, and clear it in the sign-out teardown alongside the other overlays.
+**E. Auscultation restyle**
+`Auscultation.jsx` keeps every control and diagnostic (transport switch, decoding A/B, sensor channel, wake device, gain, beat boost, bass, denoise, monitoring, recording, diagnostics, error text) but moves from the all-dark dashboard to the standard light workspace: white cards, `T.line` borders, `T.ink`/`T.sub` type, blue primary actions, facility accents. Navy retained only for the waveform/spectrum surface and the compact session header, where dark aids signal legibility. Simulator data is labelled "Test only — simulated"; nothing is called live unless the transport is native or Web Bluetooth and connected.
 
-Nothing else changes. No routes, no `src/routes/api`, no server functions, no migrations, no secrets, no publish.
+## 2. Files
 
-## Technical notes
+New:
+- `src/components/virtualis/devices/Devices.jsx` — tab shell: scope grouping, filters, list/grid, empty states
+- `src/components/virtualis/devices/CartCard.jsx` — cart/request card + actions
+- `src/components/virtualis/devices/Preflight.jsx` — channel health sheet
+- `src/components/virtualis/devices/SessionWorkspace.jsx` — beam-in wrapper around Telehealth + Auscultation
+- `src/components/virtualis/devices/useDeviceFleet.js` — local prototype state model + transitions
+- `src/components/virtualis/devices/fleet.data.js` — realistic prototype carts/stations per facility
+- `src/lib/telehealth/hellocare.ts` — adapter contract only: reads `import.meta.env.VITE_HELLOCARE_LAUNCH_URL`, builds an opaque launch context `{ requestId, deviceId, nonce }`, returns `{ configured: false }` when unset. No PHI in params, no fetch when unconfigured.
+- `src/lib/telehealth/status.ts` — shared status vocabulary + trust-label helper
 
-- **Source retrieval:** the source project is checked out read-only into a scratch path so the ported files are the real implementation, not a reconstruction. Only the listed files come across; its routing, theme, and shadcn shell do not.
-- **Boundary safety:** everything is browser-only. Web Bluetooth, `AudioContext`, `webkit.messageHandlers`, and canvas access happen inside `useEffect`/event handlers, never at module scope or during render, so SSR and the Cloudflare worker build stay clean. Capability detection picks the transport at runtime: iOS bridge → Web Bluetooth → simulator.
-- **Styling:** inline styles with `T` tokens from `src/components/virtualis/theme.js`, matching Telehealth's dark clinical stage. Canvases size to their container via `ResizeObserver`; controls wrap and become scroll-snap chips on narrow widths; the overlay respects `env(safe-area-inset-bottom)`.
-- **Responsive:** single-column stacked stage on mobile, waveform + controls side-by-side from tablet up, same `isDesktop`/landscape media logic already used in the shell.
-- **Cleanup:** the hook tears down the audio graph, stops streams, and disconnects the device on unmount and on Close, so leaving the overlay never leaves a live microphone/BLE session — same discipline as Telehealth's `onEnd`.
+Modified:
+- `src/components/VirtualisApp.jsx` — Devices route/tab, rail item, mobile nav (§3), wire beam-in overlays
+- `src/components/virtualis/Auscultation.jsx` — restyle only (§1E)
+- `src/components/virtualis/theme.js` — add device/status tokens if needed (no palette change)
 
-## Verification
+Untouched: store, Supabase files, Thread/Inbox message logic.
 
-Preview at mobile, tablet, and desktop widths (plus landscape phone): open the V menu, launch Auscultation with and without an open consult, confirm the simulator produces a live waveform and BPM in an ordinary browser, record → play → download a WAV, close and reconfirm no stray audio. Web Bluetooth and the iOS bridge are checked by capability-detection paths and a documented manual test in `docs/mintti-ios-bridge.md`; they cannot be exercised in the sandbox.
+## 3. Responsive navigation decision
+
+Desktop/tablet rail: add **Devices** between Team and ALIS. Schedule stays a rail item. No layout change otherwise.
+
+Mobile bottom bar keeps the centre V and 4 slots:
+`Inbox · Devices · [V] · ALIS · More`
+**More** opens a compact sheet containing Team, Schedule and Account. Schedule access is preserved (More sheet + Account panel + desktop rail); Team stays reachable from More, New Message search, and the rail. Devices becomes directly reachable in one tap, which is the workflow requirement.
+
+## 4. Trust / status semantics (exact)
+
+| Label | Meaning | When shown |
+| --- | --- | --- |
+| **Live** | Real connected channel with active data | Mintti: native bridge or Web Bluetooth connected and streaming. HelloCare: only when `VITE_HELLOCARE_LAUNCH_URL` is configured and a launch succeeded |
+| **Available** | Capability present, not connected | Web Bluetooth supported in this browser; cart marked Available by nurse |
+| **Needs setup** | Capability missing or unconfigured | HelloCare with no launch URL → "Adapter configuration pending". Mintti in a browser without Web Bluetooth and no native host |
+| **Test only** | Simulated data | Mintti simulator transport; preview beam-in session |
+
+Rules enforced in code:
+- Never render an unqualified "Connected" for HelloCare; unconfigured always reads "Adapter configuration pending".
+- Simulator output is never labelled live and never described in clinical terms.
+- Nurse-declared cart readiness is labelled "Marked ready by nurse", distinct from device-detected states.
+- Each status renders icon + text + color (never color alone).
+
+## 5. State model
+
+`useDeviceFleet` (component-local, no persistence):
+```
+carts: { id, facilityId, name, unit, room, state, nurse, patientRef,
+         mintti: { state, battery }, video: { state }, updatedAt }
+requests: { id, cartId, facilityId, patientRef, acuity, specialty,
+            requestedBy, requestedAt, state: pending|accepted|in_session|closed }
+session: { requestId, cartId, mode: 'preview'|'live', channels } | null
+```
+Transitions: `prepare` → Preparing; `markReady` → Available; `requestClinician` → Requested + pending request; `beamIn` → In session + `accepted→in_session`; `endSession` → Available + `closed`. Mintti channel state is read from `useStethoscope` capability detection, not stored.
+
+## 6. Accessibility
+
+Every action is a real `<button>` with an explicit label; card headers are keyboard-activatable; focus-visible ring already defined in `theme.js`; status uses icon + text; the preflight sheet traps focus and closes on Escape; live region announces session mode on beam in.
+
+## 7. Verification
+
+- `tsgo --noEmit` + build
+- focused React hooks lint on touched files
+- Playwright: desktop 1280 and mobile 390 — Devices filters, prepare/request/beam-in/end transitions, preflight labels, preview badge, Mintti simulator waveform + recording, restyled auscultation controls
+- Confirm zero console errors and no Supabase write beyond existing message send
