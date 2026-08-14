@@ -1214,6 +1214,8 @@ function Workstation() {
       <Directory onChat={openFromStaff} facilityScope={scope} staff={staff} />
     ) : tab === "alis" ? (
       <Alis />
+    ) : tab === "devices" && showDevices ? (
+      devicesPane
     ) : (
       <Schedule facilityScope={scope} shifts={shifts} />
     );
@@ -1224,6 +1226,7 @@ function Workstation() {
           me={me}
           tab={tab}
           setTab={setTab}
+          items={railTabs}
           unread={unread}
           wide={isDesktop}
           onNew={() => setConsulting(true)}
