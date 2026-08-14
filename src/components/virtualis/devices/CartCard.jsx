@@ -57,7 +57,16 @@ function Action({ label, primary, onClick, disabled }) {
   );
 }
 
-export default function CartCard({ cart, video, mintti, onPreflight, onBeam, onNurse, onMessage }) {
+export default function CartCard({
+  cart,
+  video,
+  mintti,
+  nurse,
+  onPreflight,
+  onBeam,
+  onNurse,
+  onMessage,
+}) {
   const st = CART_STATES[cart.state];
   const hue = FACILITIES[cart.facility]?.hue || T.blue;
   const m = MINTTI_FIELD[cart.mintti];
@@ -109,25 +118,45 @@ export default function CartCard({ cart, video, mintti, onPreflight, onBeam, onN
 
       <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
         <Action label="Preflight" onClick={() => onPreflight(cart)} />
-        <Action
-          primary
-          label={
-            video.level === "live"
-              ? "Join live session"
-              : video.level === "available"
-                ? "Open HelloCare handoff"
-                : "Beam in (preview)"
-          }
-          disabled={busy}
-          onClick={() => onBeam(cart)}
-        />
-        <Action label="Message nurse" onClick={() => onMessage(cart)} />
-        {cart.state === "available" ? (
-          <Action label="Request clinician" onClick={() => onNurse("request", cart)} />
-        ) : cart.state === "preparing" ? (
-          <Action label="Mark ready" onClick={() => onNurse("ready", cart)} />
+        {nurse ? (
+          <>
+            {cart.state === "preparing" ? (
+              <Action primary label="Mark ready" onClick={() => onNurse("ready", cart)} />
+            ) : cart.state === "available" ? (
+              <Action primary label="Request clinician" onClick={() => onNurse("request", cart)} />
+            ) : (
+              <Action
+                primary
+                label="Prepare cart"
+                disabled={cart.state === "offline"}
+                onClick={() => onNurse("prepare", cart)}
+              />
+            )}
+            <Action label="Message care team" onClick={() => onMessage(cart)} />
+          </>
         ) : (
-          <Action label="Prepare cart" onClick={() => onNurse("prepare", cart)} />
+          <>
+            <Action
+              primary
+              label={
+                video.level === "live"
+                  ? "Join live session"
+                  : video.level === "available"
+                    ? "Open HelloCare handoff"
+                    : "Beam in (preview)"
+              }
+              disabled={busy}
+              onClick={() => onBeam(cart)}
+            />
+            <Action label="Message nurse" onClick={() => onMessage(cart)} />
+            {cart.state === "available" ? (
+              <Action label="Request clinician" onClick={() => onNurse("request", cart)} />
+            ) : cart.state === "preparing" ? (
+              <Action label="Mark ready" onClick={() => onNurse("ready", cart)} />
+            ) : (
+              <Action label="Prepare cart" onClick={() => onNurse("prepare", cart)} />
+            )}
+          </>
         )}
       </div>
     </div>
