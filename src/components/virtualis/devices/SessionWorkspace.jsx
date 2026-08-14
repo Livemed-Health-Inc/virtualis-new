@@ -92,6 +92,9 @@ export default function SessionWorkspace({ session, video, mintti, onEnd, onAusc
           Open auscultation
         </button>
       </div>
+      <div style={{ flex: 1, minHeight: 0, position: "relative" }}>
+        <Telehealth t={t} onEnd={onEnd} />
+      </div>
     </div>
   );
 }
