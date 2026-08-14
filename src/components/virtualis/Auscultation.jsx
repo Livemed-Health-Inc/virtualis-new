@@ -277,10 +277,10 @@ export default function Auscultation({ t, threads = [], onClose }) {
           {s.battery !== null && <span>{s.battery}%</span>}
           <span style={{ fontFamily: mono, fontSize: 10, letterSpacing: 1.2 }}>
             {s.hostKind === "native"
-              ? "iOS BRIDGE"
+              ? "NATIVE BRIDGE"
               : s.hostKind === "webble"
                 ? "BLUETOOTH"
-                : "SIMULATOR"}
+                : "SIMULATOR · TEST ONLY"}
           </span>
         </span>
       </div>
@@ -469,13 +469,18 @@ export default function Auscultation({ t, threads = [], onClose }) {
             <div style={{ display: "flex", gap: 8 }}>
               {["native", "webble", "simulator"].map((k) => (
                 <Chip key={k} wide on={s.hostKind === k} onClick={() => s.setTransport(k)}>
-                  {k === "native" ? "iOS" : k === "webble" ? "Bluetooth" : "Simulator"}
+                  {k === "native"
+                    ? "Native app (iOS/Android)"
+                    : k === "webble"
+                      ? "Bluetooth"
+                      : "Simulator · test only"}
                 </Chip>
               ))}
             </div>
             {!s.webBleSupported && s.hostKind === "webble" && (
               <div style={{ fontSize: 12.5, color: "#B54708" }}>
-                This browser can’t use Bluetooth. Use Chrome or Edge, the iOS app, or the simulator.
+                This browser can’t use Bluetooth. Use Chrome or Edge over HTTPS, the native iOS/Android
+                app, or the simulator (test only — never clinical).
               </div>
             )}
             {s.error && <div style={{ fontSize: 12.5, color: T.red }}>{s.error}</div>}
