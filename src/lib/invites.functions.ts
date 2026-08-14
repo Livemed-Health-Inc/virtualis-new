@@ -4,7 +4,6 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/integrations/supabase/types";
 
-
 /* Invite-only access control. Every handler re-verifies the caller is an
    admin against RLS-scoped queries before touching privileged APIs. */
 

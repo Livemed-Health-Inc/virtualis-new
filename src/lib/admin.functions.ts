@@ -4,13 +4,11 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/integrations/supabase/types";
 
-
 /* Admin console server API. Every handler re-verifies the caller holds the
    admin role through their own RLS-scoped session before doing privileged
    work — the client is never trusted about who it is. */
 
 type AdminCtx = { userId: string; supabase: SupabaseClient<Database> };
-
 
 async function assertAdmin(context: AdminCtx) {
   const { data, error } = await context.supabase.rpc("has_role", {
