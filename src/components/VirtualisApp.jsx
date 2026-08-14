@@ -805,6 +805,19 @@ function Workstation() {
   const [creds, setCreds] = useState(false);
   const [toast, setToast] = useState(null);
   const [listCollapsed, setListCollapsed] = useState(false);
+  const [more, setMore] = useState(false);
+
+  const showDevices = canUseDevices(me?.role);
+  const railTabs = ["inbox", "team", ...(showDevices ? ["devices"] : []), "alis", "schedule"].map(
+    byKey,
+  );
+  const mobileTabs = [
+    byKey("inbox"),
+    showDevices ? byKey("devices") : byKey("team"),
+    byKey("alis"),
+    byKey("more"),
+  ];
+  const fleet = useDeviceFleet(scope);
 
   const authed = !!session;
 
