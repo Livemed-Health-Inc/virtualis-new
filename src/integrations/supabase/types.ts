@@ -55,6 +55,109 @@ export type Database = {
           },
         ]
       }
+      device_enrollments: {
+        Row: {
+          code_hash: string
+          code_hint: string
+          consumed_at: string | null
+          created_at: string
+          created_by: string | null
+          device_id: string
+          expires_at: string
+          id: string
+          revoked_at: string | null
+        }
+        Insert: {
+          code_hash: string
+          code_hint?: string
+          consumed_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          device_id: string
+          expires_at?: string
+          id?: string
+          revoked_at?: string | null
+        }
+        Update: {
+          code_hash?: string
+          code_hint?: string
+          consumed_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          device_id?: string
+          expires_at?: string
+          id?: string
+          revoked_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "device_enrollments_device_id_fkey"
+            columns: ["device_id"]
+            isOneToOne: false
+            referencedRelation: "devices"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      devices: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          device_token_hash: string | null
+          enrolled_at: string | null
+          facility_id: string
+          floating: boolean
+          has_mintti: boolean
+          id: string
+          label: string
+          last_seen_at: string | null
+          room: string | null
+          status: string
+          unit: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          device_token_hash?: string | null
+          enrolled_at?: string | null
+          facility_id: string
+          floating?: boolean
+          has_mintti?: boolean
+          id?: string
+          label: string
+          last_seen_at?: string | null
+          room?: string | null
+          status?: string
+          unit?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          device_token_hash?: string | null
+          enrolled_at?: string | null
+          facility_id?: string
+          floating?: boolean
+          has_mintti?: boolean
+          id?: string
+          label?: string
+          last_seen_at?: string | null
+          room?: string | null
+          status?: string
+          unit?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "devices_facility_id_fkey"
+            columns: ["facility_id"]
+            isOneToOne: false
+            referencedRelation: "facilities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       facilities: {
         Row: {
           created_at: string
@@ -89,13 +192,17 @@ export type Database = {
           department: string | null
           email: string
           facility_id: string | null
+          facility_ids: string[]
           full_name: string | null
           id: string
           invited_by: string | null
           role: Database["public"]["Enums"]["app_role"]
+          specialty: string | null
+          staff_type: string | null
           status: string
           title: string | null
           updated_at: string
+          user_class: string
         }
         Insert: {
           accepted_at?: string | null
@@ -103,13 +210,17 @@ export type Database = {
           department?: string | null
           email: string
           facility_id?: string | null
+          facility_ids?: string[]
           full_name?: string | null
           id?: string
           invited_by?: string | null
           role?: Database["public"]["Enums"]["app_role"]
+          specialty?: string | null
+          staff_type?: string | null
           status?: string
           title?: string | null
           updated_at?: string
+          user_class?: string
         }
         Update: {
           accepted_at?: string | null
@@ -117,13 +228,17 @@ export type Database = {
           department?: string | null
           email?: string
           facility_id?: string | null
+          facility_ids?: string[]
           full_name?: string | null
           id?: string
           invited_by?: string | null
           role?: Database["public"]["Enums"]["app_role"]
+          specialty?: string | null
+          staff_type?: string | null
           status?: string
           title?: string | null
           updated_at?: string
+          user_class?: string
         }
         Relationships: [
           {

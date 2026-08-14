@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { T, FACILITIES, ACUITY, inputStyle } from "../theme";
 import { Glyph } from "../ui";
 import { SPECIALTIES } from "../data";
@@ -61,6 +61,8 @@ function Card({ title, hint, children }) {
   );
 }
 
+const TOKEN_KEY = "virtualis.device.token";
+
 export default function DeviceStation() {
   const [cartId, setCartId] = useState(null);
   const [room, setRoom] = useState("");
@@ -71,7 +73,68 @@ export default function DeviceStation() {
   const [q, setQ] = useState("");
   const [sent, setSent] = useState(null);
 
-  const cart = useMemo(() => CARTS.find((c) => c.id === cartId) || null, [cartId]);
+  /* Provisioning: a tablet becomes a real bedside station only after an
+     administrator's single-use code pairs it to one registered cart. Until
+     then it stays in clearly-labelled demo mode. */
+  const [device, setDevice] = useState(undefined); // undefined = checking
+  const [code, setCode] = useState("");
+  const [enrolling, setEnrolling] = useState(false);
+  const [enrollErr, setEnrollErr] = useState("");
+  const [demo, setDemo] = useState(false);
+
+  useEffect(() => {
+    const token = localStorage.getItem(TOKEN_KEY);
+    if (!token) return setDevice(null);
+    fetch("/api/public/device", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "sync", token }),
+    })
+      .then((r) => r.json())
+      .then((r) => {
+        if (r.ok) setDevice(r.device);
+        else {
+          localStorage.removeItem(TOKEN_KEY);
+          setDevice(null);
+        }
+      })
+      .catch(() => setDevice(null));
+  }, []);
+
+  const enroll = async () => {
+    setEnrollErr("");
+    setEnrolling(true);
+    try {
+      const r = await fetch("/api/public/device", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "pair", code: code.trim().toUpperCase() }),
+      }).then((x) => x.json());
+      if (r.ok) {
+        localStorage.setItem(TOKEN_KEY, r.token);
+        setDevice(r.device);
+        setCode("");
+      } else setEnrollErr("That code is not valid, already used, or expired.");
+    } catch {
+      setEnrollErr("Could not reach Virtualis. Check the network and try again.");
+    }
+    setEnrolling(false);
+  };
+
+  const cart = useMemo(
+    () =>
+      device
+        ? {
+            id: device.id,
+            facility: device.facility.id,
+            facilityName: device.facility.name,
+            name: device.label,
+            unit: device.unit,
+            room: device.room || "",
+          }
+        : CARTS.find((c) => c.id === cartId) || null,
+    [device, cartId],
+  );
   const video = hellocareTrust(false);
   const specs = useMemo(() => {
     const all = [...new Set([...ON_CALL, ...SPECIALTIES])];
@@ -92,6 +155,51 @@ export default function DeviceStation() {
     </main>
   );
 
+  if (device === undefined)
+    return shell(<div style={{ fontSize: 14, color: T.sub }}>Checking this device…</div>);
+
+  if (!device && !demo) {
+    return shell(
+      <>
+        <header>
+          <h1 style={{ margin: 0, fontSize: 22, fontWeight: 760, letterSpacing: -0.5 }}>
+            Virtualis Bedside Station
+          </h1>
+          <p style={{ margin: "4px 0 0", fontSize: 13.5, color: T.sub }}>
+            This device is not provisioned yet.
+          </p>
+        </header>
+        <Card
+          title="Enroll this device"
+          hint="Ask your Virtualis administrator for the one-time code for this cart."
+        >
+          <input
+            style={{ ...inputStyle, fontSize: 22, letterSpacing: 3, textAlign: "center" }}
+            value={code}
+            onChange={(e) => setCode(e.target.value.toUpperCase())}
+            placeholder="XXXX-XXXX"
+            aria-label="Enrollment code"
+            autoComplete="off"
+          />
+          {enrollErr && <div style={{ fontSize: 13, color: T.red }}>{enrollErr}</div>}
+          <button
+            style={btn(true, enrolling || code.trim().length < 6)}
+            disabled={enrolling || code.trim().length < 6}
+            onClick={enroll}
+          >
+            {enrolling ? "Enrolling…" : "Enroll device"}
+          </button>
+          <button style={btn(false)} onClick={() => setDemo(true)}>
+            Continue in demo mode
+          </button>
+          <div style={{ fontSize: 12.5, color: T.sub }}>
+            Demo mode uses sample carts. Nothing is transmitted and it is never for clinical use.
+          </div>
+        </Card>
+      </>,
+    );
+  }
+
   if (!cart) {
     return shell(
       <>
@@ -100,10 +208,10 @@ export default function DeviceStation() {
             Virtualis Bedside Station
           </h1>
           <p style={{ margin: "4px 0 0", fontSize: 13.5, color: T.sub }}>
-            Shared device — no sign-in required. Select this cart to begin.
+            Demo mode — select a sample cart to explore the bedside flow.
           </p>
         </header>
-        <Card title="Which cart is this?" hint="Set once per device.">
+        <Card title="Which cart is this?" hint="Demo only. Enrol the device for real use.">
           <div style={{ display: "grid", gap: 8 }}>
             {CARTS.map((c) => (
               <button key={c.id} onClick={() => setCartId(c.id)} style={btn(false)}>
@@ -117,10 +225,14 @@ export default function DeviceStation() {
               </button>
             ))}
           </div>
+          <button style={btn(false)} onClick={() => setDemo(false)}>
+            Enroll this device instead
+          </button>
         </Card>
       </>,
     );
   }
+
 
   if (sent) {
     return shell(
@@ -171,12 +283,15 @@ export default function DeviceStation() {
             {cart.name}
           </h1>
           <div style={{ fontSize: 12.5, color: T.sub }}>
-            {FACILITIES[cart.facility]?.name} · {cart.unit} · shared device, no sign-in
+            {cart.facilityName || FACILITIES[cart.facility]?.name} · {cart.unit} ·{" "}
+            {device ? "provisioned device, no sign-in" : "demo mode — not for clinical use"}
           </div>
         </div>
-        <button style={{ ...btn(false), minHeight: 40 }} onClick={() => setCartId(null)}>
-          Change cart
-        </button>
+        {!device && (
+          <button style={{ ...btn(false), minHeight: 40 }} onClick={() => setCartId(null)}>
+            Change cart
+          </button>
+        )}
       </header>
 
       <Card title="Patient context" hint="Optional, but it makes the consult far faster to answer.">

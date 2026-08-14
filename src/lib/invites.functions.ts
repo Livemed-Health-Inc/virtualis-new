@@ -1,11 +1,15 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import type { SupabaseClient } from "@supabase/supabase-js";
+import type { Database } from "@/integrations/supabase/types";
 
 /* Invite-only access control. Every handler re-verifies the caller is an
    admin against RLS-scoped queries before touching privileged APIs. */
 
-async function assertAdmin(context: any) {
+type AdminCtx = { userId: string; supabase: SupabaseClient<Database> };
+
+async function assertAdmin(context: AdminCtx) {
   const { data, error } = await context.supabase.rpc("has_role", {
     _user_id: context.userId,
     _role: "admin",
@@ -97,17 +101,54 @@ export const revokeInvite = createServerFn({ method: "POST" })
     return { ok: true as const };
   });
 
-/* Called once per session: flips the caller's own pending invite to accepted. */
+/* Called once per session: flips the caller's own pending invite to accepted
+   and provisions exactly the hospital access the admin granted on the invite.
+   Nothing is granted implicitly at signup. */
 export const claimInvite = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    const email = (context.claims as any)?.email as string | undefined;
+    const email = (context.claims as { email?: string })?.email;
     if (!email) return { ok: false as const };
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    await supabaseAdmin
+
+    const { data: rows } = await supabaseAdmin
       .from("invites")
       .update({ status: "accepted", accepted_at: new Date().toISOString() })
       .eq("status", "pending")
-      .ilike("email", email);
+      .ilike("email", email)
+      .select("*");
+
+    const invite = rows?.[0];
+    if (invite) {
+      const facilities: string[] = invite.facility_ids?.length
+        ? invite.facility_ids
+        : invite.facility_id
+          ? [invite.facility_id]
+          : [];
+      if (facilities.length) {
+        await supabaseAdmin.from("provider_credentials").insert(
+          facilities.map((f) => ({
+            user_id: context.userId,
+            facility_id: f,
+            privileges:
+              invite.user_class === "onsite"
+                ? `Onsite · ${invite.staff_type || "Staff"}`
+                : invite.specialty || "Consultative",
+          })),
+        );
+      }
+      await supabaseAdmin
+        .from("profiles")
+        .update({
+          role: invite.title || invite.staff_type || "Clinician",
+          dept: invite.department || invite.specialty || "General",
+          ...(facilities[0] ? { home_facility: facilities[0] } : {}),
+        })
+        .eq("id", context.userId);
+      if (invite.role === "admin")
+        await supabaseAdmin
+          .from("user_roles")
+          .upsert({ user_id: context.userId, role: "admin" }, { onConflict: "user_id,role" });
+    }
     return { ok: true as const };
   });
