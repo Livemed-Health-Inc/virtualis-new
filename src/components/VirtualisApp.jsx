@@ -6,6 +6,7 @@ import Inbox from "./virtualis/Inbox";
 import Thread from "./virtualis/Thread";
 import Alis from "./virtualis/Alis";
 import Telehealth from "./virtualis/Telehealth";
+import Auscultation from "./virtualis/Auscultation";
 import {
   Login,
   SetPassword,
@@ -403,7 +404,7 @@ function FacilityBar({ scope, active, setActive, counts, compact }) {
   );
 }
 
-function VFab({ onConsult, onAlis, onMessage, onTelehealth, float }) {
+function VFab({ onConsult, onAlis, onMessage, onTelehealth, onAuscultate, float }) {
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
@@ -470,11 +471,22 @@ function VFab({ onConsult, onAlis, onMessage, onTelehealth, float }) {
       ),
       run: onAlis,
     },
+    {
+      label: "Auscult",
+      icon: (
+        <Icon>
+          <path d="M6 3v5a4 4 0 0 0 8 0V3" />
+          <path d="M10 12v3a5 5 0 0 0 10 0v-1" />
+          <circle cx="20" cy="12" r="2" />
+        </Icon>
+      ),
+      run: onAuscultate,
+    },
   ];
 
   /* Upward fan: on web the V sits in the bottom-right corner, so actions
      bloom up and to the left; on mobile the V is centred above the tab bar. */
-  const angles = float ? [170, 150, 130, 110] : [150, 120, 75, 45];
+  const angles = float ? [176, 158, 140, 122, 104] : [156, 128, 90, 52, 24];
   const radius = float ? 150 : 146;
 
 
@@ -649,6 +661,7 @@ function Workstation() {
   const [openId, setOpenId] = useState(null);
   const [detailId, setDetailId] = useState(null);
   const [videoId, setVideoId] = useState(null);
+  const [auscultId, setAuscultId] = useState(undefined);
   const [consulting, setConsulting] = useState(false);
   const [composing, setComposing] = useState(false);
   const [routing, setRouting] = useState(null);
@@ -679,6 +692,7 @@ function Workstation() {
     setOpenId(null);
     setDetailId(null);
     setVideoId(null);
+    setAuscultId(undefined);
     setConsulting(false);
     setComposing(false);
     setRouting(null);
@@ -930,6 +944,7 @@ function Workstation() {
       onConsult={() => setConsulting(true)}
       onAlis={() => setTab("alis")}
       onMessage={() => setComposing(true)}
+      onAuscultate={() => setAuscultId(activeThread ? activeThread.id : null)}
       onTelehealth={() => {
         const target = activeThread || visible[0];
         if (target) {
@@ -1138,6 +1153,13 @@ function Workstation() {
             setVideoId(null);
             flash("Encounter note saved to " + (FACILITIES[videoThread.facility]?.emr || "chart"));
           }}
+        />
+      )}
+      {authed && auscultId !== undefined && (
+        <Auscultation
+          t={visible.find((t) => t.id === auscultId) || null}
+          threads={visible}
+          onClose={() => setAuscultId(undefined)}
         />
       )}
       {authed && creds && (
