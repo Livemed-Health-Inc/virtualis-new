@@ -11,7 +11,9 @@ export default function SessionWorkspace({ session, video, mintti, onEnd, onAusc
     patient: cart.patient || "Unassigned patient",
     room: cart.room,
   };
-  const preview = mode !== "live";
+  const live = mode === "live"; /* reserved for a future confirmed callback */
+  const handoff = mode === "handoff";
+  const preview = !live;
 
   return (
     <div
@@ -39,18 +41,20 @@ export default function SessionWorkspace({ session, video, mintti, onEnd, onAusc
         <span
           role="status"
           style={{
-            background: preview ? "#FEF3E2" : "#E7F8F0",
-            color: preview ? "#B54708" : "#05603A",
-            border: "1px solid " + (preview ? "#F79009" : "#12B76A") + "55",
+            background: live ? "#E7F8F0" : "#FEF3E2",
+            color: live ? "#05603A" : "#B54708",
+            border: "1px solid " + (live ? "#12B76A" : "#F79009") + "55",
             borderRadius: 20,
             padding: "5px 12px",
             fontSize: 12,
             fontWeight: 700,
           }}
         >
-          {preview
-            ? "Preview session — not a live clinical call"
-            : "Live session · HelloCare handoff"}
+          {live
+            ? "Live session · HelloCare confirmed"
+            : handoff
+              ? "HelloCare handoff opened — connection unverified"
+              : "Preview session — not a live clinical call"}
         </span>
         <span
           style={{

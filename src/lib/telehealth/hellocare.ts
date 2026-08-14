@@ -15,12 +15,21 @@ export function hellocareConfig(): { configured: boolean; url: string | null } {
   return { configured: !!url, url };
 }
 
-export function hellocareTrust(launched = false): { level: TrustLevel; reason: string } {
+/** A successful window.open is NOT proof the HelloCare call connected, and this
+    repo has no callback/SDK confirmation. So an opened handoff stays "available"
+    with an explicit unverified reason. "live" is reserved for a future verified
+    callback that sets confirmed = true. */
+export function hellocareTrust(
+  handoffOpened = false,
+  confirmed = false,
+): { level: TrustLevel; reason: string } {
   const { configured } = hellocareConfig();
   if (!configured)
     return { level: "setup", reason: "Adapter configuration pending — no launch URL configured" };
-  if (launched) return { level: "live", reason: "Launch handed off to HelloCare" };
-  return { level: "available", reason: "Configured — not launched yet" };
+  if (confirmed) return { level: "live", reason: "HelloCare confirmed the connected session" };
+  if (handoffOpened)
+    return { level: "available", reason: "Handoff opened — connection not yet confirmed" };
+  return { level: "available", reason: "Configured — handoff not opened yet" };
 }
 
 /** Opaque identifiers only. Returns null when nothing is configured. */

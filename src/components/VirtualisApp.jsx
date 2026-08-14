@@ -1131,8 +1131,12 @@ function Workstation() {
       ? buildLaunchUrl({ requestId: `req-${cart.id}`, deviceId: cart.id, nonce: newNonce() })
       : null;
     if (url) window.open(url, "_blank", "noopener");
-    fleet.beamIn(cart, url ? "live" : "preview");
-    flash(url ? `Session started · ${cart.name}` : `Preview session · ${cart.name}`);
+    fleet.beamIn(cart, url ? "handoff" : "preview");
+    flash(
+      url
+        ? `HelloCare handoff opened · ${cart.name} (connection unverified)`
+        : `Preview session · ${cart.name}`,
+    );
   };
   const nurseAction = (action, cart) => {
     if (action === "prepare") {
@@ -1360,7 +1364,7 @@ function Workstation() {
       {authed && fleet.session && (
         <SessionWorkspace
           session={fleet.session}
-          video={hellocareTrust(fleet.session.mode === "live")}
+          video={hellocareTrust(fleet.session.mode === "handoff", fleet.session.mode === "live")}
           mintti={minttiTrust({
             streaming: false,
             nativeHost: typeof window !== "undefined" && hasNativeHost(),
