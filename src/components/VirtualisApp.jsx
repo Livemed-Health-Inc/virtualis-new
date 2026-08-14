@@ -231,7 +231,7 @@ function MoreSheet({ onClose, onPick, onProfile, showDevices }) {
   const rows = [
     { k: "team", label: "Team directory" },
     { k: "schedule", label: "Schedule" },
-    ...(showDevices ? [] : [{ k: "devices", label: "Devices" }]),
+    ...(showDevices ? [{ k: "devices", label: "Devices" }] : []),
   ];
   return (
     <div
