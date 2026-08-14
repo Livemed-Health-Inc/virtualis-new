@@ -108,15 +108,15 @@ function TabBar({ tab, setTab, unread }) {
       onClick={() => setTab(item.k)}
       style={{
         all: "unset",
-         boxSizing: "border-box",
+        boxSizing: "border-box",
         cursor: "pointer",
         flex: 1,
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
         gap: 2,
-         padding: 0,
-         height: 44,
+        padding: 0,
+        height: 44,
         minHeight: 44,
         justifyContent: "center",
       }}
@@ -166,9 +166,9 @@ function TabBar({ tab, setTab, unread }) {
         background: "rgba(255,255,255,.92)",
         backdropFilter: "blur(20px)",
         borderTop: "1px solid " + T.line,
-         minHeight: 44,
-         paddingBottom: "env(safe-area-inset-bottom, 0px)",
-         boxSizing: "content-box",
+        minHeight: 44,
+        paddingBottom: "env(safe-area-inset-bottom, 0px)",
+        boxSizing: "content-box",
       }}
     >
       <Item t={TABS[0]} />
@@ -317,10 +317,21 @@ function Rail({ tab, setTab, unread, onNew, onNewMessage, onProfile, wide, me })
           boxSizing: "border-box",
         }}
       >
-        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#DCE7FF" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round">
+        <svg
+          width="19"
+          height="19"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="#DCE7FF"
+          strokeWidth="2.1"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
           <path d="M21 11.5a8.5 8.5 0 0 1-12.6 7.4L3 20.5l1.6-5.2A8.5 8.5 0 1 1 21 11.5Z" />
         </svg>
-        {wide && <span style={{ fontSize: 13.5, fontWeight: 620, color: "#DCE7FF" }}>New message</span>}
+        {wide && (
+          <span style={{ fontSize: 13.5, fontWeight: 620, color: "#DCE7FF" }}>New message</span>
+        )}
       </button>
       <button
         onClick={onProfile}
@@ -354,7 +365,10 @@ function FacilityBar({ scope, active, setActive, counts, compact }) {
     ...scope.map((id) => FACILITIES[id]),
   ];
   return (
-    <div className="vx-hscroll" style={{ display: "flex", gap: 8, paddingBottom: compact ? 4 : 10 }}>
+    <div
+      className="vx-hscroll"
+      style={{ display: "flex", gap: 8, paddingBottom: compact ? 4 : 10 }}
+    >
       {items.map((f) => {
         const on = active === f.id;
         const n = counts[f.id] || 0;
@@ -431,8 +445,6 @@ function VFab({ onConsult, onAlis, onMessage, onTelehealth, onAuscultate, float 
     </svg>
   );
 
-
-
   const actions = [
     {
       label: "Consult",
@@ -489,7 +501,6 @@ function VFab({ onConsult, onAlis, onMessage, onTelehealth, onAuscultate, float 
   const angles = float ? [176, 158, 140, 122, 104] : [156, 128, 90, 52, 24];
   const radius = float ? 150 : 146;
 
-
   return (
     <>
       {open && (
@@ -502,7 +513,7 @@ function VFab({ onConsult, onAlis, onMessage, onTelehealth, onAuscultate, float 
         style={{
           position: "absolute",
           zIndex: 41,
-           bottom: float ? 26 : "env(safe-area-inset-bottom, 0px)",
+          bottom: float ? 26 : "env(safe-area-inset-bottom, 0px)",
           left: float ? "auto" : 0,
           right: float ? 26 : 0,
           transform: "none",
@@ -581,7 +592,6 @@ function VFab({ onConsult, onAlis, onMessage, onTelehealth, onAuscultate, float 
                       boxShadow: "0 4px 12px rgba(27,63,160,.12)",
                     }}
                   >
-
                     {a.label}
                   </span>
                 </button>
@@ -617,7 +627,6 @@ function VFab({ onConsult, onAlis, onMessage, onTelehealth, onAuscultate, float 
           </button>
         </div>
       </div>
-
     </>
   );
 }
@@ -673,8 +682,8 @@ function Workstation() {
 
   // Invite links return here with an invite/recovery grant; the clinician sets
   // their own password before the workstation opens.
-  const [needsPassword, setNeedsPassword] = useState(() =>
-    typeof window !== "undefined" && /type=(invite|recovery)/.test(window.location.hash),
+  const [needsPassword, setNeedsPassword] = useState(
+    () => typeof window !== "undefined" && /type=(invite|recovery)/.test(window.location.hash),
   );
   useEffect(() => {
     if (needsPassword && typeof window !== "undefined")
@@ -755,7 +764,9 @@ function Workstation() {
     if (!id) return flash("Could not start that conversation");
     setTab("inbox");
     setOpenId(id);
-    flash(group ? `Group started · ${recipients.length} providers` : `Chat started · ${first.name}`);
+    flash(
+      group ? `Group started · ${recipients.length} providers` : `Chat started · ${first.name}`,
+    );
   };
 
   const sendConsult = (payload) => {
@@ -792,7 +803,9 @@ function Workstation() {
     <div style={{ marginBottom: multiPane ? 6 : 7 }}>
       <div style={{ display: "flex", alignItems: "center", gap: 9 }}>
         {!multiPane && <VMark size={26} />}
-        <div style={{ minWidth: 0, display: "flex", alignItems: "baseline", gap: 8, flexWrap: "wrap" }}>
+        <div
+          style={{ minWidth: 0, display: "flex", alignItems: "baseline", gap: 8, flexWrap: "wrap" }}
+        >
           <div
             style={{
               fontSize: multiPane ? 16 : 16,
@@ -837,17 +850,23 @@ function Workstation() {
               justifyContent: "center",
             }}
           >
-            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke={T.blueDeep} strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round">
+            <svg
+              width="17"
+              height="17"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke={T.blueDeep}
+              strokeWidth="2.1"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
               <path d="M21 11.5a8.5 8.5 0 0 1-12.6 7.4L3 20.5l1.6-5.2A8.5 8.5 0 1 1 21 11.5Z" />
               <path d="M12 8.5v6M9 11.5h6" />
             </svg>
           </button>
         )}
         {!multiPane && (
-          <button
-            onClick={() => setCreds(true)}
-            style={{ all: "unset", cursor: "pointer" }}
-          >
+          <button onClick={() => setCreds(true)} style={{ all: "unset", cursor: "pointer" }}>
             <Avatar initials={me.initials} team size={32} />
           </button>
         )}
@@ -863,8 +882,6 @@ function Workstation() {
       </div>
     </div>
   );
-
-
 
   const inboxPane = (
     <Inbox
@@ -918,8 +935,6 @@ function Workstation() {
     </button>
   );
 
-
-
   const pushed = composing ? (
     <NewMessage
       onBack={() => setComposing(false)}
@@ -957,7 +972,6 @@ function Workstation() {
     />
   );
 
-
   const related = activeThread
     ? visible.filter((t) => t.id !== activeThread.id && patientKey(t) === patientKey(activeThread))
     : [];
@@ -992,7 +1006,6 @@ function Workstation() {
           </div>
           {vfab(false)}
           <TabBar tab={tab} setTab={setTab} unread={unread} />
-
         </>
       ));
   } else {
@@ -1088,8 +1101,6 @@ function Workstation() {
         )}
         {!secondary && vfab(true)}
       </div>
-
-
     );
   }
 

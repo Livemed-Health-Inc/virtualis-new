@@ -51,9 +51,11 @@ export function Spectrum({
     return () => cancelAnimationFrame(raf);
   }, [analyser, active, trace, grid]);
 
-  return <canvas
+  return (
+    <canvas
       ref={canvasRef}
       style={{ width: "100%", height: "100%", display: "block" }}
       aria-label="Frequency spectrum"
-    />;
+    />
+  );
 }

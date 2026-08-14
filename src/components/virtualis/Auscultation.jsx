@@ -414,11 +414,7 @@ export default function Auscultation({ t, threads = [], onClose }) {
                   </Chip>
                 </>
               ) : (
-                <Chip
-                  wide
-                  on
-                  onClick={s.status === "scanning" ? undefined : s.scan}
-                >
+                <Chip wide on onClick={s.status === "scanning" ? undefined : s.scan}>
                   {s.status === "scanning" || s.status === "connecting"
                     ? "Pairing…"
                     : "Pair stethoscope"}

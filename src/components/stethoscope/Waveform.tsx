@@ -26,7 +26,6 @@ export function Waveform({
     const COLUMNS = 320;
     const data = analyser ? new Uint8Array(analyser.fftSize) : null;
 
-
     const render = () => {
       raf = requestAnimationFrame(render);
       const dpr = window.devicePixelRatio || 1;
@@ -80,9 +79,11 @@ export function Waveform({
     return () => cancelAnimationFrame(raf);
   }, [analyser, active, trace, grid]);
 
-  return <canvas
+  return (
+    <canvas
       ref={canvasRef}
       style={{ width: "100%", height: "100%", display: "block" }}
       aria-label="Live auscultation waveform"
-    />;
+    />
+  );
 }

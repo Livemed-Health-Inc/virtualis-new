@@ -63,7 +63,7 @@ export function imaDecode(
       else if (state.sample < -32768) state.sample = -32768;
       out[o++] = state.sample;
 
-      const predictorDiff = (((nibble & 7) * step) + step) >> 2;
+      const predictorDiff = ((nibble & 7) * step + step) >> 2;
       state.predictor += nibble & 8 ? -predictorDiff : predictorDiff;
       if (state.predictor > 32767) state.predictor = 32767;
       else if (state.predictor < -32768) state.predictor = -32768;

@@ -348,7 +348,10 @@ export function createWebBluetoothTransport(): MinttiTransport {
     reconnecting = false;
     streaming = false;
     emit({ type: "captureState", capturing: false });
-    emit({ type: "diag", message: "Could not reconnect. Power-cycle the stethoscope and scan again." });
+    emit({
+      type: "diag",
+      message: "Could not reconnect. Power-cycle the stethoscope and scan again.",
+    });
   };
 
   const handle = async (command: MinttiCommand) => {
