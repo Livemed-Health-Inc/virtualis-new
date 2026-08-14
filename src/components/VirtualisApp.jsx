@@ -100,12 +100,49 @@ const TABS = [
       </svg>
     ),
   },
+  {
+    k: "devices",
+    label: "Devices",
+    icon: (c) => (
+      <svg
+        width="22"
+        height="22"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke={c}
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <rect x="3" y="4.5" width="14" height="10" rx="2.5" />
+        <path d="M10 14.5V21M6.5 21h7M17 8h3.5v9H17" />
+      </svg>
+    ),
+  },
+  {
+    k: "more",
+    label: "More",
+    icon: (c) => (
+      <svg width="22" height="22" viewBox="0 0 24 24" fill={c}>
+        <circle cx="5" cy="12" r="1.9" />
+        <circle cx="12" cy="12" r="1.9" />
+        <circle cx="19" cy="12" r="1.9" />
+      </svg>
+    ),
+  },
 ];
 
-function TabBar({ tab, setTab, unread }) {
+const byKey = (k) => TABS.find((t) => t.k === k);
+
+/* Provider-like roles get the dedicated Devices tab; anything unrecognised
+   keeps access so the default "Virtual Provider" is never locked out. */
+const NON_PROVIDER = /nurse|rn\b|tech|admin|coordinator|clerk/i;
+export const canUseDevices = (role) => !NON_PROVIDER.test(role || "");
+
+function TabBar({ tab, setTab, unread, items, onMore }) {
   const Item = ({ t: item }) => (
     <button
-      onClick={() => setTab(item.k)}
+      onClick={() => (item.k === "more" ? onMore() : setTab(item.k))}
       style={{
         all: "unset",
         boxSizing: "border-box",
