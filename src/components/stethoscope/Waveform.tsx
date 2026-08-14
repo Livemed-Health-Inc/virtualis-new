@@ -1,7 +1,17 @@
 import { useEffect, useRef } from "react";
 
 /** Live oscilloscope trace of the auscultation signal. */
-export function Waveform({ analyser, active }: { analyser: AnalyserNode | null; active: boolean }) {
+export function Waveform({
+  analyser,
+  active,
+  trace = "#4C8DFF",
+  grid = "rgba(255,255,255,.10)",
+}: {
+  analyser: AnalyserNode | null;
+  active: boolean;
+  trace?: string;
+  grid?: string;
+}) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
   useEffect(() => {
@@ -16,9 +26,6 @@ export function Waveform({ analyser, active }: { analyser: AnalyserNode | null; 
     const COLUMNS = 320;
     const data = analyser ? new Uint8Array(analyser.fftSize) : null;
 
-    const css = getComputedStyle(document.documentElement);
-    const trace = `oklch(${css.getPropertyValue("--trace").trim()})`;
-    const grid = `oklch(${css.getPropertyValue("--grid").trim()})`;
 
     const render = () => {
       raf = requestAnimationFrame(render);
@@ -71,7 +78,11 @@ export function Waveform({ analyser, active }: { analyser: AnalyserNode | null; 
 
     render();
     return () => cancelAnimationFrame(raf);
-  }, [analyser, active]);
+  }, [analyser, active, trace, grid]);
 
-  return <canvas ref={canvasRef} className="h-full w-full" aria-label="Live auscultation waveform" />;
+  return <canvas
+      ref={canvasRef}
+      style={{ width: "100%", height: "100%", display: "block" }}
+      aria-label="Live auscultation waveform"
+    />;
 }

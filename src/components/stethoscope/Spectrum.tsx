@@ -1,7 +1,17 @@
 import { useEffect, useRef } from "react";
 
 /** Frequency-band bars showing where energy sits in the auscultation signal. */
-export function Spectrum({ analyser, active }: { analyser: AnalyserNode | null; active: boolean }) {
+export function Spectrum({
+  analyser,
+  active,
+  trace = "#4C8DFF",
+  grid = "rgba(255,255,255,.10)",
+}: {
+  analyser: AnalyserNode | null;
+  active: boolean;
+  trace?: string;
+  grid?: string;
+}) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
   useEffect(() => {
@@ -10,9 +20,6 @@ export function Spectrum({ analyser, active }: { analyser: AnalyserNode | null; 
     if (!canvas || !ctx) return;
     let raf = 0;
     const data = analyser ? new Uint8Array(analyser.frequencyBinCount) : null;
-    const css = getComputedStyle(document.documentElement);
-    const bar = `oklch(${css.getPropertyValue("--trace").trim()})`;
-    const dim = `oklch(${css.getPropertyValue("--grid").trim()})`;
 
     const render = () => {
       raf = requestAnimationFrame(render);
@@ -36,13 +43,17 @@ export function Spectrum({ analyser, active }: { analyser: AnalyserNode | null; 
         const idx = Math.floor(Math.pow(i / bars, 1.6) * ((data?.length ?? bars) / 6));
         const v = data && active ? (data[idx] ?? 0) / 255 : 0;
         const bh = Math.max(2, v * h);
-        ctx.fillStyle = v > 0.02 ? bar : dim;
+        ctx.fillStyle = v > 0.02 ? trace : grid;
         ctx.fillRect(i * bw + 1, h - bh, bw - 2, bh);
       }
     };
     render();
     return () => cancelAnimationFrame(raf);
-  }, [analyser, active]);
+  }, [analyser, active, trace, grid]);
 
-  return <canvas ref={canvasRef} className="h-full w-full" aria-label="Frequency spectrum" />;
+  return <canvas
+      ref={canvasRef}
+      style={{ width: "100%", height: "100%", display: "block" }}
+      aria-label="Frequency spectrum"
+    />;
 }
