@@ -105,6 +105,13 @@ export function StethoscopeProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => () => client?.destroy(), [client]);
 
+  // Once per app (covers both / and /device): silently re-attach to a device this
+  // browser has already been granted. This never prompts — first-time pairing
+  // stays behind the explicit user-gesture Pair action — and never auto-captures.
+  useEffect(() => {
+    void client?.autoPair();
+  }, [client]);
+
   const state = useSyncExternalStore(
     client ? client.subscribe : noopSubscribe,
     client ? client.getState : () => SSR_STATE,
