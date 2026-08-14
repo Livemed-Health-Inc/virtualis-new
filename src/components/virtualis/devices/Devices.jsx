@@ -8,7 +8,7 @@ import Preflight from "./Preflight";
 
 const STATE_FILTERS = ["all", ...Object.keys(CART_STATES)];
 
-export default function Devices({ carts, scope, onBeam, onNurse, onMessage, embedded }) {
+export default function Devices({ carts, scope, onBeam, onNurse, onMessage, embedded, nurse }) {
   const [facility, setFacility] = useState("all");
   const [state, setState] = useState("all");
   const [q, setQ] = useState("");
