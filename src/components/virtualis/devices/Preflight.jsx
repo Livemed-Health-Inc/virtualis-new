@@ -136,7 +136,11 @@ export default function Preflight({ cart, video, mintti, onClose, onBeam }) {
             fontWeight: 680,
           }}
         >
-          {video.level === "live" ? "Beam in" : "Beam in · preview session"}
+          {video.level === "live"
+            ? "Join live session"
+            : video.level === "available"
+              ? "Open HelloCare handoff"
+              : "Beam in · preview session"}
         </button>
       </div>
     </div>

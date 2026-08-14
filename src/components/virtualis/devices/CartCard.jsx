@@ -111,7 +111,13 @@ export default function CartCard({ cart, video, mintti, onPreflight, onBeam, onN
         <Action label="Preflight" onClick={() => onPreflight(cart)} />
         <Action
           primary
-          label={video.level === "live" ? "Beam in" : "Beam in (preview)"}
+          label={
+            video.level === "live"
+              ? "Join live session"
+              : video.level === "available"
+                ? "Open HelloCare handoff"
+                : "Beam in (preview)"
+          }
           disabled={busy}
           onClick={() => onBeam(cart)}
         />
