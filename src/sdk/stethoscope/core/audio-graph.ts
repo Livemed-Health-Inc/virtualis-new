@@ -155,8 +155,22 @@ export async function createAudioGraph(s: GraphSettings): Promise<AudioGraph> {
   monitor.connect(ctx.destination);
 
   return {
-    ctx, pcm, hp, hp2, lp, lp2, lp3, heartPeak, shelf, makeup, gate,
-    detectAnalyser, gain, monitor, analyser, broadcast,
+    ctx,
+    pcm,
+    hp,
+    hp2,
+    lp,
+    lp2,
+    lp3,
+    heartPeak,
+    shelf,
+    makeup,
+    gate,
+    detectAnalyser,
+    gain,
+    monitor,
+    analyser,
+    broadcast,
   };
 }
 

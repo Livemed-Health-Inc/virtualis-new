@@ -119,7 +119,7 @@ interface WebkitHost {
 export function hasNativeHost(): boolean {
   if (typeof window === "undefined") return false;
   const w = window as unknown as WebkitHost & { MinttiHost?: unknown };
-  return Boolean(w.webkit?.messageHandlers?.['mintti'] || w.MinttiHost);
+  return Boolean(w.webkit?.messageHandlers?.["mintti"] || w.MinttiHost);
 }
 
 /** Decodes base64 16-bit LE PCM coming from the native side. */
@@ -139,14 +139,17 @@ export function createNativeTransport(): MinttiTransport {
 
   // The native layer calls window.__minttiEmit(payload) for every delegate callback.
   w.__minttiEmit = (raw: unknown) => {
-    const msg = typeof raw === "string" ? (JSON.parse(raw) as Record<string, unknown>) : (raw as Record<string, unknown>);
-    if (!msg || typeof msg['type'] !== "string") return;
+    const msg =
+      typeof raw === "string"
+        ? (JSON.parse(raw) as Record<string, unknown>)
+        : (raw as Record<string, unknown>);
+    if (!msg || typeof msg["type"] !== "string") return;
     const event =
-      msg['type'] === "audio"
+      msg["type"] === "audio"
         ? ({
             type: "audio",
-            channel: (msg['channel'] as AudioChannel) ?? "result",
-            pcm: decodePcm(String(msg['pcm'] ?? "")),
+            channel: (msg["channel"] as AudioChannel) ?? "result",
+            pcm: decodePcm(String(msg["pcm"] ?? "")),
           } satisfies MinttiEvent)
         : (msg as unknown as MinttiEvent);
     listeners.forEach((l) => l(event));
@@ -155,7 +158,7 @@ export function createNativeTransport(): MinttiTransport {
   return {
     kind: "native",
     send(command) {
-      const handler = w.webkit?.messageHandlers?.['mintti'];
+      const handler = w.webkit?.messageHandlers?.["mintti"];
       if (handler) handler.postMessage(command);
       else w.MinttiHost?.postMessage?.(JSON.stringify(command));
     },
@@ -214,7 +217,10 @@ export function createSimulatorTransport(): MinttiTransport {
       emit({ type: "audio", channel: "result", pcm: frame() });
     }, 50);
     timers.push(
-      window.setInterval(() => emit({ type: "heartRate", bpm: 68 + Math.round(Math.random() * 8) }), 3000),
+      window.setInterval(
+        () => emit({ type: "heartRate", bpm: 68 + Math.round(Math.random() * 8) }),
+        3000,
+      ),
     );
   };
 
@@ -225,11 +231,23 @@ export function createSimulatorTransport(): MinttiTransport {
         case "startScan":
           emit({ type: "bleState", available: true });
           window.setTimeout(
-            () => emit({ type: "scanResult", uuid: "SIM-0001-SMARTHO", name: "Smartho-P (demo)", rssi: -52 }),
+            () =>
+              emit({
+                type: "scanResult",
+                uuid: "SIM-0001-SMARTHO",
+                name: "Smartho-P (demo)",
+                rssi: -52,
+              }),
             400,
           );
           window.setTimeout(
-            () => emit({ type: "scanResult", uuid: "SIM-0002-SMARTHO", name: "Smartho-P (demo 2)", rssi: -71 }),
+            () =>
+              emit({
+                type: "scanResult",
+                uuid: "SIM-0002-SMARTHO",
+                name: "Smartho-P (demo 2)",
+                rssi: -71,
+              }),
             1100,
           );
           break;
@@ -285,8 +303,7 @@ export function createSimulatorTransport(): MinttiTransport {
 }
 
 export async function createMinttiTransport(preferred?: TransportKind): Promise<MinttiTransport> {
-  const kind: TransportKind =
-    preferred ?? (hasNativeHost() ? "native" : "simulator");
+  const kind: TransportKind = preferred ?? (hasNativeHost() ? "native" : "simulator");
   if (kind === "native") return createNativeTransport();
   if (kind === "webble") {
     const { createWebBluetoothTransport } = await import("./webble");

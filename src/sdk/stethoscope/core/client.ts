@@ -112,8 +112,7 @@ export class StethoscopeClient {
 
   constructor(opts: StethoscopeClientOptions = {}) {
     this.kind =
-      opts.transport ??
-      (hasNativeHost() ? "native" : hasWebBluetooth() ? "webble" : "simulator");
+      opts.transport ?? (hasNativeHost() ? "native" : hasWebBluetooth() ? "webble" : "simulator");
     const settings = { ...DEFAULT_SETTINGS, ...opts.settings };
     this.state = {
       ...settings,

@@ -348,7 +348,10 @@ export function createWebBluetoothTransport(): MinttiTransport {
     reconnecting = false;
     streaming = false;
     emit({ type: "captureState", capturing: false });
-    emit({ type: "diag", message: "Could not reconnect. Power-cycle the stethoscope and scan again." });
+    emit({
+      type: "diag",
+      message: "Could not reconnect. Power-cycle the stethoscope and scan again.",
+    });
   };
 
   const handle = async (command: MinttiCommand) => {
@@ -377,8 +380,7 @@ export function createWebBluetoothTransport(): MinttiTransport {
         };
         if (!bt?.getDevices) return;
         const known = await bt.getDevices();
-        const match =
-          known.find((d) => /smartho|mintti/i.test(d.name ?? "")) ?? known[0] ?? null;
+        const match = known.find((d) => /smartho|mintti/i.test(d.name ?? "")) ?? known[0] ?? null;
         if (!match) return;
         device = match;
         emit({
