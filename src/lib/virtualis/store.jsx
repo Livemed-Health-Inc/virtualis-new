@@ -99,7 +99,7 @@ export function VirtualisProvider({ children }) {
     }
     const [p, c, ct, sh, th, rd] = await Promise.all([
       supabase.from("profiles").select("*").eq("id", userId).maybeSingle(),
-      supabase.from("provider_credentials").select("*"),
+      supabase.from("provider_credentials").select("*").eq("user_id", userId),
       supabase.from("care_team").select("*").order("name"),
       supabase.from("shifts").select("*"),
       supabase.from("threads").select("*").order("last_message_at", { ascending: false }),
