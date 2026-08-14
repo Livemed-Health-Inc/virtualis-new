@@ -208,18 +208,109 @@ function TabBar({ tab, setTab, unread, items, onMore }) {
         boxSizing: "content-box",
       }}
     >
-      <Item t={TABS[0]} />
-      <Item t={TABS[1]} />
+      <Item t={items[0]} />
+      <Item t={items[1]} />
       {/* Space for the floating V trigger, which overlays this slot. */}
       <span style={{ width: 54, margin: "0 8px", flexShrink: 0 }} aria-hidden />
 
-      <Item t={TABS[2]} />
-      <Item t={TABS[3]} />
+      <Item t={items[2]} />
+      <Item t={items[3]} />
     </div>
   );
 }
 
-function Rail({ tab, setTab, unread, onNew, onNewMessage, onProfile, wide, me }) {
+/* Mobile "More": keeps Team, Schedule and Account one tap away while the
+   bottom bar surfaces Devices. */
+function MoreSheet({ onClose, onPick, onProfile, showDevices }) {
+  const rows = [
+    { k: "team", label: "Team directory" },
+    { k: "schedule", label: "Schedule" },
+    ...(showDevices ? [] : [{ k: "devices", label: "Devices" }]),
+  ];
+  return (
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-label="More"
+      onClick={onClose}
+      style={{
+        position: "absolute",
+        inset: 0,
+        zIndex: 84,
+        background: "rgba(16,24,40,.35)",
+        display: "flex",
+        alignItems: "flex-end",
+      }}
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        style={{
+          background: "#fff",
+          width: "100%",
+          borderRadius: "22px 22px 0 0",
+          padding: "14px 14px calc(18px + env(safe-area-inset-bottom, 0px))",
+          display: "grid",
+          gap: 8,
+          animation: "rise .25s ease",
+        }}
+      >
+        {rows.map((r) => (
+          <button
+            key={r.k}
+            onClick={() => {
+              onPick(r.k);
+              onClose();
+            }}
+            style={{
+              all: "unset",
+              cursor: "pointer",
+              padding: "13px 14px",
+              borderRadius: 14,
+              border: "1px solid " + T.line,
+              fontSize: 14.5,
+              fontWeight: 620,
+            }}
+          >
+            {r.label}
+          </button>
+        ))}
+        <button
+          onClick={() => {
+            onProfile();
+            onClose();
+          }}
+          style={{
+            all: "unset",
+            cursor: "pointer",
+            padding: "13px 14px",
+            borderRadius: 14,
+            border: "1px solid " + T.line,
+            fontSize: 14.5,
+            fontWeight: 620,
+          }}
+        >
+          Account
+        </button>
+        <button
+          onClick={onClose}
+          style={{
+            all: "unset",
+            cursor: "pointer",
+            textAlign: "center",
+            padding: "12px 0",
+            fontSize: 13.5,
+            fontWeight: 620,
+            color: T.sub,
+          }}
+        >
+          Close
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function Rail({ tab, setTab, unread, onNew, onNewMessage, onProfile, wide, me, items }) {
   return (
     <div
       style={{
