@@ -1,11 +1,16 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import type { SupabaseClient } from "@supabase/supabase-js";
+import type { Database } from "@/integrations/supabase/types";
+
 
 /* Invite-only access control. Every handler re-verifies the caller is an
    admin against RLS-scoped queries before touching privileged APIs. */
 
-async function assertAdmin(context: any) {
+type AdminCtx = { userId: string; supabase: SupabaseClient<Database> };
+
+async function assertAdmin(context: AdminCtx) {
   const { data, error } = await context.supabase.rpc("has_role", {
     _user_id: context.userId,
     _role: "admin",
@@ -103,7 +108,7 @@ export const revokeInvite = createServerFn({ method: "POST" })
 export const claimInvite = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    const email = (context.claims as any)?.email as string | undefined;
+    const email = (context.claims as { email?: string })?.email;
     if (!email) return { ok: false as const };
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
