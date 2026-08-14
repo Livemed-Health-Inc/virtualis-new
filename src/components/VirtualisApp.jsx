@@ -814,6 +814,7 @@ function Workstation() {
   const [listCollapsed, setListCollapsed] = useState(false);
   const [more, setMore] = useState(false);
 
+  const nurseMode = isNurseRole(me?.role);
   const showDevices = canUseDevices(me?.role);
   const railTabs = ["inbox", "team", ...(showDevices ? ["devices"] : []), "alis", "schedule"].map(
     byKey,
