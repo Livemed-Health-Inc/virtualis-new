@@ -73,10 +73,13 @@ export default function Devices({ carts, scope, onBeam, onNurse, onMessage, embe
     >
       <div style={{ maxWidth: 1080, margin: "0 auto", display: "grid", gap: 12 }}>
         <div>
-          <h1 style={{ fontSize: 19, fontWeight: 740, letterSpacing: -0.4, margin: 0 }}>Devices</h1>
+          <h1 style={{ fontSize: 19, fontWeight: 740, letterSpacing: -0.4, margin: 0 }}>
+            {nurse ? "Devices · Bedside" : "Devices"}
+          </h1>
           <div style={{ fontSize: 12.5, color: T.sub, marginTop: 2 }}>
-            Carts and bedside stations across your credentialed facilities. Prototype fleet data.
-          </div>
+            {nurse
+              ? "Prepare carts, mark them ready and request a clinician for your unit. Prototype fleet data."
+              : "Carts and bedside stations across your credentialed facilities. Prototype fleet data."}
         </div>
 
         <input
