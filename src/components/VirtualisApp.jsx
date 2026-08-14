@@ -1117,6 +1117,40 @@ function Workstation() {
     ? visible.filter((t) => t.id !== activeThread.id && patientKey(t) === patientKey(activeThread))
     : [];
 
+  /* Devices workflow. Every transition below is local prototype state —
+     nothing is written to the backend by preparing or requesting a cart. */
+  const beamIn = (cart) => {
+    const { configured } = hellocareConfig();
+    const url = configured
+      ? buildLaunchUrl({ requestId: `req-${cart.id}`, deviceId: cart.id, nonce: newNonce() })
+      : null;
+    if (url) window.open(url, "_blank", "noopener");
+    fleet.beamIn(cart, url ? "live" : "preview");
+    flash(url ? `Session started · ${cart.name}` : `Preview session · ${cart.name}`);
+  };
+  const nurseAction = (action, cart) => {
+    if (action === "prepare") {
+      fleet.prepare(cart.id);
+      flash(`${cart.name} · preparing`);
+    } else if (action === "ready") {
+      fleet.markReady(cart.id);
+      flash(`${cart.name} · marked ready by nurse`);
+    } else {
+      fleet.requestClinician(cart.id, cart.acuity || "urgent");
+      flash(`${cart.name} · clinician requested (prototype)`);
+    }
+  };
+  const devicesPane = (
+    <Devices
+      carts={fleet.carts}
+      scope={scope}
+      embedded={multiPane}
+      onBeam={beamIn}
+      onNurse={nurseAction}
+      onMessage={() => setComposing(true)}
+    />
+  );
+
   let content;
   if (!authed) {
     content = ready ? <Login /> : null;
