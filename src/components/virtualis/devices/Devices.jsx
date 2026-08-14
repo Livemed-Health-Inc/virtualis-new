@@ -80,6 +80,7 @@ export default function Devices({ carts, scope, onBeam, onNurse, onMessage, embe
             {nurse
               ? "Prepare carts, mark them ready and request a clinician for your unit. Prototype fleet data."
               : "Carts and bedside stations across your credentialed facilities. Prototype fleet data."}
+          </div>
         </div>
 
         <input
