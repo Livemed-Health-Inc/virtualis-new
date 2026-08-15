@@ -1,5 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { PRESENCE_TTL_MS, canTransition, effectivePresence, kioskBody, shouldChime } from "./core";
+import {
+  PRESENCE_TTL_MS,
+  canRespond,
+  canTransition,
+  effectivePresence,
+  kioskBody,
+  shouldChime,
+} from "./core";
 
 const NOW = Date.UTC(2026, 0, 1, 12, 0, 0);
 const at = (msAgo: number) => new Date(NOW - msAgo).toISOString();
@@ -112,24 +119,34 @@ describe("respond authorization", () => {
   });
   it("refuses a clinician from another facility", () => {
     expect(canRespond(outsider, req, "accepted")).toBe(false);
-    expect(canRespond(outsider, { ...req, status: "accepted", provider_id: outsider.userId }, "ended")).toBe(false);
+    expect(
+      canRespond(outsider, { ...req, status: "accepted", provider_id: outsider.userId }, "ended"),
+    ).toBe(false);
   });
   it("refuses a signed-out caller", () => {
     expect(canRespond({ userId: null, facilities: ["saint"] }, req, "accepted")).toBe(false);
   });
   it("refuses re-answering an already answered request", () => {
-    expect(canRespond(clinician, { ...req, status: "accepted", provider_id: UUID }, "accepted")).toBe(false);
+    expect(
+      canRespond(clinician, { ...req, status: "accepted", provider_id: UUID }, "accepted"),
+    ).toBe(false);
     expect(canRespond(clinician, { ...req, status: "declined" }, "accepted")).toBe(false);
     expect(canRespond(clinician, { ...req, status: "cancelled" }, "accepted")).toBe(false);
   });
   it("only lets the bound provider end an accepted encounter", () => {
-    const accepted = { ...req, status: "accepted" as const, provider_id: "33333333-3333-4333-8333-333333333333" };
+    const accepted = {
+      ...req,
+      status: "accepted" as const,
+      provider_id: "33333333-3333-4333-8333-333333333333",
+    };
     expect(canRespond(clinician, accepted, "ended")).toBe(false);
     expect(canRespond(clinician, { ...accepted, provider_id: UUID }, "ended")).toBe(true);
   });
   it("allows an administrator to answer or end across facilities", () => {
     expect(canRespond(admin, req, "declined")).toBe(true);
-    expect(canRespond(admin, { ...req, status: "accepted", provider_id: UUID }, "ended")).toBe(true);
+    expect(canRespond(admin, { ...req, status: "accepted", provider_id: UUID }, "ended")).toBe(
+      true,
+    );
   });
   it("never allows cancelled or requested as a clinician answer", () => {
     expect(canRespond(clinician, req, "cancelled")).toBe(false);
