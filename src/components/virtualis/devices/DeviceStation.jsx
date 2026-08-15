@@ -65,13 +65,11 @@ const TOKEN_KEY = "virtualis.device.token";
 
 export default function DeviceStation() {
   const [cartId, setCartId] = useState(null);
-  const [room, setRoom] = useState("");
-  const [patient, setPatient] = useState("");
   const [acuity, setAcuity] = useState("urgent");
-  const [reason, setReason] = useState("");
   const [spec, setSpec] = useState(null);
   const [q, setQ] = useState("");
   const [sent, setSent] = useState(null);
+
 
   /* Provisioning: a tablet becomes a real bedside station only after an
      administrator's single-use code pairs it to one registered cart. Until
@@ -238,23 +236,22 @@ export default function DeviceStation() {
     return shell(
       <>
         <Card
-          title={sent.call ? "Connecting to on-call" : "Consult packaged and sent"}
+          title={sent.call ? "Connecting to on-call" : "Consult request sent"}
           hint={
             sent.call
               ? "The on-call clinician for this specialty is being paged from this cart."
-              : "The receiving clinician sees the room, acuity and reason before they answer."
+              : "The receiving clinician sees the cart, room and urgency before they answer."
           }
         >
           <div style={{ fontSize: 14.5, lineHeight: 1.6 }}>
             <strong>{sent.spec}</strong> on call
             <br />
-            {cart.name} · Rm {sent.room || cart.room}
-            {sent.patient ? ` · ${sent.patient}` : ""}
+            {cart.name}
+            {cart.room ? ` · Rm ${cart.room}` : ""}
             <br />
             <span style={{ color: ACUITY[sent.acuity].color, fontWeight: 680 }}>
               {ACUITY[sent.acuity].label}
             </span>
-            {sent.reason ? ` · ${sent.reason}` : ""}
           </div>
           <div style={{ fontSize: 12.5, color: T.sub }}>
             Video channel: {TRUST[video.level].label} — {video.reason}. Prototype device: nothing is
@@ -265,22 +262,37 @@ export default function DeviceStation() {
             onClick={() => {
               setSent(null);
               setSpec(null);
-              setReason("");
             }}
           >
             Done
           </button>
         </Card>
+
       </>,
     );
   }
 
   return shell(
     <>
-      <header style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+      <header
+        style={{
+          position: "sticky",
+          top: 0,
+          zIndex: 2,
+          display: "flex",
+          alignItems: "center",
+          gap: 10,
+          flexWrap: "wrap",
+          padding: "10px 0",
+          background: T.bg,
+        }}
+      >
         <div style={{ flex: 1, minWidth: 200 }}>
-          <h1 style={{ margin: 0, fontSize: 20, fontWeight: 760, letterSpacing: -0.4 }}>
+          <h1 style={{ margin: 0, fontSize: 18.5, fontWeight: 760, letterSpacing: -0.4 }}>
             {cart.name}
+            <span style={{ color: T.sub, fontWeight: 600 }}>
+              {cart.room ? ` · Rm ${cart.room}` : ""}
+            </span>
           </h1>
           <div style={{ fontSize: 12.5, color: T.sub }}>
             {cart.facilityName || FACILITIES[cart.facility]?.name} · {cart.unit} ·{" "}
@@ -294,51 +306,26 @@ export default function DeviceStation() {
         )}
       </header>
 
-      <Card title="Patient context" hint="Optional, but it makes the consult far faster to answer.">
-        <div style={{ display: "grid", gap: 10, gridTemplateColumns: "repeat(auto-fit,minmax(180px,1fr))" }}>
-          <input
-            style={inputStyle}
-            value={room}
-            onChange={(e) => setRoom(e.target.value)}
-            placeholder={`Room (default ${cart.room})`}
-            aria-label="Room"
-          />
-          <input
-            style={inputStyle}
-            value={patient}
-            onChange={(e) => setPatient(e.target.value)}
-            placeholder="Patient or MRN"
-            aria-label="Patient or MRN"
-          />
-        </div>
-        <input
-          style={inputStyle}
-          value={reason}
-          onChange={(e) => setReason(e.target.value)}
-          placeholder="Reason for consult"
-          aria-label="Reason for consult"
-        />
-        <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-          {Object.keys(ACUITY).map((a) => (
-            <button
-              key={a}
-              aria-pressed={acuity === a}
-              onClick={() => setAcuity(a)}
-              style={{
-                ...btn(false),
-                minHeight: 44,
-                padding: "0 14px",
-                gap: 8,
-                borderColor: acuity === a ? ACUITY[a].color : T.line,
-                background: acuity === a ? ACUITY[a].color + "12" : "#fff",
-              }}
-            >
-              <Glyph level={a} size={14} />
-              <span style={{ marginLeft: 8 }}>{ACUITY[a].label}</span>
-            </button>
-          ))}
-        </div>
-      </Card>
+      <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }} role="group" aria-label="Urgency">
+        {Object.keys(ACUITY).map((a) => (
+          <button
+            key={a}
+            aria-pressed={acuity === a}
+            onClick={() => setAcuity(a)}
+            style={{
+              ...btn(false),
+              flex: "1 1 140px",
+              minHeight: 48,
+              padding: "0 14px",
+              borderColor: acuity === a ? ACUITY[a].color : T.line,
+              background: acuity === a ? ACUITY[a].color + "12" : "#fff",
+            }}
+          >
+            <Glyph level={a} size={14} />
+            <span style={{ marginLeft: 8 }}>{ACUITY[a].label}</span>
+          </button>
+        ))}
+      </div>
 
       <Card
         title="On call now"
@@ -354,7 +341,7 @@ export default function DeviceStation() {
         <div
           style={{
             display: "grid",
-            gap: 8,
+            gap: 10,
             gridTemplateColumns: "repeat(auto-fit,minmax(200px,1fr))",
           }}
         >
@@ -365,9 +352,12 @@ export default function DeviceStation() {
               onClick={() => setSpec(s)}
               style={{
                 ...btn(false),
+                minHeight: 60,
                 justifyContent: "flex-start",
+                borderWidth: spec === s ? 2 : 1,
                 borderColor: spec === s ? T.blue : T.line,
                 background: spec === s ? T.blueSoft : "#fff",
+                boxShadow: spec === s ? "0 6px 18px rgba(16,60,120,.12)" : "none",
               }}
             >
               <span
@@ -381,7 +371,7 @@ export default function DeviceStation() {
                   flexShrink: 0,
                 }}
               />
-              <span style={{ fontSize: 14.5 }}>{s}</span>
+              <span style={{ fontSize: 15 }}>{s}</span>
             </button>
           ))}
           {specs.length === 0 && (
@@ -390,22 +380,33 @@ export default function DeviceStation() {
         </div>
       </Card>
 
-      <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+      <div
+        style={{
+          position: "sticky",
+          bottom: 0,
+          display: "flex",
+          gap: 10,
+          flexWrap: "wrap",
+          padding: "12px 0 calc(8px + env(safe-area-inset-bottom, 0px))",
+          background: T.bg,
+        }}
+      >
         <button
-          style={btn(true, !spec)}
+          style={{ ...btn(true, !spec), flex: "2 1 240px" }}
           disabled={!spec}
-          onClick={() => setSent({ spec, room, patient, acuity, reason, call: false })}
+          onClick={() => setSent({ spec, acuity, call: true })}
         >
-          Send consult package
+          Start virtual encounter
         </button>
         <button
-          style={btn(false, !spec)}
+          style={{ ...btn(false, !spec), flex: "1 1 180px" }}
           disabled={!spec}
-          onClick={() => setSent({ spec, room, patient, acuity, reason, call: true })}
+          onClick={() => setSent({ spec, acuity, call: false })}
         >
-          Call on-call now
+          Send consult request
         </button>
       </div>
     </>,
   );
 }
+
