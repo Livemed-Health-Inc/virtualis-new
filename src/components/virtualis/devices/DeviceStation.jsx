@@ -21,6 +21,33 @@ const ON_CALL = [
   "Psychiatry",
 ];
 
+/* Who is holding the pager right now. Prototype roster: the station shows the
+   on-call clinician only once a request has actually been placed. */
+const ROSTER = {
+  Cardiology: { name: "Dr. E. Vasquez", cred: "MD, FACC · Interventional Cardiology", eta: "2 min" },
+  Neurology: { name: "Dr. R. Patel", cred: "MD · Vascular Neurology", eta: "4 min" },
+  "Emergency Medicine": { name: "Dr. L. Okafor", cred: "MD, FACEP", eta: "1 min" },
+  "Critical Care": { name: "Dr. M. Hussain", cred: "MD · Tele-ICU", eta: "2 min" },
+  "Infectious Diseases": { name: "Dr. S. Lindqvist", cred: "MD, PhD · ID", eta: "8 min" },
+  Nephrology: { name: "Dr. A. Boateng", cred: "MD · Nephrology", eta: "6 min" },
+  Pulmonology: { name: "Dr. K. Yamada", cred: "MD · Pulmonary & Sleep", eta: "5 min" },
+  Psychiatry: { name: "Dr. N. Carver", cred: "MD · Consult-Liaison Psychiatry", eta: "9 min" },
+};
+
+const onCallFor = (spec) =>
+  ROSTER[spec] || { name: "On-call clinician", cred: `${spec} pager`, eta: "10 min" };
+
+const initials = (n) =>
+  n
+    .replace(/^Dr\.\s*/, "")
+    .split(/[\s.]+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((p) => p[0])
+    .join("")
+    .toUpperCase();
+
+
 const btn = (primary, disabled) => ({
   all: "unset",
   boxSizing: "border-box",
@@ -233,19 +260,57 @@ export default function DeviceStation() {
 
 
   if (sent) {
+    const doc = onCallFor(sent.spec);
     return shell(
       <>
         <Card
-          title={sent.call ? "Connecting to on-call" : "Consult request sent"}
+          title={sent.call ? "Connecting…" : "Consult request sent"}
           hint={
             sent.call
-              ? "The on-call clinician for this specialty is being paged from this cart."
+              ? "Waiting for the on-call clinician to join this cart."
               : "The receiving clinician sees the cart, room and urgency before they answer."
           }
         >
-          <div style={{ fontSize: 14.5, lineHeight: 1.6 }}>
-            <strong>{sent.spec}</strong> on call
-            <br />
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 14,
+              border: "1px solid " + T.line,
+              borderRadius: 16,
+              padding: 14,
+              background: T.blueSoft,
+            }}
+          >
+            <div
+              aria-hidden
+              style={{
+                width: 54,
+                height: 54,
+                borderRadius: 54,
+                flexShrink: 0,
+                display: "grid",
+                placeItems: "center",
+                background: "#fff",
+                border: "1px solid " + T.line,
+                fontSize: 17,
+                fontWeight: 760,
+                color: T.blueDeep || T.blue,
+              }}
+            >
+              {initials(doc.name)}
+            </div>
+            <div style={{ minWidth: 0 }}>
+              <div style={{ fontSize: 16.5, fontWeight: 740 }}>{doc.name}</div>
+              <div style={{ fontSize: 12.5, color: T.sub }}>{doc.cred}</div>
+              <div style={{ fontSize: 12.5, color: T.sub, marginTop: 2 }}>
+                On call for <strong style={{ color: T.ink }}>{sent.spec}</strong> ·{" "}
+                {sent.call ? "responding in" : "expected reply"} ~{doc.eta}
+              </div>
+            </div>
+          </div>
+
+          <div style={{ fontSize: 14, lineHeight: 1.6 }}>
             {cart.name}
             {cart.room ? ` · Rm ${cart.room}` : ""}
             <br />
@@ -264,13 +329,13 @@ export default function DeviceStation() {
               setSpec(null);
             }}
           >
-            Done
+            {sent.call ? "Cancel" : "Done"}
           </button>
         </Card>
-
       </>,
     );
   }
+
 
   return shell(
     <>
