@@ -56,7 +56,6 @@ export function useHandoff() {
     return () => {
       supabase.removeChannel(ch);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userId, key, load]);
 
   /* Heartbeat. It refreshes liveness only and never touches ready_to_round. */
