@@ -21,6 +21,33 @@ const ON_CALL = [
   "Psychiatry",
 ];
 
+/* Who is holding the pager right now. Prototype roster: the station shows the
+   on-call clinician only once a request has actually been placed. */
+const ROSTER = {
+  Cardiology: { name: "Dr. E. Vasquez", cred: "MD, FACC · Interventional Cardiology", eta: "2 min" },
+  Neurology: { name: "Dr. R. Patel", cred: "MD · Vascular Neurology", eta: "4 min" },
+  "Emergency Medicine": { name: "Dr. L. Okafor", cred: "MD, FACEP", eta: "1 min" },
+  "Critical Care": { name: "Dr. M. Hussain", cred: "MD · Tele-ICU", eta: "2 min" },
+  "Infectious Diseases": { name: "Dr. S. Lindqvist", cred: "MD, PhD · ID", eta: "8 min" },
+  Nephrology: { name: "Dr. A. Boateng", cred: "MD · Nephrology", eta: "6 min" },
+  Pulmonology: { name: "Dr. K. Yamada", cred: "MD · Pulmonary & Sleep", eta: "5 min" },
+  Psychiatry: { name: "Dr. N. Carver", cred: "MD · Consult-Liaison Psychiatry", eta: "9 min" },
+};
+
+const onCallFor = (spec) =>
+  ROSTER[spec] || { name: "On-call clinician", cred: `${spec} pager`, eta: "10 min" };
+
+const initials = (n) =>
+  n
+    .replace(/^Dr\.\s*/, "")
+    .split(/[\s.]+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((p) => p[0])
+    .join("")
+    .toUpperCase();
+
+
 const btn = (primary, disabled) => ({
   all: "unset",
   boxSizing: "border-box",
