@@ -238,23 +238,22 @@ export default function DeviceStation() {
     return shell(
       <>
         <Card
-          title={sent.call ? "Connecting to on-call" : "Consult packaged and sent"}
+          title={sent.call ? "Connecting to on-call" : "Consult request sent"}
           hint={
             sent.call
               ? "The on-call clinician for this specialty is being paged from this cart."
-              : "The receiving clinician sees the room, acuity and reason before they answer."
+              : "The receiving clinician sees the cart, room and urgency before they answer."
           }
         >
           <div style={{ fontSize: 14.5, lineHeight: 1.6 }}>
             <strong>{sent.spec}</strong> on call
             <br />
-            {cart.name} · Rm {sent.room || cart.room}
-            {sent.patient ? ` · ${sent.patient}` : ""}
+            {cart.name}
+            {cart.room ? ` · Rm ${cart.room}` : ""}
             <br />
             <span style={{ color: ACUITY[sent.acuity].color, fontWeight: 680 }}>
               {ACUITY[sent.acuity].label}
             </span>
-            {sent.reason ? ` · ${sent.reason}` : ""}
           </div>
           <div style={{ fontSize: 12.5, color: T.sub }}>
             Video channel: {TRUST[video.level].label} — {video.reason}. Prototype device: nothing is
@@ -265,12 +264,12 @@ export default function DeviceStation() {
             onClick={() => {
               setSent(null);
               setSpec(null);
-              setReason("");
             }}
           >
             Done
           </button>
         </Card>
+
       </>,
     );
   }
