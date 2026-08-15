@@ -6,7 +6,9 @@ let primed = false;
 
 export function primeChime() {
   if (primed || typeof window === "undefined") return;
-  const AC = window.AudioContext ?? (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+  const AC =
+    window.AudioContext ??
+    (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
   if (!AC) return;
   ctx = ctx ?? new AC();
   ctx.resume().catch(() => {});

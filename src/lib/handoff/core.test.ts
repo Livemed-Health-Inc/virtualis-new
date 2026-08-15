@@ -1,11 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  PRESENCE_TTL_MS,
-  canTransition,
-  effectivePresence,
-  kioskBody,
-  shouldChime,
-} from "./core";
+import { PRESENCE_TTL_MS, canTransition, effectivePresence, kioskBody, shouldChime } from "./core";
 
 const NOW = Date.UTC(2026, 0, 1, 12, 0, 0);
 const at = (msAgo: number) => new Date(NOW - msAgo).toISOString();
