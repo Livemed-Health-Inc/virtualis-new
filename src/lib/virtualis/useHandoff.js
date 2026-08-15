@@ -106,21 +106,20 @@ export function useHandoff() {
     [userId, facilities, load],
   );
 
+  /* Answering goes through the guarded RPC: the database binds provider_id to
+     the caller and enforces the legal transition. Direct UPDATE is revoked. */
   const respond = useCallback(
     async (id, next) => {
       primeChime();
-      const patch = { status: next };
-      if (next === "accepted") {
-        patch.provider_id = userId;
-        patch.accepted_at = new Date().toISOString();
-      }
-      if (next === "ended") patch.ended_at = new Date().toISOString();
-      const q = supabase.from("encounter_requests").update(patch).eq("id", id);
-      await (next === "ended" ? q.eq("status", "accepted") : q.eq("status", "requested"));
-      if (next === "accepted") await beat("in_consult");
+      const { error } = await supabase.rpc("respond_to_encounter_request", {
+        _request_id: id,
+        _next: next,
+      });
+      if (!error && next === "accepted") await beat("in_consult");
       load();
+      return !error;
     },
-    [userId, beat, load],
+    [beat, load],
   );
 
   const incoming = useMemo(() => requests.filter((r) => r.status === "requested"), [requests]);

@@ -16,6 +16,21 @@ const TRANSITIONS: Record<RequestStatus, RequestStatus[]> = {
 export const canTransition = (from: RequestStatus, to: RequestStatus) =>
   TRANSITIONS[from]?.includes(to) ?? false;
 
+/** Mirrors public.respond_to_encounter_request. The database is the authority;
+    this keeps the UI honest and is what the authorization tests assert. */
+export function canRespond(
+  actor: { userId: string | null; facilities: string[]; isAdmin?: boolean },
+  req: { facility_id: string; status: RequestStatus; provider_id: string | null },
+  next: RequestStatus,
+) {
+  if (!actor.userId) return false;
+  if (!(["accepted", "declined", "ended"] as RequestStatus[]).includes(next)) return false;
+  if (!actor.isAdmin && !actor.facilities.includes(req.facility_id)) return false;
+  if (!canTransition(req.status, next)) return false;
+  if (next === "ended" && !actor.isAdmin && req.provider_id !== actor.userId) return false;
+  return true;
+}
+
 /** A heartbeat older than this is treated as offline. */
 export const PRESENCE_TTL_MS = 90_000;
 

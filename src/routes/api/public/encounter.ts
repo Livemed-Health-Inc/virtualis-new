@@ -88,6 +88,16 @@ export const Route = createFileRoute("/api/public/encounter")({
         }
 
         if (input.action === "ack_rounding") {
+          /* Only a clinician actually signalling rounding at this device's
+             facility can be acknowledged — the kiosk cannot name anyone else. */
+          const { data: signalling } = await supabaseAdmin
+            .from("provider_presence")
+            .select("user_id")
+            .eq("user_id", input.providerId)
+            .eq("facility_id", device.facility_id)
+            .eq("ready_to_round", true)
+            .maybeSingle();
+          if (!signalling) return fail(404);
           await supabaseAdmin
             .from("rounding_acks")
             .upsert({ device_id: device.id, provider_id: input.providerId });
