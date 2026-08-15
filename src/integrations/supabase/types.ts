@@ -669,6 +669,30 @@ export type Database = {
         }
         Returns: boolean
       }
+      respond_to_encounter_request: {
+        Args: { _next: string; _request_id: string }
+        Returns: {
+          accepted_at: string | null
+          created_at: string
+          device_id: string
+          ended_at: string | null
+          facility_id: string
+          id: string
+          mode: string
+          provider_id: string | null
+          requested_at: string
+          specialty: string
+          status: string
+          updated_at: string
+          urgency: Database["public"]["Enums"]["acuity_level"]
+        }
+        SetofOptions: {
+          from: "*"
+          to: "encounter_requests"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
     }
     Enums: {
       acuity_level: "critical" | "urgent" | "routine"
