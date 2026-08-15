@@ -65,13 +65,11 @@ const TOKEN_KEY = "virtualis.device.token";
 
 export default function DeviceStation() {
   const [cartId, setCartId] = useState(null);
-  const [room, setRoom] = useState("");
-  const [patient, setPatient] = useState("");
   const [acuity, setAcuity] = useState("urgent");
-  const [reason, setReason] = useState("");
   const [spec, setSpec] = useState(null);
   const [q, setQ] = useState("");
   const [sent, setSent] = useState(null);
+
 
   /* Provisioning: a tablet becomes a real bedside station only after an
      administrator's single-use code pairs it to one registered cart. Until
