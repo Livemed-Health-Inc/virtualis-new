@@ -260,19 +260,57 @@ export default function DeviceStation() {
 
 
   if (sent) {
+    const doc = onCallFor(sent.spec);
     return shell(
       <>
         <Card
-          title={sent.call ? "Connecting to on-call" : "Consult request sent"}
+          title={sent.call ? "Connecting…" : "Consult request sent"}
           hint={
             sent.call
-              ? "The on-call clinician for this specialty is being paged from this cart."
+              ? "Waiting for the on-call clinician to join this cart."
               : "The receiving clinician sees the cart, room and urgency before they answer."
           }
         >
-          <div style={{ fontSize: 14.5, lineHeight: 1.6 }}>
-            <strong>{sent.spec}</strong> on call
-            <br />
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 14,
+              border: "1px solid " + T.line,
+              borderRadius: 16,
+              padding: 14,
+              background: T.blueSoft,
+            }}
+          >
+            <div
+              aria-hidden
+              style={{
+                width: 54,
+                height: 54,
+                borderRadius: 54,
+                flexShrink: 0,
+                display: "grid",
+                placeItems: "center",
+                background: "#fff",
+                border: "1px solid " + T.line,
+                fontSize: 17,
+                fontWeight: 760,
+                color: T.blueDeep || T.blue,
+              }}
+            >
+              {initials(doc.name)}
+            </div>
+            <div style={{ minWidth: 0 }}>
+              <div style={{ fontSize: 16.5, fontWeight: 740 }}>{doc.name}</div>
+              <div style={{ fontSize: 12.5, color: T.sub }}>{doc.cred}</div>
+              <div style={{ fontSize: 12.5, color: T.sub, marginTop: 2 }}>
+                On call for <strong style={{ color: T.ink }}>{sent.spec}</strong> ·{" "}
+                {sent.call ? "responding in" : "expected reply"} ~{doc.eta}
+              </div>
+            </div>
+          </div>
+
+          <div style={{ fontSize: 14, lineHeight: 1.6 }}>
             {cart.name}
             {cart.room ? ` · Rm ${cart.room}` : ""}
             <br />
@@ -291,13 +329,13 @@ export default function DeviceStation() {
               setSpec(null);
             }}
           >
-            Done
+            {sent.call ? "Cancel" : "Done"}
           </button>
         </Card>
-
       </>,
     );
   }
+
 
   return shell(
     <>
