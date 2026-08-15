@@ -158,6 +158,69 @@ export type Database = {
           },
         ]
       }
+      encounter_requests: {
+        Row: {
+          accepted_at: string | null
+          created_at: string
+          device_id: string
+          ended_at: string | null
+          facility_id: string
+          id: string
+          mode: string
+          provider_id: string | null
+          requested_at: string
+          specialty: string
+          status: string
+          updated_at: string
+          urgency: Database["public"]["Enums"]["acuity_level"]
+        }
+        Insert: {
+          accepted_at?: string | null
+          created_at?: string
+          device_id: string
+          ended_at?: string | null
+          facility_id: string
+          id?: string
+          mode?: string
+          provider_id?: string | null
+          requested_at?: string
+          specialty: string
+          status?: string
+          updated_at?: string
+          urgency?: Database["public"]["Enums"]["acuity_level"]
+        }
+        Update: {
+          accepted_at?: string | null
+          created_at?: string
+          device_id?: string
+          ended_at?: string | null
+          facility_id?: string
+          id?: string
+          mode?: string
+          provider_id?: string | null
+          requested_at?: string
+          specialty?: string
+          status?: string
+          updated_at?: string
+          urgency?: Database["public"]["Enums"]["acuity_level"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "encounter_requests_device_id_fkey"
+            columns: ["device_id"]
+            isOneToOne: false
+            referencedRelation: "devices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "encounter_requests_facility_id_fkey"
+            columns: ["facility_id"]
+            isOneToOne: false
+            referencedRelation: "facilities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       facilities: {
         Row: {
           created_at: string
@@ -366,6 +429,76 @@ export type Database = {
             columns: ["facility_id"]
             isOneToOne: false
             referencedRelation: "facilities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      provider_presence: {
+        Row: {
+          created_at: string
+          facility_id: string
+          last_seen_at: string
+          ready_to_round: boolean
+          ready_to_round_at: string | null
+          specialty: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          facility_id: string
+          last_seen_at?: string
+          ready_to_round?: boolean
+          ready_to_round_at?: string | null
+          specialty?: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          facility_id?: string
+          last_seen_at?: string
+          ready_to_round?: boolean
+          ready_to_round_at?: string | null
+          specialty?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "provider_presence_facility_id_fkey"
+            columns: ["facility_id"]
+            isOneToOne: false
+            referencedRelation: "facilities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      rounding_acks: {
+        Row: {
+          acked_at: string
+          device_id: string
+          provider_id: string
+        }
+        Insert: {
+          acked_at?: string
+          device_id: string
+          provider_id: string
+        }
+        Update: {
+          acked_at?: string
+          device_id?: string
+          provider_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rounding_acks_device_id_fkey"
+            columns: ["device_id"]
+            isOneToOne: false
+            referencedRelation: "devices"
             referencedColumns: ["id"]
           },
         ]

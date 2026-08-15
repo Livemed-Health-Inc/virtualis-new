@@ -16,6 +16,7 @@ import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]
 import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
 import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
 import { Route as ApiPublicDeviceRouteImport } from './routes/api/public/device'
+import { Route as ApiPublicEncounterRouteImport } from './routes/api/public/encounter'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -55,6 +56,11 @@ const ApiPublicDeviceRoute = ApiPublicDeviceRouteImport.update({
   path: '/api/public/device',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicEncounterRoute = ApiPublicEncounterRouteImport.update({
+  id: '/api/public/encounter',
+  path: '/api/public/encounter',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -64,6 +70,7 @@ export interface FileRoutesByFullPath {
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/api/public/device': typeof ApiPublicDeviceRoute
+  '/api/public/encounter': typeof ApiPublicEncounterRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -73,6 +80,7 @@ export interface FileRoutesByTo {
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/api/public/device': typeof ApiPublicDeviceRoute
+  '/api/public/encounter': typeof ApiPublicEncounterRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -83,6 +91,7 @@ export interface FileRoutesById {
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/api/public/device': typeof ApiPublicDeviceRoute
+  '/api/public/encounter': typeof ApiPublicEncounterRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -94,6 +103,7 @@ export interface FileRouteTypes {
     | '/.well-known/oauth-protected-resource'
     | '/.mcp/invoke-tool/$tool'
     | '/api/public/device'
+    | '/api/public/encounter'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -103,6 +113,7 @@ export interface FileRouteTypes {
     | '/.well-known/oauth-protected-resource'
     | '/.mcp/invoke-tool/$tool'
     | '/api/public/device'
+    | '/api/public/encounter'
   id:
     | '__root__'
     | '/'
@@ -112,6 +123,7 @@ export interface FileRouteTypes {
     | '/.well-known/oauth-protected-resource'
     | '/.mcp/invoke-tool/$tool'
     | '/api/public/device'
+    | '/api/public/encounter'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -122,6 +134,7 @@ export interface RootRouteChildren {
   Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
   ApiPublicDeviceRoute: typeof ApiPublicDeviceRoute
+  ApiPublicEncounterRoute: typeof ApiPublicEncounterRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -175,6 +188,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicDeviceRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/encounter': {
+      id: '/api/public/encounter'
+      path: '/api/public/encounter'
+      fullPath: '/api/public/encounter'
+      preLoaderRoute: typeof ApiPublicEncounterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -187,6 +207,7 @@ const rootRouteChildren: RootRouteChildren = {
     Char91DotwellKnownChar93OauthProtectedResourceRoute,
   Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
   ApiPublicDeviceRoute: ApiPublicDeviceRoute,
+  ApiPublicEncounterRoute: ApiPublicEncounterRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

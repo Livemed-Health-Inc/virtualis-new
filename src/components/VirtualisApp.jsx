@@ -19,6 +19,7 @@ import {
 import { Account } from "./virtualis/Account";
 import NewMessage from "./virtualis/NewMessage";
 import Devices from "./virtualis/devices/Devices";
+import OnCall from "./virtualis/OnCall";
 import SessionWorkspace from "./virtualis/devices/SessionWorkspace";
 import { useDeviceFleet } from "./virtualis/devices/useDeviceFleet";
 import { hellocareConfig, buildLaunchUrl, newNonce, hellocareTrust } from "@/lib/telehealth/hellocare";
@@ -1377,6 +1378,7 @@ function Workstation() {
           }}
         />
       )}
+      {authed && !needsPassword && showDevices && <OnCall />}
       {authed && more && (
         <MoreSheet
           showDevices={showDevices}
