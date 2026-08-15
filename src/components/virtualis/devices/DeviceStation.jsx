@@ -7,10 +7,12 @@ import { hellocareTrust } from "@/lib/telehealth/hellocare";
 import { TRUST } from "@/lib/telehealth/status";
 
 /* Shared bedside device. No login, no user accounts: the cart identifies
-   itself, and on-call cover is shown by specialty only — never by name.
-   Prototype state only; nothing is persisted or sent. */
+   itself with its enrollment token, and on-call cover is shown by specialty
+   only — never by name, and never with a fabricated clinician or ETA.
+   Demo mode is local only and touches no backend. */
 
-const ON_CALL = [
+/* Demo-mode specialty list. Enrolled devices use live facility coverage. */
+const DEMO_SPECIALTIES = [
   "Cardiology",
   "Neurology",
   "Emergency Medicine",
@@ -21,21 +23,14 @@ const ON_CALL = [
   "Psychiatry",
 ];
 
-/* Who is holding the pager right now. Prototype roster: the station shows the
-   on-call clinician only once a request has actually been placed. */
-const ROSTER = {
-  Cardiology: { name: "Dr. E. Vasquez", cred: "MD, FACC · Interventional Cardiology", eta: "2 min" },
-  Neurology: { name: "Dr. R. Patel", cred: "MD · Vascular Neurology", eta: "4 min" },
-  "Emergency Medicine": { name: "Dr. L. Okafor", cred: "MD, FACEP", eta: "1 min" },
-  "Critical Care": { name: "Dr. M. Hussain", cred: "MD · Tele-ICU", eta: "2 min" },
-  "Infectious Diseases": { name: "Dr. S. Lindqvist", cred: "MD, PhD · ID", eta: "8 min" },
-  Nephrology: { name: "Dr. A. Boateng", cred: "MD · Nephrology", eta: "6 min" },
-  Pulmonology: { name: "Dr. K. Yamada", cred: "MD · Pulmonary & Sleep", eta: "5 min" },
-  Psychiatry: { name: "Dr. N. Carver", cred: "MD · Consult-Liaison Psychiatry", eta: "9 min" },
-};
-
-const onCallFor = (spec) =>
-  ROSTER[spec] || { name: "On-call clinician", cred: `${spec} pager`, eta: "10 min" };
+const api = (payload) =>
+  fetch("/api/public/encounter", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  })
+    .then((r) => r.json())
+    .catch(() => ({ ok: false }));
 
 const initials = (n) =>
   n
@@ -95,7 +90,10 @@ export default function DeviceStation() {
   const [acuity, setAcuity] = useState("urgent");
   const [spec, setSpec] = useState(null);
   const [q, setQ] = useState("");
-  const [sent, setSent] = useState(null);
+  const [sent, setSent] = useState(null); // { spec, acuity, call, requestId?, status?, provider? }
+  const [coverage, setCoverage] = useState(null); // null = not loaded yet (enrolled only)
+  const [rounding, setRounding] = useState([]);
+  const [sending, setSending] = useState(false);
 
 
   /* Provisioning: a tablet becomes a real bedside station only after an
@@ -161,11 +159,85 @@ export default function DeviceStation() {
     [device, cartId],
   );
   const video = hellocareTrust(false);
+
+  /* Live facility coverage for an enrolled device. Demo mode stays local. */
+  useEffect(() => {
+    if (!device) return;
+    const token = localStorage.getItem(TOKEN_KEY);
+    if (!token) return;
+    let alive = true;
+    const pull = async () => {
+      const r = await api({ action: "coverage", token });
+      if (!alive || !r.ok) return;
+      setCoverage(r.coverage ?? []);
+      setRounding(r.rounding ?? []);
+    };
+    pull();
+    const id = setInterval(pull, 15000);
+    return () => {
+      alive = false;
+      clearInterval(id);
+    };
+  }, [device]);
+
+  /* Poll the placed request until a clinician answers. */
+  useEffect(() => {
+    if (!device || !sent?.requestId || ["accepted", "declined", "ended", "cancelled"].includes(sent.status))
+      return;
+    const token = localStorage.getItem(TOKEN_KEY);
+    if (!token) return;
+    const id = setInterval(async () => {
+      const r = await api({ action: "status", token, requestId: sent.requestId });
+      if (r.ok) setSent((s) => (s ? { ...s, status: r.status, provider: r.provider ?? null } : s));
+    }, 4000);
+    return () => clearInterval(id);
+  }, [device, sent?.requestId, sent?.status]);
+
+  const available = useMemo(
+    () => new Map((coverage ?? []).map((c) => [c.specialty, c.available])),
+    [coverage],
+  );
+
   const specs = useMemo(() => {
-    const all = [...new Set([...ON_CALL, ...SPECIALTIES])];
+    const onCall = device ? [...available.keys()] : DEMO_SPECIALTIES;
     const t = q.trim().toLowerCase();
-    return (t ? all.filter((s) => s.toLowerCase().includes(t)) : ON_CALL).slice(0, 12);
-  }, [q]);
+    if (!t) return onCall.slice(0, 12);
+    const all = [...new Set([...onCall, ...SPECIALTIES])];
+    return all.filter((s) => s.toLowerCase().includes(t)).slice(0, 12);
+  }, [q, device, available]);
+
+  const canSend = !!spec && (!device || (available.get(spec) ?? 0) > 0);
+
+  const place = async (call) => {
+    if (!canSend) return;
+    if (!device) return setSent({ spec, acuity, call, status: "demo" });
+    const token = localStorage.getItem(TOKEN_KEY);
+    setSending(true);
+    const r = await api({
+      action: "request",
+      token,
+      specialty: spec,
+      urgency: acuity,
+      mode: call ? "call" : "consult",
+    });
+    setSending(false);
+    if (r.ok) setSent({ spec, acuity, call, requestId: r.requestId, status: r.status });
+  };
+
+  const closeSent = async () => {
+    if (device && sent?.requestId && sent.status === "requested") {
+      const token = localStorage.getItem(TOKEN_KEY);
+      await api({ action: "cancel", token, requestId: sent.requestId });
+    }
+    setSent(null);
+    setSpec(null);
+  };
+
+  const ackRounding = async (providerId) => {
+    const token = localStorage.getItem(TOKEN_KEY);
+    setRounding((rs) => rs.filter((r) => r.providerId !== providerId));
+    if (device && token) await api({ action: "ack_rounding", token, providerId });
+  };
 
   const shell = (children) => (
     <main
@@ -260,55 +332,85 @@ export default function DeviceStation() {
 
 
   if (sent) {
-    const doc = onCallFor(sent.spec);
+    const accepted = sent.status === "accepted" && sent.provider;
+    const closed = ["declined", "ended", "cancelled"].includes(sent.status);
+    const title = accepted
+      ? sent.call
+        ? "Clinician joining"
+        : "Consult accepted"
+      : sent.status === "declined"
+        ? "Request declined"
+        : closed
+          ? "Request closed"
+          : sent.call
+            ? "Calling the on-call clinician…"
+            : "Consult request sent";
     return shell(
       <>
         <Card
-          title={sent.call ? "Connecting…" : "Consult request sent"}
+          title={title}
           hint={
-            sent.call
-              ? "Waiting for the on-call clinician to join this cart."
-              : "The receiving clinician sees the cart, room and urgency before they answer."
+            accepted
+              ? "The clinician has accepted and is connecting to this cart."
+              : closed
+                ? "No clinician is attached to this request."
+                : "Waiting for whoever is holding the pager to answer. No clinician is assigned yet."
           }
         >
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 14,
-              border: "1px solid " + T.line,
-              borderRadius: 16,
-              padding: 14,
-              background: T.blueSoft,
-            }}
-          >
+          {accepted ? (
             <div
-              aria-hidden
               style={{
-                width: 54,
-                height: 54,
-                borderRadius: 54,
-                flexShrink: 0,
-                display: "grid",
-                placeItems: "center",
-                background: "#fff",
+                display: "flex",
+                alignItems: "center",
+                gap: 14,
                 border: "1px solid " + T.line,
-                fontSize: 17,
-                fontWeight: 760,
-                color: T.blueDeep || T.blue,
+                borderRadius: 16,
+                padding: 14,
+                background: T.blueSoft,
               }}
             >
-              {initials(doc.name)}
-            </div>
-            <div style={{ minWidth: 0 }}>
-              <div style={{ fontSize: 16.5, fontWeight: 740 }}>{doc.name}</div>
-              <div style={{ fontSize: 12.5, color: T.sub }}>{doc.cred}</div>
-              <div style={{ fontSize: 12.5, color: T.sub, marginTop: 2 }}>
-                On call for <strong style={{ color: T.ink }}>{sent.spec}</strong> ·{" "}
-                {sent.call ? "responding in" : "expected reply"} ~{doc.eta}
+              <div
+                aria-hidden
+                style={{
+                  width: 54,
+                  height: 54,
+                  borderRadius: 54,
+                  flexShrink: 0,
+                  display: "grid",
+                  placeItems: "center",
+                  background: "#fff",
+                  border: "1px solid " + T.line,
+                  fontSize: 17,
+                  fontWeight: 760,
+                  color: T.blueDeep || T.blue,
+                }}
+              >
+                {initials(sent.provider.name)}
+              </div>
+              <div style={{ minWidth: 0 }}>
+                <div style={{ fontSize: 16.5, fontWeight: 740 }}>{sent.provider.name}</div>
+                <div style={{ fontSize: 12.5, color: T.sub }}>{sent.provider.role}</div>
+                <div style={{ fontSize: 12.5, color: T.sub, marginTop: 2 }}>
+                  Accepted for <strong style={{ color: T.ink }}>{sent.spec}</strong>
+                </div>
               </div>
             </div>
-          </div>
+          ) : (
+            <div
+              style={{
+                border: "1px dashed " + T.line,
+                borderRadius: 16,
+                padding: 14,
+                fontSize: 13.5,
+                color: T.sub,
+                background: "#fff",
+              }}
+            >
+              {sent.status === "demo"
+                ? "Demo mode — nothing was sent."
+                : `${sent.spec} pager alerted. The clinician's name appears once someone accepts.`}
+            </div>
+          )}
 
           <div style={{ fontSize: 14, lineHeight: 1.6 }}>
             {cart.name}
@@ -319,17 +421,11 @@ export default function DeviceStation() {
             </span>
           </div>
           <div style={{ fontSize: 12.5, color: T.sub }}>
-            Video channel: {TRUST[video.level].label} — {video.reason}. Prototype device: nothing is
-            transmitted.
+            Video channel: {TRUST[video.level].label} — {video.reason}.
+            {!device && " Demo mode — nothing is transmitted."}
           </div>
-          <button
-            style={btn(true)}
-            onClick={() => {
-              setSent(null);
-              setSpec(null);
-            }}
-          >
-            {sent.call ? "Cancel" : "Done"}
+          <button style={btn(true)} onClick={closeSent}>
+            {closed || accepted ? "Done" : sent.call ? "Cancel" : "Done"}
           </button>
         </Card>
       </>,
@@ -371,6 +467,31 @@ export default function DeviceStation() {
         )}
       </header>
 
+      {rounding.map((r) => (
+        <div
+          key={r.providerId}
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 10,
+            border: "1px solid " + T.green,
+            background: T.green + "12",
+            borderRadius: 16,
+            padding: "12px 14px",
+          }}
+        >
+          <div style={{ flex: 1, fontSize: 14, fontWeight: 660 }}>
+            {r.name} is ready to round
+          </div>
+          <button
+            style={{ ...btn(false), minHeight: 40 }}
+            onClick={() => ackRounding(r.providerId)}
+          >
+            Acknowledge
+          </button>
+        </div>
+      ))}
+
       <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }} role="group" aria-label="Urgency">
         {Object.keys(ACUITY).map((a) => (
           <button
@@ -410,37 +531,52 @@ export default function DeviceStation() {
             gridTemplateColumns: "repeat(auto-fit,minmax(200px,1fr))",
           }}
         >
-          {specs.map((s) => (
-            <button
-              key={s}
-              aria-pressed={spec === s}
-              onClick={() => setSpec(s)}
-              style={{
-                ...btn(false),
-                minHeight: 60,
-                justifyContent: "flex-start",
-                borderWidth: spec === s ? 2 : 1,
-                borderColor: spec === s ? T.blue : T.line,
-                background: spec === s ? T.blueSoft : "#fff",
-                boxShadow: spec === s ? "0 6px 18px rgba(16,60,120,.12)" : "none",
-              }}
-            >
-              <span
-                aria-hidden
+          {specs.map((s) => {
+            const free = device ? (available.get(s) ?? 0) > 0 : true;
+            return (
+              <button
+                key={s}
+                aria-pressed={spec === s}
+                disabled={!free}
+                onClick={() => setSpec(s)}
                 style={{
-                  width: 8,
-                  height: 8,
-                  borderRadius: 8,
-                  background: T.green,
-                  marginRight: 10,
-                  flexShrink: 0,
+                  ...btn(false, !free),
+                  minHeight: 60,
+                  justifyContent: "flex-start",
+                  borderWidth: spec === s ? 2 : 1,
+                  borderColor: spec === s ? T.blue : T.line,
+                  background: spec === s ? T.blueSoft : "#fff",
+                  boxShadow: spec === s ? "0 6px 18px rgba(16,60,120,.12)" : "none",
                 }}
-              />
-              <span style={{ fontSize: 15 }}>{s}</span>
-            </button>
-          ))}
+              >
+                <span
+                  aria-hidden
+                  style={{
+                    width: 8,
+                    height: 8,
+                    borderRadius: 8,
+                    background: free ? T.green : T.line,
+                    marginRight: 10,
+                    flexShrink: 0,
+                  }}
+                />
+                <span style={{ fontSize: 15 }}>{s}</span>
+                {device && (
+                  <span style={{ marginLeft: "auto", fontSize: 12, color: T.sub }}>
+                    {free ? `${available.get(s)} on call` : "unavailable"}
+                  </span>
+                )}
+              </button>
+            );
+          })}
           {specs.length === 0 && (
-            <div style={{ color: T.sub, fontSize: 13.5 }}>No specialty matches that search.</div>
+            <div style={{ color: T.sub, fontSize: 13.5 }}>
+              {q.trim()
+                ? "No specialty matches that search."
+                : coverage === null && device
+                  ? "Checking who is on call…"
+                  : "No clinician is on call right now."}
+            </div>
           )}
         </div>
       </Card>
@@ -457,16 +593,16 @@ export default function DeviceStation() {
         }}
       >
         <button
-          style={{ ...btn(true, !spec), flex: "2 1 240px" }}
-          disabled={!spec}
-          onClick={() => setSent({ spec, acuity, call: true })}
+          style={{ ...btn(true, !canSend || sending), flex: "2 1 240px" }}
+          disabled={!canSend || sending}
+          onClick={() => place(true)}
         >
           Start virtual encounter
         </button>
         <button
-          style={{ ...btn(false, !spec), flex: "1 1 180px" }}
-          disabled={!spec}
-          onClick={() => setSent({ spec, acuity, call: false })}
+          style={{ ...btn(false, !canSend || sending), flex: "1 1 180px" }}
+          disabled={!canSend || sending}
+          onClick={() => place(false)}
         >
           Send consult request
         </button>
