@@ -12,6 +12,22 @@ const contextSchema = z.object({
   specialty_hint: z.string().max(64).optional(),
 });
 
+export interface DecisionResult {
+  decision_id?: string;
+  label?: string;
+  probabilities?: { low?: number; medium?: number; high?: number };
+  review_required?: boolean;
+  model_version?: string;
+  policy_version?: string;
+  clinically_validated?: boolean;
+  routing?: {
+    destination?: string;
+    service_line?: string;
+    priority?: string;
+    fallback?: string;
+  };
+}
+
 const feedbackSchema = z.object({
   decision_id: z.string().min(1).max(128),
   agrees: z.boolean(),
@@ -42,8 +58,12 @@ export const getModelInfo = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async () => {
     const { callAcuity } = await import("./acuity.server");
-    if (!process.env["ACUITY_API_URL"]) return { configured: false as const };
-    return { configured: true as const, info: await callAcuity("/v1/info", { method: "GET" }) };
+    if (!process.env["ACUITY_API_URL"])
+      return { configured: false as const, info: undefined as { model_version?: string } | undefined };
+    const info = await callAcuity<{ model_version?: string; policy_version?: string }>("/v1/info", {
+      method: "GET",
+    });
+    return { configured: true as const, info };
   });
 
 export const runDecision = createServerFn({ method: "POST" })
@@ -51,7 +71,7 @@ export const runDecision = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => contextSchema.parse(input))
   .handler(async ({ data }) => {
     const { callAcuity } = await import("./acuity.server");
-    return await callAcuity("/v1/decisions", { method: "POST", body: data });
+    return await callAcuity<DecisionResult>("/v1/decisions", { method: "POST", body: data });
   });
 
 export const sendFeedback = createServerFn({ method: "POST" })
@@ -59,7 +79,10 @@ export const sendFeedback = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => feedbackSchema.parse(input))
   .handler(async ({ data }) => {
     const { callAcuity } = await import("./acuity.server");
-    return await callAcuity("/v1/feedback", { method: "POST", body: data });
+    return await callAcuity<{ accepted: boolean; feedback_id?: string }>("/v1/feedback", {
+      method: "POST",
+      body: data,
+    });
   });
 
 /* Staging only. The runtime stores the batch; it never retrains or promotes
