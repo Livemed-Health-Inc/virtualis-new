@@ -1268,7 +1268,8 @@ function Workstation() {
         <Rail
           me={me}
           tab={tab}
-          setTab={setTab}
+          setTab={goTab}
+
           items={railTabs}
           unread={unread}
           wide={isDesktop}
