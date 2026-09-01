@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "@tanstack/react-router";
 import { T, font, mono, ACUITY, FACILITIES, useMediaQuery, KEYFRAMES } from "./virtualis/theme";
 import { VMark, Avatar, Glyph, Wordmark, patientKey } from "./virtualis/ui";
 import { VirtualisProvider, useVirtualis } from "@/lib/virtualis/store";
@@ -127,6 +128,26 @@ const TABS = [
     ),
   },
   {
+    k: "model-lab",
+    label: "Model Lab",
+    icon: (c) => (
+      <svg
+        width="22"
+        height="22"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke={c}
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <path d="M9.5 3v6.2L4.8 17.6A2.5 2.5 0 0 0 7 21.4h10a2.5 2.5 0 0 0 2.2-3.8L14.5 9.2V3" />
+        <path d="M8 3h8M7.6 14.5h8.8" />
+      </svg>
+    ),
+  },
+  {
+
     k: "more",
     label: "More",
     icon: (c) => (
@@ -233,6 +254,7 @@ function MoreSheet({ onClose, onPick, onProfile, showDevices }) {
     { k: "team", label: "Team directory" },
     { k: "schedule", label: "Schedule" },
     ...(showDevices ? [{ k: "devices", label: "Devices" }] : []),
+    { k: "model-lab", label: "Model Lab" },
   ];
   return (
     <div
@@ -815,9 +837,14 @@ function Workstation() {
   const [more, setMore] = useState(false);
 
   const showDevices = canUseDevices(me?.role);
-  const railTabs = ["inbox", "team", ...(showDevices ? ["devices"] : []), "alis", "schedule"].map(
-    byKey,
-  );
+  const railTabs = [
+    "inbox",
+    "team",
+    ...(showDevices ? ["devices"] : []),
+    "alis",
+    "schedule",
+    "model-lab",
+  ].map(byKey);
   const mobileTabs = [
     byKey("inbox"),
     showDevices ? byKey("devices") : byKey("team"),
@@ -825,6 +852,11 @@ function Workstation() {
     byKey("more"),
   ];
   const fleet = useDeviceFleet(scope);
+  const navigate = useNavigate();
+
+  /* Model Lab lives on its own authenticated route; every nav surface
+     funnels through here so the tab shell never tries to render it. */
+  const goTab = (k) => (k === "model-lab" ? navigate({ to: "/model-lab" }) : setTab(k));
 
   const authed = !!session;
 
@@ -1236,7 +1268,8 @@ function Workstation() {
         <Rail
           me={me}
           tab={tab}
-          setTab={setTab}
+          setTab={goTab}
+
           items={railTabs}
           unread={unread}
           wide={isDesktop}
@@ -1383,7 +1416,7 @@ function Workstation() {
         <MoreSheet
           showDevices={showDevices}
           onClose={() => setMore(false)}
-          onPick={setTab}
+          onPick={goTab}
           onProfile={() => setCreds(true)}
         />
       )}

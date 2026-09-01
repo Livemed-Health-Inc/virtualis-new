@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { useNavigate } from "@tanstack/react-router";
 import { T, mono, FACILITIES, inputStyle, useMediaQuery } from "./theme";
 import { Avatar } from "./ui";
 import { useVirtualis } from "@/lib/virtualis/store";
@@ -119,6 +120,7 @@ export function Account({ onClose, onSchedule, onSignOut }) {
   const { me, threads, updateProfile } = useVirtualis();
   const wide = useMediaQuery("(min-width: 900px)");
   const [view, setView] = useState("home");
+  const navigate = useNavigate();
   const [form, setForm] = useState({
     name: me.name,
     role: me.role,
@@ -260,6 +262,14 @@ export function Account({ onClose, onSchedule, onSignOut }) {
           label="Administration"
           hint="Hospitals, staff onboarding and bedside devices"
           onClick={() => setView("admin")}
+        />
+        <Row
+          label="Model Lab"
+          hint="Acuity model testing and governed training data"
+          onClick={() => {
+            onClose();
+            navigate({ to: "/model-lab" });
+          }}
         />
         <Row
           label="My Schedule"
