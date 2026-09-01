@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "@tanstack/react-router";
 import { T, font, mono, ACUITY, FACILITIES, useMediaQuery, KEYFRAMES } from "./virtualis/theme";
 import { VMark, Avatar, Glyph, Wordmark, patientKey } from "./virtualis/ui";
 import { VirtualisProvider, useVirtualis } from "@/lib/virtualis/store";
@@ -253,6 +254,7 @@ function MoreSheet({ onClose, onPick, onProfile, showDevices }) {
     { k: "team", label: "Team directory" },
     { k: "schedule", label: "Schedule" },
     ...(showDevices ? [{ k: "devices", label: "Devices" }] : []),
+    { k: "model-lab", label: "Model Lab" },
   ];
   return (
     <div
@@ -835,9 +837,14 @@ function Workstation() {
   const [more, setMore] = useState(false);
 
   const showDevices = canUseDevices(me?.role);
-  const railTabs = ["inbox", "team", ...(showDevices ? ["devices"] : []), "alis", "schedule"].map(
-    byKey,
-  );
+  const railTabs = [
+    "inbox",
+    "team",
+    ...(showDevices ? ["devices"] : []),
+    "alis",
+    "schedule",
+    "model-lab",
+  ].map(byKey);
   const mobileTabs = [
     byKey("inbox"),
     showDevices ? byKey("devices") : byKey("team"),
@@ -845,6 +852,11 @@ function Workstation() {
     byKey("more"),
   ];
   const fleet = useDeviceFleet(scope);
+  const navigate = useNavigate();
+
+  /* Model Lab lives on its own authenticated route; every nav surface
+     funnels through here so the tab shell never tries to render it. */
+  const goTab = (k) => (k === "model-lab" ? navigate({ to: "/model-lab" }) : setTab(k));
 
   const authed = !!session;
 
@@ -1403,7 +1415,7 @@ function Workstation() {
         <MoreSheet
           showDevices={showDevices}
           onClose={() => setMore(false)}
-          onPick={setTab}
+          onPick={goTab}
           onProfile={() => setCreds(true)}
         />
       )}
