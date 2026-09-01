@@ -127,6 +127,26 @@ const TABS = [
     ),
   },
   {
+    k: "model-lab",
+    label: "Model Lab",
+    icon: (c) => (
+      <svg
+        width="22"
+        height="22"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke={c}
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <path d="M9.5 3v6.2L4.8 17.6A2.5 2.5 0 0 0 7 21.4h10a2.5 2.5 0 0 0 2.2-3.8L14.5 9.2V3" />
+        <path d="M8 3h8M7.6 14.5h8.8" />
+      </svg>
+    ),
+  },
+  {
+
     k: "more",
     label: "More",
     icon: (c) => (
