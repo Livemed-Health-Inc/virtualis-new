@@ -179,10 +179,20 @@ export const registerDevice = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
-    const { error } = await context.supabase
+    const { data: row, error } = await context.supabase
       .from("devices")
-      .insert({ ...data, room: data.room || null, created_by: context.userId });
-    return error ? { ok: false as const, message: error.message } : { ok: true as const };
+      .insert({ ...data, room: data.room || null, created_by: context.userId })
+      .select("id")
+      .maybeSingle();
+    if (error) return { ok: false as const, message: error.message };
+    const { recordAudit } = await import("./audit.server");
+    await recordAudit(context.userId, {
+      action: "admin_device_register",
+      entity_type: "device",
+      entity_id: row?.id ?? null,
+      facility_id: data.facility_id,
+    });
+    return { ok: true as const };
   });
 
 /* Mints a single-use enrollment code. The plaintext is returned exactly
@@ -206,6 +216,12 @@ export const mintEnrollment = createServerFn({ method: "POST" })
       created_by: context.userId,
     });
     if (error) return { ok: false as const, message: error.message };
+    const { recordAudit } = await import("./audit.server");
+    await recordAudit(context.userId, {
+      action: "admin_device_enrollment",
+      entity_type: "device_enrollment",
+      entity_id: data.device_id,
+    });
     return { ok: true as const, code };
   });
 
@@ -218,9 +234,25 @@ export const setDeviceStatus = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
+    const now = new Date().toISOString();
+    /* Revocation clears the token hash AND stamps revoked_at, so an already
+       issued token fails on every endpoint even if the row is re-enabled. */
     const { error } = await context.supabase
       .from("devices")
-      .update({ status: data.status, device_token_hash: null, enrolled_at: null })
+      .update({
+        status: data.status,
+        device_token_hash: null,
+        enrolled_at: null,
+        token_expires_at: null,
+        revoked_at: data.status === "revoked" ? now : null,
+      })
       .eq("id", data.device_id);
-    return error ? { ok: false as const, message: error.message } : { ok: true as const };
+    if (error) return { ok: false as const, message: error.message };
+    const { recordAudit } = await import("./audit.server");
+    await recordAudit(context.userId, {
+      action: "admin_device_status",
+      entity_type: "device",
+      entity_id: data.device_id,
+    });
+    return { ok: true as const };
   });
