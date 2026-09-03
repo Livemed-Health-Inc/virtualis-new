@@ -14,6 +14,47 @@ export type Database = {
   }
   public: {
     Tables: {
+      audit_log: {
+        Row: {
+          action: string
+          actor_id: string | null
+          correlation_id: string | null
+          created_at: string
+          entity_id: string | null
+          entity_type: string
+          facility_id: string | null
+          id: string
+        }
+        Insert: {
+          action: string
+          actor_id?: string | null
+          correlation_id?: string | null
+          created_at?: string
+          entity_id?: string | null
+          entity_type: string
+          facility_id?: string | null
+          id?: string
+        }
+        Update: {
+          action?: string
+          actor_id?: string | null
+          correlation_id?: string | null
+          created_at?: string
+          entity_id?: string | null
+          entity_type?: string
+          facility_id?: string | null
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "audit_log_facility_id_fkey"
+            columns: ["facility_id"]
+            isOneToOne: false
+            referencedRelation: "facilities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       care_team: {
         Row: {
           created_at: string
@@ -111,8 +152,10 @@ export type Database = {
           id: string
           label: string
           last_seen_at: string | null
+          revoked_at: string | null
           room: string | null
           status: string
+          token_expires_at: string | null
           unit: string
           updated_at: string
         }
@@ -127,8 +170,10 @@ export type Database = {
           id?: string
           label: string
           last_seen_at?: string | null
+          revoked_at?: string | null
           room?: string | null
           status?: string
+          token_expires_at?: string | null
           unit?: string
           updated_at?: string
         }
@@ -143,8 +188,10 @@ export type Database = {
           id?: string
           label?: string
           last_seen_at?: string | null
+          revoked_at?: string | null
           room?: string | null
           status?: string
+          token_expires_at?: string | null
           unit?: string
           updated_at?: string
         }
@@ -358,6 +405,7 @@ export type Database = {
           home_facility: string
           id: string
           initials: string
+          must_change_password: boolean
           name: string
           notification_prefs: Json
           online: boolean
@@ -370,6 +418,7 @@ export type Database = {
           home_facility?: string
           id: string
           initials?: string
+          must_change_password?: boolean
           name?: string
           notification_prefs?: Json
           online?: boolean
@@ -382,6 +431,7 @@ export type Database = {
           home_facility?: string
           id?: string
           initials?: string
+          must_change_password?: boolean
           name?: string
           notification_prefs?: Json
           online?: boolean
@@ -476,6 +526,30 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      rate_limits: {
+        Row: {
+          attempts: number
+          bucket_key: string
+          locked_until: string | null
+          updated_at: string
+          window_start: string
+        }
+        Insert: {
+          attempts?: number
+          bucket_key: string
+          locked_until?: string | null
+          updated_at?: string
+          window_start?: string
+        }
+        Update: {
+          attempts?: number
+          bucket_key?: string
+          locked_until?: string | null
+          updated_at?: string
+          window_start?: string
+        }
+        Relationships: []
       }
       rounding_acks: {
         Row: {
@@ -658,6 +732,16 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      clear_rate_limit: { Args: { _key: string }; Returns: undefined }
+      consume_rate_limit: {
+        Args: {
+          _key: string
+          _limit: number
+          _lock_seconds: number
+          _window_seconds: number
+        }
+        Returns: boolean
+      }
       has_facility_access: {
         Args: { _facility: string; _user_id: string }
         Returns: boolean
@@ -693,6 +777,8 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      setup_complete: { Args: { _user_id: string }; Returns: boolean }
+      shares_facility: { Args: { _a: string; _b: string }; Returns: boolean }
     }
     Enums: {
       acuity_level: "critical" | "urgent" | "routine"
