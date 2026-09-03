@@ -194,6 +194,12 @@ export function VirtualisProvider({ children }) {
     [profile, credentials, scope, session],
   );
 
+  const refreshProfile = useCallback(async () => {
+    if (!userId) return;
+    const { data } = await supabase.from("profiles").select("*").eq("id", userId).maybeSingle();
+    if (data) setProfile(data);
+  }, [userId]);
+
   const updateProfile = useCallback(
     async (patch) => {
       if (!userId) return;
@@ -322,6 +328,7 @@ export function VirtualisProvider({ children }) {
     userId,
     /* Server-authoritative: the same flag the RLS policies read. */
     mustChangePassword: !!profile?.must_change_password,
+    refreshProfile,
     profileLoaded: !!profile,
     me,
     scope,
