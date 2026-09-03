@@ -818,6 +818,8 @@ function Workstation() {
     createThread,
     markRead,
     signOut,
+    mustChangePassword,
+    refreshProfile,
   } = useVirtualis();
 
   const [tab, setTab] = useState("inbox");
@@ -862,13 +864,16 @@ function Workstation() {
 
   // Invite links return here with an invite/recovery grant; the clinician sets
   // their own password before the workstation opens.
-  const [needsPassword, setNeedsPassword] = useState(
+  const [linkGrant, setLinkGrant] = useState(
     () => typeof window !== "undefined" && /type=(invite|recovery)/.test(window.location.hash),
   );
+  /* The server flag is authoritative — the link hint only covers the moment
+     before the profile arrives, and a completed setup clears both. */
+  const needsPassword = linkGrant || mustChangePassword;
   useEffect(() => {
-    if (needsPassword && typeof window !== "undefined")
+    if (linkGrant && typeof window !== "undefined")
       window.history.replaceState(null, "", window.location.pathname);
-  }, [needsPassword]);
+  }, [linkGrant]);
 
   /* Signing out must leave nothing behind: every overlay and view
      selection resets the moment the session disappears. */
@@ -1198,7 +1203,14 @@ function Workstation() {
   if (!authed) {
     content = ready ? <Login /> : null;
   } else if (needsPassword) {
-    content = <SetPassword onDone={() => setNeedsPassword(false)} />;
+    content = (
+      <SetPassword
+        onDone={() => {
+          setLinkGrant(false);
+          refreshProfile?.();
+        }}
+      />
+    );
   } else if (!multiPane) {
     content =
       pushed ||
