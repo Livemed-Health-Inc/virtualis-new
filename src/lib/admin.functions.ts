@@ -153,8 +153,15 @@ export const inviteStaff = createServerFn({ method: "POST" })
     });
     if (error && !error.message.includes("duplicate"))
       return { ok: false as const, message: error.message };
+    const { recordAudit } = await import("./audit.server");
+    await recordAudit(context.userId, {
+      action: "admin_invite",
+      entity_type: "invite",
+      facility_id: data.facility_ids[0] ?? null,
+    });
     return { ok: true as const };
   });
+
 
 export const registerDevice = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
