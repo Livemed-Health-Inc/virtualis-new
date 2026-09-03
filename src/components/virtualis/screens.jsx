@@ -1882,12 +1882,20 @@ export function SetPassword({ onDone }) {
 
   const save = async () => {
     setErr("");
-    if (pw.length < 10) return setErr("Use at least 10 characters.");
+    /* Clinical accounts carry PHI access, so setup enforces a real passphrase
+       rather than the auth provider's minimum. */
+    if (pw.length < 12) return setErr("Use at least 12 characters.");
+    if (!/[a-z]/.test(pw) || !/[A-Z]/.test(pw) || !/[0-9]/.test(pw))
+      return setErr("Include upper case, lower case and a number.");
     if (pw !== pw2) return setErr("Passwords do not match.");
     setBusy(true);
     const { error } = await supabase.auth.updateUser({ password: pw });
+    if (error) {
+      setBusy(false);
+      return setErr(error.message);
+    }
+    await completePasswordSetup().catch(() => {});
     setBusy(false);
-    if (error) return setErr(error.message);
     onDone?.();
   };
 
@@ -1905,8 +1913,8 @@ export function SetPassword({ onDone }) {
       <div style={{ width: "100%", maxWidth: 380 }}>
         <div style={{ fontSize: 22, fontWeight: 720, color: T.ink }}>Set your password</div>
         <p style={{ fontSize: 13.5, color: T.sub, margin: "6px 0 18px", lineHeight: 1.6 }}>
-          Your Virtualis access has been provisioned. Choose a password to finish activating your
-          account.
+          Your Virtualis access has been provisioned. Choose a password of at least 12 characters
+          to finish activating your account.
         </p>
         <input
           type="password"

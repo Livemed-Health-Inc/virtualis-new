@@ -167,3 +167,18 @@ export const claimInvite = createServerFn({ method: "POST" })
     }
     return { ok: true as const };
   });
+
+/* Called once the clinician has actually chosen a password. Clearing the flag
+   is server-side so the client cannot skip setup by flipping local state. */
+export const completePasswordSetup = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    await supabaseAdmin
+      .from("profiles")
+      .update({ must_change_password: false })
+      .eq("id", context.userId);
+    const { recordAudit } = await import("./audit.server");
+    await recordAudit(context.userId, { action: "password_set", entity_type: "session" });
+    return { ok: true as const };
+  });
