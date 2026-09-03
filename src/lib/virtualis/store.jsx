@@ -9,6 +9,11 @@ import {
 } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { claimInvite } from "@/lib/invites.functions";
+import { logAudit } from "@/lib/audit.client";
+
+/* A clinical workstation is often left unattended at a nurses' station, so an
+   idle session signs itself out rather than waiting for the token to expire. */
+const IDLE_LIMIT_MS = 15 * 60 * 1000;
 
 /* Live clinical data layer. Everything here is scoped by the signed-in
    provider's credentials — RLS enforces it server-side, so no view can
@@ -95,7 +100,8 @@ export function VirtualisProvider({ children }) {
       resetDone.current = userId;
       await supabase.from("thread_reads").delete().eq("user_id", userId);
       setReads({});
-      claimInvite().catch(() => {});
+      await claimInvite().catch(() => {});
+      logAudit(userId, { action: "sign_in", entity_type: "session" });
     }
     const [p, c, ct, sh, th, rd] = await Promise.all([
       supabase.from("profiles").select("*").eq("id", userId).maybeSingle(),
@@ -202,11 +208,17 @@ export function VirtualisProvider({ children }) {
       if (!userId) return;
       const now = new Date().toISOString();
       setReads((r) => ({ ...r, [threadId]: now }));
+      logAudit(userId, {
+        action: "thread_open",
+        entity_type: "thread",
+        entity_id: threadId,
+        facility_id: threadRows.find((t) => t.id === threadId)?.facility_id ?? null,
+      });
       await supabase
         .from("thread_reads")
         .upsert({ user_id: userId, thread_id: threadId, last_read_at: now });
     },
-    [userId],
+    [userId, threadRows],
   );
 
   const sendMessage = useCallback(
@@ -223,7 +235,14 @@ export function VirtualisProvider({ children }) {
         })
         .select()
         .single();
-      if (data) setMessages((m) => (m.some((x) => x.id === data.id) ? m : [...m, data]));
+      if (data) {
+        setMessages((m) => (m.some((x) => x.id === data.id) ? m : [...m, data]));
+        logAudit(userId, {
+          action: "message_send",
+          entity_type: "message",
+          entity_id: data.id,
+        });
+      }
       markRead(threadId);
     },
     [userId, me.name, markRead],
@@ -252,6 +271,12 @@ export function VirtualisProvider({ children }) {
         .single();
       if (error || !data) return null;
       setThreadRows((t) => [data, ...t]);
+      logAudit(userId, {
+        action: "thread_create",
+        entity_type: "thread",
+        entity_id: data.id,
+        facility_id: data.facility_id,
+      });
       if (input.reason) await sendMessage(data.id, input.reason, "consult");
       await markRead(data.id);
       return data.id;
@@ -260,6 +285,7 @@ export function VirtualisProvider({ children }) {
   );
 
   const signOut = useCallback(async () => {
+    await logAudit(userId, { action: "sign_out", entity_type: "session" });
     resetDone.current = null;
     await supabase.auth.signOut();
     setProfile(null);
@@ -269,12 +295,34 @@ export function VirtualisProvider({ children }) {
     setThreadRows([]);
     setMessages([]);
     setReads({});
-  }, []);
+  }, [userId]);
+
+  /* Fifteen minutes of no interaction ends the session. */
+  useEffect(() => {
+    if (!userId) return undefined;
+    let timer;
+    const arm = () => {
+      clearTimeout(timer);
+      timer = setTimeout(() => {
+        signOut();
+      }, IDLE_LIMIT_MS);
+    };
+    const events = ["pointerdown", "keydown", "wheel", "touchstart", "visibilitychange"];
+    events.forEach((e) => window.addEventListener(e, arm, { passive: true }));
+    arm();
+    return () => {
+      clearTimeout(timer);
+      events.forEach((e) => window.removeEventListener(e, arm));
+    };
+  }, [userId, signOut]);
 
   const value = {
     ready,
     session,
     userId,
+    /* Server-authoritative: the same flag the RLS policies read. */
+    mustChangePassword: !!profile?.must_change_password,
+    profileLoaded: !!profile,
     me,
     scope,
     staff: staff.map((s) => ({
