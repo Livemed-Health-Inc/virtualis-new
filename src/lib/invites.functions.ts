@@ -179,6 +179,6 @@ export const completePasswordSetup = createServerFn({ method: "POST" })
       .update({ must_change_password: false })
       .eq("id", context.userId);
     const { recordAudit } = await import("./audit.server");
-    await recordAudit(context.userId, { action: "password_set", entity_type: "session" });
+    await recordAudit(context.userId, { action: "password_complete", entity_type: "session" });
     return { ok: true as const };
   });
