@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useVirtualis } from "@/lib/virtualis/store";
+import { completePasswordSetup } from "@/lib/invites.functions";
+
 
 
 import {
