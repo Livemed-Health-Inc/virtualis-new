@@ -3,6 +3,20 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { detectIdentifiers } from "./training";
+import type { SupabaseClient } from "@supabase/supabase-js";
+import type { Database } from "@/integrations/supabase/types";
+
+/* Model Lab is an engineering surface, not a clinical one: every handler
+   re-verifies the admin role server-side. Hiding the tab is not access
+   control. */
+async function assertAdmin(context: { userId: string; supabase: SupabaseClient<Database> }) {
+  const { data, error } = await context.supabase.rpc("has_role", {
+    _user_id: context.userId,
+    _role: "admin",
+  });
+  if (error || !data) throw new Error("Forbidden");
+}
 
 const contextSchema = z.object({
   text: z.string().min(1).max(4000),
@@ -56,7 +70,8 @@ const intakeSchema = z.object({
 
 export const getModelInfo = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .handler(async () => {
+  .handler(async ({ context }) => {
+    await assertAdmin(context);
     const { callAcuity } = await import("./acuity.server");
     if (!process.env["ACUITY_API_URL"])
       return { configured: false as const, info: undefined as { model_version?: string } | undefined };
@@ -69,7 +84,8 @@ export const getModelInfo = createServerFn({ method: "GET" })
 export const runDecision = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => contextSchema.parse(input))
-  .handler(async ({ data }) => {
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context);
     const { callAcuity } = await import("./acuity.server");
     return await callAcuity<DecisionResult>("/v1/decisions", { method: "POST", body: data });
   });
@@ -77,7 +93,8 @@ export const runDecision = createServerFn({ method: "POST" })
 export const sendFeedback = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => feedbackSchema.parse(input))
-  .handler(async ({ data }) => {
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context);
     const { callAcuity } = await import("./acuity.server");
     return await callAcuity<{ accepted: boolean; feedback_id?: string }>("/v1/feedback", {
       method: "POST",
@@ -90,7 +107,15 @@ export const sendFeedback = createServerFn({ method: "POST" })
 export const stageTrainingBatch = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => intakeSchema.parse(input))
-  .handler(async ({ data }) => {
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context);
+    /* The browser already screens for identifiers, but the server repeats the
+       scan and refuses the whole batch: a client check is not a safeguard. */
+    const flagged = data.examples.filter((e) => detectIdentifiers(e.text).length > 0);
+    if (flagged.length)
+      throw new Error(
+        `Rejected: ${flagged.length} example(s) contain possible identifiers. Only synthetic or approved deidentified text may be staged.`,
+      );
     const { callAcuity } = await import("./acuity.server");
     return await callAcuity<{
       accepted: boolean;
