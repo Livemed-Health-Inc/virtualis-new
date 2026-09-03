@@ -72,6 +72,12 @@ export const sendInvite = createServerFn({ method: "POST" })
     if (error && !error.message.includes("duplicate")) {
       return { ok: false as const, message: error.message };
     }
+    const { recordAudit } = await import("./audit.server");
+    await recordAudit(context.userId, {
+      action: "admin_invite",
+      entity_type: "invite",
+      facility_id: data.facility_id || null,
+    });
     return { ok: true as const };
   });
 
@@ -98,6 +104,12 @@ export const revokeInvite = createServerFn({ method: "POST" })
       );
       if (pending) await supabaseAdmin.auth.admin.deleteUser(pending.id);
     }
+    const { recordAudit } = await import("./audit.server");
+    await recordAudit(context.userId, {
+      action: "admin_invite_revoke",
+      entity_type: "invite",
+      entity_id: data.id,
+    });
     return { ok: true as const };
   });
 
@@ -137,11 +149,14 @@ export const claimInvite = createServerFn({ method: "POST" })
           })),
         );
       }
+      /* An accepted invite always starts in setup: the clinician must set
+         their own password before any clinical policy will admit them. */
       await supabaseAdmin
         .from("profiles")
         .update({
           role: invite.title || invite.staff_type || "Clinician",
           dept: invite.department || invite.specialty || "General",
+          must_change_password: true,
           ...(facilities[0] ? { home_facility: facilities[0] } : {}),
         })
         .eq("id", context.userId);
