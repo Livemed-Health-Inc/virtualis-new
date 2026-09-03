@@ -103,6 +103,9 @@ export default function DeviceStation() {
   const [code, setCode] = useState("");
   const [enrolling, setEnrolling] = useState(false);
   const [enrollErr, setEnrollErr] = useState("");
+  /* Demo mode is a development affordance only. A production build has no
+     path to it: an unprovisioned tablet can only enrol. */
+  const DEMO_ALLOWED = !import.meta.env.PROD;
   const [demo, setDemo] = useState(false);
 
   useEffect(() => {
@@ -115,8 +118,15 @@ export default function DeviceStation() {
     })
       .then((r) => r.json())
       .then((r) => {
-        if (r.ok) setDevice(r.device);
-        else {
+        if (r.ok) {
+          /* The station rotates onto the fresh token the moment one is
+             issued, so a stolen copy stops working within the window. */
+          if (r.token) localStorage.setItem(TOKEN_KEY, r.token);
+          setDevice(r.device);
+        } else if (r.reason === "throttled") {
+          /* Throttled is not unenrolled — keep the token and retry later. */
+          setDevice(null);
+        } else {
           localStorage.removeItem(TOKEN_KEY);
           setDevice(null);
         }
@@ -137,7 +147,9 @@ export default function DeviceStation() {
         localStorage.setItem(TOKEN_KEY, r.token);
         setDevice(r.device);
         setCode("");
-      } else setEnrollErr("That code is not valid, already used, or expired.");
+      } else if (r.reason === "throttled")
+        setEnrollErr("Too many attempts. Wait a few minutes, then try again.");
+      else setEnrollErr("That code is not valid, already used, or expired.");
     } catch {
       setEnrollErr("Could not reach Virtualis. Check the network and try again.");
     }
@@ -255,7 +267,7 @@ export default function DeviceStation() {
   if (device === undefined)
     return shell(<div style={{ fontSize: 14, color: T.sub }}>Checking this device…</div>);
 
-  if (!device && !demo) {
+  if (!device && !(demo && DEMO_ALLOWED)) {
     return shell(
       <>
         <header>
