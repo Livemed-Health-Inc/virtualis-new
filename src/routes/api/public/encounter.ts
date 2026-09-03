@@ -1,5 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { canTransition, effectivePresence, kioskBody } from "@/lib/handoff/core";
+import { consume, guard, RateLimitUnavailable } from "@/lib/security/ratelimit.server";
+import { recordAudit } from "@/lib/audit.server";
 import type { PresenceRow, RequestStatus } from "@/lib/handoff/core";
 
 /* Bedside handoff API. The kiosk has no user account: every call is scoped by
@@ -15,6 +17,11 @@ const sha256 = async (s: string) => {
 
 const fail = (status = 400) => new Response(JSON.stringify({ ok: false }), { status });
 
+/* Polling is frequent and legitimate, so the per-token ceiling is generous;
+   the per-IP ceiling is what stops token guessing from an unknown caller. */
+const IP_LIMIT = { limit: 240, windowSeconds: 300, lockSeconds: 600 };
+const TOKEN_LIMIT = { limit: 600, windowSeconds: 300, lockSeconds: 300 };
+
 export const Route = createFileRoute("/api/public/encounter")({
   server: {
     handlers: {
@@ -23,14 +30,36 @@ export const Route = createFileRoute("/api/public/encounter")({
         if (!parsed.success) return fail(400);
         const input = parsed.data;
 
+        const ipGate = await guard(request, "encounter_ip", IP_LIMIT);
+        if (!ipGate.ok) return fail(ipGate.status);
+        try {
+          if (!(await consume("encounter_token", input.token, TOKEN_LIMIT))) return fail(429);
+        } catch (e) {
+          return fail(e instanceof RateLimitUnavailable ? 503 : 429);
+        }
+
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
         const { data: device } = await supabaseAdmin
           .from("devices")
-          .select("id, facility_id")
+          .select("id, facility_id, token_expires_at")
           .eq("device_token_hash", await sha256(input.token))
           .eq("status", "enrolled")
+          .is("revoked_at", null)
           .maybeSingle();
-        if (!device) return fail(401);
+        /* Revoked or expired tokens are indistinguishable from unknown ones. */
+        if (!device) {
+          await recordAudit(null, { action: "device_sync_denied", entity_type: "device" });
+          return fail(401);
+        }
+        if (device.token_expires_at && Date.parse(device.token_expires_at) < Date.now()) {
+          await recordAudit(null, {
+            action: "device_sync_denied",
+            entity_type: "device",
+            entity_id: device.id,
+            facility_id: device.facility_id,
+          });
+          return fail(401);
+        }
 
         if (input.action === "coverage") {
           const { data: rows } = await supabaseAdmin
@@ -84,6 +113,12 @@ export const Route = createFileRoute("/api/public/encounter")({
             .select("id, status")
             .maybeSingle();
           if (!data) return fail(400);
+          await recordAudit(null, {
+            action: "encounter_request",
+            entity_type: "encounter_request",
+            entity_id: data.id,
+            facility_id: device.facility_id,
+          });
           return Response.json({ ok: true, requestId: data.id, status: data.status });
         }
 
@@ -118,6 +153,12 @@ export const Route = createFileRoute("/api/public/encounter")({
             .from("encounter_requests")
             .update({ status: "cancelled", ended_at: new Date().toISOString() })
             .eq("id", req.id);
+          await recordAudit(null, {
+            action: "encounter_cancel",
+            entity_type: "encounter_request",
+            entity_id: req.id,
+            facility_id: device.facility_id,
+          });
           return Response.json({ ok: true, status: "cancelled" });
         }
 
