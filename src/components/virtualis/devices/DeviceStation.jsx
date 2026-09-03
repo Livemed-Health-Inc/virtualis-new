@@ -298,12 +298,18 @@ export default function DeviceStation() {
           >
             {enrolling ? "Enrolling…" : "Enroll device"}
           </button>
-          <button style={btn(false)} onClick={() => setDemo(true)}>
-            Continue in demo mode
-          </button>
-          <div style={{ fontSize: 12.5, color: T.sub }}>
-            Demo mode uses sample carts. Nothing is transmitted and it is never for clinical use.
-          </div>
+          {DEMO_ALLOWED && (
+            <>
+              <button style={btn(false)} onClick={() => setDemo(true)}>
+                Continue in demo mode
+              </button>
+              <div style={{ fontSize: 12.5, color: T.sub }}>
+                Demo mode uses sample carts. Nothing is transmitted and it is never for clinical
+                use. It is unavailable in production builds.
+              </div>
+            </>
+          )}
+
         </Card>
       </>,
     );
