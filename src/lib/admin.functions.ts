@@ -90,8 +90,16 @@ export const createFacility = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
     const { error } = await context.supabase.from("facilities").insert(data);
-    return error ? { ok: false as const, message: error.message } : { ok: true as const };
+    if (error) return { ok: false as const, message: error.message };
+    const { recordAudit } = await import("./audit.server");
+    await recordAudit(context.userId, {
+      action: "admin_facility_create",
+      entity_type: "facility",
+      facility_id: data.id,
+    });
+    return { ok: true as const };
   });
+
 
 /* Onsite staff are bound to exactly one hospital; virtual physicians may
    cover several. Both get explicit credential rows — nothing is implicit. */
