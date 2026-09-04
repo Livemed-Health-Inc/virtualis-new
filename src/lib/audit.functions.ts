@@ -7,7 +7,6 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { sanitizeAuditEvent, type AuditEvent } from "./audit";
 
-
 const event = z.object({
   action: z.string().min(1).max(64),
   entity_type: z.string().min(1).max(64),
