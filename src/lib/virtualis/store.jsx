@@ -9,7 +9,7 @@ import {
 } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { claimInvite } from "@/lib/invites.functions";
-import { logAudit } from "@/lib/audit.client";
+import { logAudit } from "@/lib/audit.functions";
 
 /* A clinical workstation is often left unattended at a nurses' station, so an
    idle session signs itself out rather than waiting for the token to expire. */
