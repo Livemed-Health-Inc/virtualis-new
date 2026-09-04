@@ -24,3 +24,14 @@ export const recordAuditEvent = createServerFn({ method: "POST" })
     await recordAudit(context.userId, data as AuditEvent);
     return { ok: true as const };
   });
+
+/** Best-effort browser-side helper. Metadata only; an audit failure must never
+    block or delay a clinical action. */
+export async function logAudit(actorId: string | null, event: AuditEvent): Promise<void> {
+  if (!actorId) return; // signed-out callers have nothing to attribute
+  try {
+    await recordAuditEvent({ data: sanitizeAuditEvent(event) });
+  } catch {
+    /* swallow — never surfaced to the clinician */
+  }
+}
