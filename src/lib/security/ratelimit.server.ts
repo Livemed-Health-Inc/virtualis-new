@@ -7,16 +7,15 @@ import { createHmac } from "node:crypto";
 
 export class RateLimitUnavailable extends Error {}
 
-/** Only edge-set headers are trusted; a client-supplied X-Forwarded-For is not. */
+/** Only the hosting edge's own header is trusted. X-Forwarded-For and
+    X-Real-IP are client-settable, so honouring them would let an attacker mint
+    a fresh throttling identity per request. Absent the trusted header the
+    caller cannot be identified and the request must fail closed. */
 export function clientIp(request: Request): string | null {
-  const cf = request.headers.get("cf-connecting-ip");
-  if (cf) return cf.trim();
-  const real = request.headers.get("x-real-ip");
-  if (real) return real.trim();
-  const fwd = request.headers.get("x-forwarded-for");
-  const first = fwd?.split(",")[0]?.trim();
-  return first || null;
+  const cf = request.headers.get("cf-connecting-ip")?.trim();
+  return cf || null;
 }
+
 
 export function bucketKey(scope: string, identifier: string): string {
   const secret = process.env["RATE_LIMIT_SECRET"];
