@@ -56,7 +56,7 @@ export async function guard(
   cfg: Limit,
 ): Promise<{ ok: true; identifier: string } | { ok: false; status: 429 | 503 }> {
   const ip = clientIp(request);
-  if (!ip) return { ok: false, status: 429 };
+  if (!ip) return { ok: false, status: 503 };
   try {
     const allowed = await consume(scope, ip, cfg);
     return allowed ? { ok: true, identifier: ip } : { ok: false, status: 429 };
