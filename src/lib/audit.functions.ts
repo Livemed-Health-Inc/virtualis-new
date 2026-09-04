@@ -5,7 +5,8 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import type { AuditEvent } from "./audit";
+import { sanitizeAuditEvent, type AuditEvent } from "./audit";
+
 
 const event = z.object({
   action: z.string().min(1).max(64),
