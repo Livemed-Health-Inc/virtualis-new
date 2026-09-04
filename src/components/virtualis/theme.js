@@ -114,4 +114,3 @@ export const KEYFRAMES = `
   .vx-hscroll::-webkit-scrollbar { display: none }
   .vx-hscroll > * { scroll-snap-align: start }
 `;
-

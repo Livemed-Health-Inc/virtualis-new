@@ -13,9 +13,9 @@ describe("clientIp", () => {
   });
 
   it("cannot be shadowed by a spoofed X-Forwarded-For", () => {
-    expect(
-      clientIp(req({ "cf-connecting-ip": "203.0.113.7", "x-forwarded-for": "1.2.3.4" })),
-    ).toBe("203.0.113.7");
+    expect(clientIp(req({ "cf-connecting-ip": "203.0.113.7", "x-forwarded-for": "1.2.3.4" }))).toBe(
+      "203.0.113.7",
+    );
   });
 
   it("returns null when no trusted header is present, so callers fail closed", () => {

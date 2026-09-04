@@ -57,7 +57,8 @@ function sigv4Headers(method: string, url: URL, body: string) {
     scope,
     createHash("sha256").update(canonical).digest("hex"),
   ].join("\n");
-  const hmac = (key: Buffer | string, data: string) => createHmac("sha256", key).update(data).digest();
+  const hmac = (key: Buffer | string, data: string) =>
+    createHmac("sha256", key).update(data).digest();
   const signing = hmac(hmac(hmac(hmac(`AWS4${secret}`, date), region), service), "aws4_request");
   const signature = createHmac("sha256", signing).update(toSign).digest("hex");
   return {

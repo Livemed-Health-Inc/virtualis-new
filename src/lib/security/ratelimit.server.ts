@@ -16,7 +16,6 @@ export function clientIp(request: Request): string | null {
   return cf || null;
 }
 
-
 export function bucketKey(scope: string, identifier: string): string {
   const secret = process.env["RATE_LIMIT_SECRET"];
   if (!secret) throw new RateLimitUnavailable("rate limiting is not configured");

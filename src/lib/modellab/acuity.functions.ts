@@ -74,7 +74,10 @@ export const getModelInfo = createServerFn({ method: "GET" })
     await assertAdmin(context);
     const { callAcuity } = await import("./acuity.server");
     if (!process.env["ACUITY_API_URL"])
-      return { configured: false as const, info: undefined as { model_version?: string } | undefined };
+      return {
+        configured: false as const,
+        info: undefined as { model_version?: string } | undefined,
+      };
     const info = await callAcuity<{ model_version?: string; policy_version?: string }>("/v1/info", {
       method: "GET",
     });
