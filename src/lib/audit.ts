@@ -58,8 +58,7 @@ export function sanitizeAuditEvent(e: AuditEvent): AuditEvent {
     action: e.action,
     entity_type: e.entity_type,
     entity_id: e.entity_id && UUID.test(e.entity_id) ? e.entity_id : null,
-    facility_id:
-      e.facility_id && /^[a-z0-9_-]{1,60}$/i.test(e.facility_id) ? e.facility_id : null,
+    facility_id: e.facility_id && /^[a-z0-9_-]{1,60}$/i.test(e.facility_id) ? e.facility_id : null,
     correlation_id:
       e.correlation_id && CORRELATION.test(e.correlation_id) ? e.correlation_id : null,
   };

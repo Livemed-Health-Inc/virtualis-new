@@ -26,7 +26,6 @@ export const Route = createFileRoute("/")({
       { name: "twitter:image", content: "https://virtualischat.com/og-image.jpg" },
     ],
     links: [{ rel: "canonical", href: "https://virtualischat.com/" }],
-
   }),
   component: VirtualisApp,
 });

@@ -138,9 +138,7 @@ export function buildExamples(records: Record<string, string>[]): TrainingExampl
       rawLabel: String(rawLabel),
       routeLabel: normalizeRouteLabel(rec["route"] ?? rec["route_label"]),
       groupId: rec["group_id"] || rec["group"] || id,
-      split: (["train", "validation", "test"] as const).includes(
-        (rec["split"] ?? "") as "train",
-      )
+      split: (["train", "validation", "test"] as const).includes((rec["split"] ?? "") as "train")
         ? (rec["split"] as TrainingExample["split"])
         : "train",
       include: !duplicateOf,
@@ -162,7 +160,10 @@ export function assignSplits(
   const bucket = new Map<string, TrainingExample["split"]>();
   groups.forEach((g, i) => {
     const p = groups.length === 1 ? 0 : i / groups.length;
-    bucket.set(g, p < ratios.test ? "test" : p < ratios.test + ratios.validation ? "validation" : "train");
+    bucket.set(
+      g,
+      p < ratios.test ? "test" : p < ratios.test + ratios.validation ? "validation" : "train",
+    );
   });
   return examples.map((e) => ({ ...e, split: bucket.get(e.groupId) ?? "train" }));
 }
@@ -174,15 +175,27 @@ export interface ExportIssue {
 
 /* Governed export: only approved, included, labelled examples with no
    unresolved identifier warnings ever leave the lab. */
-export function exportJsonl(examples: TrainingExample[]): { jsonl: string; blocked: ExportIssue[] } {
+export function exportJsonl(examples: TrainingExample[]): {
+  jsonl: string;
+  blocked: ExportIssue[];
+} {
   const candidates = examples.filter((e) => e.include);
   const blocked: ExportIssue[] = [];
   const add = (reason: string, list: TrainingExample[]) => {
     if (list.length) blocked.push({ reason, ids: list.map((e) => e.id) });
   };
-  add("not approved", candidates.filter((e) => !e.approved));
-  add("missing normalized label", candidates.filter((e) => !e.label));
-  add("unresolved identifier warning", candidates.filter((e) => e.warnings.length > 0));
+  add(
+    "not approved",
+    candidates.filter((e) => !e.approved),
+  );
+  add(
+    "missing normalized label",
+    candidates.filter((e) => !e.label),
+  );
+  add(
+    "unresolved identifier warning",
+    candidates.filter((e) => e.warnings.length > 0),
+  );
   const ready = candidates.filter((e) => e.approved && e.label && e.warnings.length === 0);
   const jsonl = ready
     .map((e) =>

@@ -100,7 +100,6 @@ export const createFacility = createServerFn({ method: "POST" })
     return { ok: true as const };
   });
 
-
 /* Onsite staff are bound to exactly one hospital; virtual physicians may
    cover several. Both get explicit credential rows — nothing is implicit. */
 export const inviteStaff = createServerFn({ method: "POST" })
@@ -161,7 +160,6 @@ export const inviteStaff = createServerFn({ method: "POST" })
     });
     return { ok: true as const };
   });
-
 
 export const registerDevice = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
