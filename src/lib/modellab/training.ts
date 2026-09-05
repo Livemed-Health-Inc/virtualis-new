@@ -230,22 +230,11 @@ export function exportJsonl(examples: TrainingExample[]): {
     "unresolved identifier warning",
     candidates.filter((e) => e.warnings.length > 0),
   );
-  const ready = candidates.filter((e) => e.approved && e.label && e.warnings.length === 0);
-  const jsonl = ready
-    .map((e) =>
-      JSON.stringify({
-        id: e.id,
-        text: e.text,
-        label: e.label,
-        route_label: e.routeLabel,
-        group_id: e.groupId,
-        split: e.split,
-        quality: e.quality,
-        provenance: "synthetic_or_approved_deidentified",
-      }),
-    )
-    .join("\n");
-  return { jsonl, blocked };
+  const ready = candidates.filter(
+    (e): e is TrainingExample & { label: Label } =>
+      e.approved && !!e.label && e.warnings.length === 0,
+  );
+  return { jsonl: ready.map((e) => JSON.stringify(toIntakeExample(e))).join("\n"), blocked };
 }
 
 export function datasetStats(examples: TrainingExample[]) {
