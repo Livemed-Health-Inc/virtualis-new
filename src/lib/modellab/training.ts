@@ -70,9 +70,7 @@ export function normalizeRouteLabel(raw: unknown): RouteLabel | null {
     .trim()
     .toLowerCase()
     .replace(/[\s-]+/g, "_");
-  return (["self_serve", "nurse_line", "provider", "escalate"] as const).includes(v as RouteLabel)
-    ? (v as RouteLabel)
-    : null;
+  return ROUTES.includes(v as RouteLabel) ? (v as RouteLabel) : null;
 }
 
 /* RFC4180-ish CSV: quoted fields, escaped "" quotes, embedded commas/newlines. */
