@@ -7,60 +7,56 @@
 import { detectIdentifiers, type IntakeExample, type Label, LABELS } from "./training";
 
 export { LABELS, type Label };
-export const CHANNELS = ["chat", "portal", "sms", "voice", "device"] as const;
-export const SETTINGS = ["ed", "inpatient", "clinic", "telehealth", "home"] as const;
-export const SENDERS = ["patient", "nurse", "provider", "device"] as const;
+/* Decisions from this surface are always tagged as Model Lab traffic. */
+export const DECISION_CHANNEL = "synthetic_model_lab" as const;
 
 type Str = string | undefined;
 type Num = number | undefined;
 
-/* POST /v1/decisions → { message, context } and nothing else. */
+/* POST /v1/decisions — exact deployed body, nothing else. */
 export interface DecisionInput {
+  message_id: string;
   text: string;
-  channel: (typeof CHANNELS)[number];
-  sender_role: (typeof SENDERS)[number];
-  care_setting: (typeof SETTINGS)[number];
   use_case: IntakeExample["use_case"];
+  care_setting?: string | undefined;
+  sender_role?: string | undefined;
   specialty_hint?: string | undefined;
-  legacy_score_band?: number | undefined;
 }
 
-export const toDecisionRequest = ({
-  text,
-  specialty_hint,
-  legacy_score_band,
-  ...c
-}: DecisionInput) => ({
-  message: text,
+export const toDecisionRequest = (d: DecisionInput) => ({
+  use_case: d.use_case,
+  message: { message_id: d.message_id, text: d.text, channel: DECISION_CHANNEL },
   context: {
-    channel: c.channel,
-    sender_role: c.sender_role,
-    care_setting: c.care_setting,
-    use_case: c.use_case,
-    ...(specialty_hint ? { specialty_hint } : {}),
-    ...(legacy_score_band ? { legacy_score_band } : {}),
+    ...(d.care_setting ? { care_setting: d.care_setting } : {}),
+    ...(d.sender_role ? { sender_role: d.sender_role } : {}),
+    ...(d.specialty_hint ? { specialty_hint: d.specialty_hint } : {}),
   },
 });
 
 export interface Decision {
   decision_id?: Str;
-  model_version?: Str;
-  policy_version?: Str;
+  request_id?: Str;
+  use_case?: Str;
+  created_at?: Str;
   acuity: {
     level?: Label | undefined;
-    score?: Num;
-    confidence?: Num;
+    display_label?: Str;
+    legacy_score_band: number[];
     probabilities: Partial<Record<Label, number>>;
+    confidence?: Num;
+    reason_codes: string[];
+    model_version?: Str;
   };
   route: {
     destination?: Str;
     service_line?: Str;
-    priority?: Str;
-    sla_seconds?: Num;
-    escalation_after_seconds?: Num;
-    fallback?: Str;
+    priority?: Num;
+    escalation_after_seconds: number | null;
+    notify: string[];
+    reason_codes: string[];
+    fallback_destination?: Str;
+    policy_version?: Str;
   };
-  reason_codes: string[];
   review_required: true;
   clinically_validated: false;
 }
@@ -113,25 +109,33 @@ export function projectDecision(raw: unknown, submitted: string): Decision {
   const rt = obj(r["route"]);
   const out: Decision = {
     decision_id: short(r["decision_id"], 128),
-    model_version: short(r["model_version"]),
-    policy_version: short(r["policy_version"]),
+    request_id: short(r["request_id"], 128),
+    use_case: short(r["use_case"]),
+    created_at: short(r["created_at"]),
     acuity: {
       level: label(a["level"]),
-      score: num(a["score"], 5),
-      confidence: num(a["confidence"], 1),
+      display_label: short(a["display_label"]),
+      legacy_score_band: (Array.isArray(a["legacy_score_band"]) ? a["legacy_score_band"] : [])
+        .map((v) => num(v, 5))
+        .filter((v): v is number => v !== undefined)
+        .slice(0, 5),
       probabilities: Object.fromEntries(
         LABELS.map((l) => [l, num(p[l], 1)]).filter(([, v]) => v !== undefined),
       ),
+      confidence: num(a["confidence"], 1),
+      reason_codes: codes(a["reason_codes"]),
+      model_version: short(a["model_version"]),
     },
     route: {
       destination: short(rt["destination"]),
       service_line: short(rt["service_line"]),
-      priority: short(rt["priority"]),
-      sla_seconds: num(rt["sla_seconds"]),
-      escalation_after_seconds: num(rt["escalation_after_seconds"]),
-      fallback: short(rt["fallback"]),
+      priority: num(rt["priority"], 1000),
+      escalation_after_seconds: num(rt["escalation_after_seconds"]) ?? null,
+      notify: codes(rt["notify"]),
+      reason_codes: codes(rt["reason_codes"]),
+      fallback_destination: short(rt["fallback_destination"]),
+      policy_version: short(rt["policy_version"]),
     },
-    reason_codes: codes(r["reason_codes"]),
     review_required: true,
     clinically_validated: false,
   };
