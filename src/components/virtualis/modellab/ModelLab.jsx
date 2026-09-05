@@ -362,26 +362,86 @@ function TestModel() {
               <div style={{ fontSize: 11, fontWeight: 700, color: T.faint, marginBottom: 10 }}>
                 CLASS PROBABILITIES
               </div>
-              {["low", "medium", "high"].map((c) => (
+              {LABELS.map((c) => (
                 <ProbBar key={c} label={c} value={probs[c]} />
               ))}
               <div style={{ fontSize: 11.5, color: T.faint, marginTop: 6 }}>{SCALE}</div>
+              {r.reason_codes?.length > 0 && (
+                <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginTop: 12 }}>
+                  {r.reason_codes.map((c) => (
+                    <span
+                      key={c}
+                      style={{
+                        fontFamily: mono,
+                        fontSize: 11,
+                        color: T.blueDeep,
+                        background: T.blueSoft,
+                        borderRadius: 8,
+                        padding: "3px 8px",
+                      }}
+                    >
+                      {c}
+                    </span>
+                  ))}
+                </div>
+              )}
             </div>
             <div>
               <div style={{ fontSize: 11, fontWeight: 700, color: T.faint, marginBottom: 4 }}>
                 ROUTING & GOVERNANCE
               </div>
-              <KV k="Predicted class" v={r.label} />
+              <KV k="Acuity level" v={a.level} />
+              <KV
+                k="Confidence"
+                v={a.confidence == null ? undefined : `${Math.round(a.confidence * 100)}%`}
+              />
               <KV k="Review required" v="yes — human review" />
               <KV k="Model version" v={r.model_version} />
               <KV k="Policy version" v={r.policy_version} />
-              <KV k="Destination" v={routing.destination} />
-              <KV k="Service line" v={routing.service_line} />
-              <KV k="Priority" v={routing.priority} />
-              <KV k="Fallback" v={routing.fallback} />
+              <KV k="Destination" v={rt.destination} />
+              <KV k="Service line" v={rt.service_line} />
+              <KV k="Priority" v={rt.priority} />
+              <KV k="Response SLA" v={secs(rt.sla_seconds)} />
+              <KV k="Escalate after" v={secs(rt.escalation_after_seconds)} />
+              <KV k="Fallback" v={rt.fallback} />
               <KV k="Clinically validated" v="false — engineering only" />
             </div>
           </div>
+          {r.decision_id && (
+            <div
+              style={{
+                display: "flex",
+                gap: 8,
+                alignItems: "center",
+                flexWrap: "wrap",
+                marginTop: 16,
+                paddingTop: 14,
+                borderTop: "1px solid " + T.line,
+              }}
+            >
+              <span style={{ fontSize: 12.5, color: T.sub, marginRight: 4 }}>Reviewer acuity</span>
+              {LABELS.map((l) => (
+                <Chip
+                  key={l}
+                  on={review.acuity === l}
+                  disabled={review.phase === "busy"}
+                  onClick={() => submitReview(l)}
+                >
+                  {l}
+                </Chip>
+              ))}
+              <span style={{ fontSize: 12, color: review.phase === "failed" ? T.red : T.faint }}>
+                {
+                  {
+                    idle: "Record the human verdict for this decision",
+                    busy: "Recording…",
+                    sent: "Recorded — no retraining triggered",
+                    failed: "Not recorded. The runtime rejected the review.",
+                  }[review.phase]
+                }
+              </span>
+            </div>
+          )}
         </Section>
       )}
     </>
