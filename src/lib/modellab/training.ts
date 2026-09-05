@@ -165,16 +165,17 @@ export function buildExamples(records: Record<string, string>[]): TrainingExampl
     const warnings = detectIdentifiers(text);
     if (!label && rawLabel) warnings.push(`unrecognized label "${rawLabel}"`);
     if (!text.trim()) warnings.push("empty text");
+    const pick = <T extends string>(list: readonly T[], v: unknown, fallback: T): T =>
+      list.includes(v as T) ? (v as T) : fallback;
     return {
       id,
       text,
       label,
       rawLabel: String(rawLabel),
       routeLabel: normalizeRouteLabel(rec["route"] ?? rec["route_label"]),
+      useCase: pick(USE_CASES, rec["use_case"], "triage"),
       groupId: rec["group_id"] || rec["group"] || id,
-      split: (["train", "validation", "test"] as const).includes((rec["split"] ?? "") as "train")
-        ? (rec["split"] as TrainingExample["split"])
-        : "train",
+      split: pick(SPLITS, rec["split"], "train"),
       include: !duplicateOf,
       approved: false,
       quality: "unrated",
