@@ -5,92 +5,93 @@ import { toIntakeExample } from "./training";
 
 const TEXT = "Synthetic: post-op day 3 knee replacement, incision warm with mild drainage.";
 const INPUT = {
+  message_id: "ml-test-01",
   text: TEXT,
-  channel: "chat",
-  sender_role: "nurse",
-  care_setting: "inpatient",
   use_case: "triage",
+  care_setting: "inpatient",
+  sender_role: "nurse",
 } as const;
 
 describe("POST /v1/decisions request", () => {
-  it("is exactly {message, context} with only the canonical context fields", () => {
-    expect(toDecisionRequest({ ...INPUT, specialty_hint: "ortho", legacy_score_band: 3 })).toEqual({
-      message: TEXT,
-      context: {
-        channel: "chat",
-        sender_role: "nurse",
-        care_setting: "inpatient",
-        use_case: "triage",
-        specialty_hint: "ortho",
-        legacy_score_band: 3,
-      },
+  it("is exactly {use_case, message, context} per the deployed schema", () => {
+    expect(toDecisionRequest({ ...INPUT, specialty_hint: "ortho" })).toEqual({
+      use_case: "triage",
+      message: { message_id: "ml-test-01", text: TEXT, channel: "synthetic_model_lab" },
+      context: { care_setting: "inpatient", sender_role: "nurse", specialty_hint: "ortho" },
     });
-    expect(toDecisionRequest(INPUT)).toEqual({
-      message: TEXT,
-      context: {
-        channel: "chat",
-        sender_role: "nurse",
-        care_setting: "inpatient",
-        use_case: "triage",
-      },
+    expect(toDecisionRequest({ message_id: "m1", text: TEXT, use_case: "triage" })).toEqual({
+      use_case: "triage",
+      message: { message_id: "m1", text: TEXT, channel: "synthetic_model_lab" },
+      context: {},
     });
   });
 
   it("rejects fields outside the contract at the server boundary", () => {
     expect(decisionSchema.safeParse(INPUT).success).toBe(true);
-    expect(decisionSchema.safeParse({ ...INPUT, legacy_score_band: 6 }).success).toBe(false);
+    expect(decisionSchema.safeParse({ ...INPUT, legacy_score_band: 3 }).success).toBe(false);
+    expect(decisionSchema.safeParse({ ...INPUT, channel: "chat" }).success).toBe(false);
     expect(decisionSchema.safeParse({ ...INPUT, patient_id: "x" }).success).toBe(false);
-    expect(decisionSchema.safeParse({ ...INPUT, channel: "fax" }).success).toBe(false);
+    const { message_id: _m, ...noId } = INPUT;
+    expect(decisionSchema.safeParse(noId).success).toBe(false);
   });
 });
 
 describe("projectDecision", () => {
-  it("keeps only the canonical response fields and drops any echo of the input", () => {
-    const out = projectDecision(
-      {
-        decision_id: "d_1",
-        model_version: "rc3",
-        policy_version: "p1",
-        acuity: {
-          level: "medium",
-          score: 2.6,
-          confidence: 0.71,
-          probabilities: { low: 0.1, medium: 0.7, high: 0.2 },
-        },
-        route: {
-          destination: "nurse_line",
-          service_line: "ortho",
-          priority: "routine",
-          sla_seconds: 1800,
-          escalation_after_seconds: 3600,
-          fallback: "provider",
-        },
-        reason_codes: ["post_op", "low_grade_fever"],
-        warning: "clinically_validated=false — human review required",
-        message: TEXT,
-        context: { text: TEXT },
-      },
-      TEXT,
-    );
-    expect(out).toEqual({
-      decision_id: "d_1",
-      model_version: "rc3",
+  const RAW = {
+    decision_id: "3f6c4b7a-1c2d-4e5f-8a9b-0c1d2e3f4a5b",
+    request_id: "req_1",
+    use_case: "specialist_consult",
+    created_at: "2026-09-05T08:00:00Z",
+    acuity: {
+      level: "medium",
+      display_label: "Moderate",
+      legacy_score_band: [2, 3],
+      probabilities: { low: 0.1, medium: 0.7, high: 0.2 },
+      confidence: 0.71,
+      review_required: false,
+      reason_codes: ["post_op", "low_grade_fever"],
+      model_version: "virtualis-qwen3-1.7b-rc4m-20260829",
+    },
+    route: {
+      destination: "nurse_line",
+      service_line: "ortho",
+      priority: 2,
+      escalation_after_seconds: 3600,
+      notify: ["ortho_oncall"],
+      reason_codes: ["policy_default"],
+      fallback_destination: "provider",
       policy_version: "p1",
+    },
+    message: TEXT,
+    context: { text: TEXT },
+  };
+
+  it("keeps only the deployed response fields and drops any echo of the input", () => {
+    const out = projectDecision(RAW, TEXT);
+    expect(out).toEqual({
+      decision_id: RAW.decision_id,
+      request_id: "req_1",
+      use_case: "specialist_consult",
+      created_at: "2026-09-05T08:00:00Z",
       acuity: {
         level: "medium",
-        score: 2.6,
-        confidence: 0.71,
+        display_label: "Moderate",
+        legacy_score_band: [2, 3],
         probabilities: { low: 0.1, medium: 0.7, high: 0.2 },
+        confidence: 0.71,
+        reason_codes: ["post_op", "low_grade_fever"],
+        model_version: "virtualis-qwen3-1.7b-rc4m-20260829",
       },
       route: {
         destination: "nurse_line",
         service_line: "ortho",
-        priority: "routine",
-        sla_seconds: 1800,
+        priority: 2,
         escalation_after_seconds: 3600,
-        fallback: "provider",
+        notify: ["ortho_oncall"],
+        reason_codes: ["policy_default"],
+        fallback_destination: "provider",
+        policy_version: "p1",
       },
-      reason_codes: ["post_op", "low_grade_fever"],
       review_required: true,
       clinically_validated: false,
     });
@@ -101,19 +102,25 @@ describe("projectDecision", () => {
     const out = projectDecision({ review_required: false, clinically_validated: true }, TEXT);
     expect(out.review_required).toBe(true);
     expect(out.clinically_validated).toBe(false);
+    expect(out.route.escalation_after_seconds).toBeNull();
   });
 
   it("discards malformed values and free-text reason codes", () => {
     const out = projectDecision(
       {
-        acuity: { level: "urgent", probabilities: { high: 1.4, low: -0.1, medium: 0.5 } },
-        reason_codes: ["ok_code", `patient said ${TEXT}`, 42],
+        acuity: {
+          level: "urgent",
+          probabilities: { high: 1.4, low: -0.1, medium: 0.5 },
+          reason_codes: ["ok_code", `patient said ${TEXT}`, 42],
+          legacy_score_band: [2, "x"],
+        },
       },
       TEXT,
     );
     expect(out.acuity.level).toBeUndefined();
     expect(out.acuity.probabilities).toEqual({ medium: 0.5 });
-    expect(out.reason_codes).toEqual(["ok_code"]);
+    expect(out.acuity.reason_codes).toEqual(["ok_code"]);
+    expect(out.acuity.legacy_score_band).toEqual([2]);
   });
 
   it("rejects a reply whose short fields echo the submitted text", () => {
@@ -155,7 +162,7 @@ describe("feedback and training-intake payloads", () => {
       acuity: "medium",
       use_case: "triage",
       routes: ["nurse_line"],
-      label_quality: "high",
+      label_quality: "adjudicated",
       sample_weight: 1,
       include_in_training: true,
       group_id: "g1",
@@ -173,11 +180,42 @@ describe("feedback and training-intake payloads", () => {
     expect(
       intakeSchema.safeParse({ examples: [{ ...example, include_in_training: false }] }).success,
     ).toBe(false);
+    for (const w of [0, -1, 101])
+      expect(intakeSchema.safeParse({ examples: [{ ...example, sample_weight: w }] }).success).toBe(
+        false,
+      );
+    expect(
+      intakeSchema.safeParse({ examples: [{ ...example, label_quality: "high" }] }).success,
+    ).toBe(false);
 
-    const fb = { decision_id: "d_1", acuity: "high", routes: ["escalate"] };
-    expect(feedbackSchema.safeParse(fb).success).toBe(true);
-    expect(feedbackSchema.safeParse({ ...fb, agrees: true }).success).toBe(false);
-    expect(feedbackSchema.safeParse({ ...fb, note: "free text" }).success).toBe(false);
+    const id = "3f6c4b7a-1c2d-4e5f-8a9b-0c1d2e3f4a5b";
+    expect(feedbackSchema.safeParse({ decision_id: id, corrected_acuity: "high" }).success).toBe(
+      true,
+    );
+    expect(feedbackSchema.safeParse({ decision_id: id, route_accepted: false }).success).toBe(true);
+    expect(
+      feedbackSchema.safeParse({
+        decision_id: id,
+        outcome_code: "ESCALATED_TO_PROVIDER",
+        reviewer_role: "physician",
+        observed_at: "2026-09-05T08:00:00Z",
+      }).success,
+    ).toBe(true);
+    // at least one verdict field is required, and retired fields are refused
+    expect(feedbackSchema.safeParse({ decision_id: id, reviewer_role: "rn" }).success).toBe(false);
+    expect(feedbackSchema.safeParse({ decision_id: "d_1", route_accepted: true }).success).toBe(
+      false,
+    );
+    expect(
+      feedbackSchema.safeParse({ decision_id: id, acuity: "high", routes: ["escalate"] }).success,
+    ).toBe(false);
+    expect(
+      feedbackSchema.safeParse({ decision_id: id, route_accepted: true, note: "free text" })
+        .success,
+    ).toBe(false);
+    expect(feedbackSchema.safeParse({ decision_id: id, outcome_code: "lower case" }).success).toBe(
+      false,
+    );
   });
 });
 
