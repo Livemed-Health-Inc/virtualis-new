@@ -4,13 +4,23 @@ import { useServerFn } from "@tanstack/react-start";
 import { T, font, mono, card, inputStyle, KEYFRAMES } from "../theme";
 import { VMark } from "../ui";
 import {
+  LABELS,
+  ROUTES,
+  SPLITS,
+  USE_CASES,
   assignSplits,
   buildExamples,
   datasetStats,
   exportJsonl,
   parseRecords,
 } from "@/lib/modellab/training";
-import { getModelInfo, runDecision, stageTrainingBatch } from "@/lib/modellab/acuity.functions";
+import { CHANNELS, SENDERS, SETTINGS } from "@/lib/modellab/contract";
+import {
+  getModelInfo,
+  runDecision,
+  sendFeedback,
+  stageTrainingBatch,
+} from "@/lib/modellab/acuity.functions";
 
 /* ═══ VIRTUALIS® MODEL LAB ════════════════════════════════════════
    Engineering surface for the acuity model. Synthetic or approved
@@ -27,10 +37,13 @@ const SAMPLES = {
 };
 
 const SELECTS = {
-  care_setting: ["ed", "inpatient", "clinic", "telehealth", "home"],
-  sender_role: ["patient", "nurse", "provider", "device"],
-  use_case: ["triage", "routing", "escalation", "quality_review"],
+  channel: CHANNELS,
+  care_setting: SETTINGS,
+  sender_role: SENDERS,
+  use_case: USE_CASES,
 };
+
+const secs = (n) => (n == null ? undefined : n >= 60 ? `${Math.round(n / 60)} min` : `${n} s`);
 
 const Section = ({ title, hint, children, style }) => (
   <div style={{ ...card(), padding: 18, marginBottom: 14, ...style }}>
