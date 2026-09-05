@@ -32,14 +32,22 @@ export interface IntakeExample {
   acuity: Label;
   use_case: (typeof USE_CASES)[number];
   routes: RouteLabel[];
-  label_quality: "high" | "medium" | "low";
+  label_quality: (typeof QUALITY_LEVELS)[number];
   sample_weight: number;
   include_in_training: true;
   group_id: string;
   split: (typeof SPLITS)[number];
 }
 
-const QUALITY = { good: "high", unrated: "medium", needs_work: "low" } as const;
+/* Deployed label-quality vocabulary: adjudicated > expert_reviewed > single_reviewed. */
+export const QUALITY_LEVELS = ["single_reviewed", "expert_reviewed", "adjudicated"] as const;
+
+const quality = (e: TrainingExample) =>
+  e.approved && e.quality === "good"
+    ? "adjudicated"
+    : e.quality === "good"
+      ? "expert_reviewed"
+      : "single_reviewed";
 
 export const toIntakeExample = (e: TrainingExample & { label: Label }): IntakeExample => ({
   record_id: e.id,
@@ -47,7 +55,7 @@ export const toIntakeExample = (e: TrainingExample & { label: Label }): IntakeEx
   acuity: e.label,
   use_case: e.useCase,
   routes: e.routeLabel ? [e.routeLabel] : [],
-  label_quality: QUALITY[e.quality],
+  label_quality: quality(e),
   sample_weight: e.quality === "needs_work" ? 0.5 : 1,
   include_in_training: true,
   group_id: e.groupId,
