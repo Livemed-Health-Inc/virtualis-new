@@ -544,7 +544,8 @@ function TrainingData() {
           <input
             value={batchLabel}
             onChange={(e) => setBatchLabel(e.target.value)}
-            aria-label="Batch label"
+            aria-label="Export file name"
+            title="Local export file name only — the runtime assigns batch IDs"
             style={{ ...inputStyle, width: 220 }}
           />
           {rows.length > 0 && (
