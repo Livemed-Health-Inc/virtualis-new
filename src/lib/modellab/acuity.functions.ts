@@ -1,12 +1,22 @@
 /* Model Lab RPC surface. Every call is authenticated with the clinician's
    Supabase session and re-verified as admin; only that session token is
    forwarded to the runtime, and every reply is projected onto the fixed
-   contract in ./contract.ts before it reaches the browser. */
+   contract in ./contract.ts before it reaches the browser. Input schemas are
+   strict: fields outside the canonical API contract are rejected, not dropped. */
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { detectIdentifiers } from "./training";
-import { projectDecision, projectInfo, projectIntake, type RuntimeInfo } from "./contract";
+import { detectIdentifiers, LABELS, ROUTES, SPLITS, USE_CASES } from "./training";
+import {
+  CHANNELS,
+  SENDERS,
+  SETTINGS,
+  projectDecision,
+  projectInfo,
+  projectIntake,
+  toDecisionRequest,
+  type RuntimeInfo,
+} from "./contract";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/integrations/supabase/types";
 
@@ -21,39 +31,49 @@ async function assertAdmin(context: { userId: string; supabase: SupabaseClient<D
   if (error || !data) throw new Error("Forbidden");
 }
 
-const contextSchema = z.object({
-  text: z.string().min(1).max(4000),
-  care_setting: z.enum(["ed", "inpatient", "clinic", "telehealth", "home"]),
-  sender_role: z.enum(["patient", "nurse", "provider", "device"]),
-  use_case: z.enum(["triage", "routing", "escalation", "quality_review"]),
-  specialty_hint: z.string().max(64).optional(),
-});
+export const decisionSchema = z
+  .object({
+    text: z.string().min(1).max(4000),
+    channel: z.enum(CHANNELS),
+    sender_role: z.enum(SENDERS),
+    care_setting: z.enum(SETTINGS),
+    use_case: z.enum(USE_CASES),
+    specialty_hint: z.string().max(64).optional(),
+    legacy_score_band: z.number().int().min(1).max(5).optional(),
+  })
+  .strict();
 
-const feedbackSchema = z.object({
-  decision_id: z.string().min(1).max(128),
-  agrees: z.boolean(),
-  corrected_label: z.enum(["low", "medium", "high"]).optional(),
-  note: z.string().max(1000).optional(),
-});
+export const feedbackSchema = z
+  .object({
+    decision_id: z.string().min(1).max(128),
+    acuity: z.enum(LABELS),
+    routes: z.array(z.enum(ROUTES)).max(ROUTES.length),
+  })
+  .strict();
 
-const intakeSchema = z.object({
-  batch_label: z.string().min(1).max(120),
-  provenance: z.literal("synthetic_or_approved_deidentified"),
-  examples: z
-    .array(
-      z.object({
-        id: z.string().min(1),
-        text: z.string().min(1).max(4000),
-        label: z.enum(["low", "medium", "high"]),
-        route_label: z.enum(["self_serve", "nurse_line", "provider", "escalate"]).nullable(),
-        group_id: z.string().min(1),
-        split: z.enum(["train", "validation", "test"]),
-        quality: z.enum(["unrated", "good", "needs_work"]),
-      }),
-    )
-    .min(1)
-    .max(5000),
-});
+export const intakeSchema = z
+  .object({
+    examples: z
+      .array(
+        z
+          .object({
+            record_id: z.string().min(1).max(128),
+            text: z.string().min(1).max(4000),
+            acuity: z.enum(LABELS),
+            use_case: z.enum(USE_CASES),
+            routes: z.array(z.enum(ROUTES)).max(ROUTES.length),
+            label_quality: z.enum(["high", "medium", "low"]),
+            sample_weight: z.number().min(0).max(10),
+            include_in_training: z.literal(true),
+            group_id: z.string().min(1).max(128),
+            split: z.enum(SPLITS),
+          })
+          .strict(),
+      )
+      .min(1)
+      .max(5000),
+  })
+  .strict();
 
 export const getModelInfo = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
@@ -67,7 +87,7 @@ export const getModelInfo = createServerFn({ method: "GET" })
 
 export const runDecision = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) => contextSchema.parse(input))
+  .inputValidator((input: unknown) => decisionSchema.parse(input))
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
     /* Synthetic/deidentified only — the server refuses anything that looks
@@ -76,18 +96,17 @@ export const runDecision = createServerFn({ method: "POST" })
       throw new Error("Rejected: input contains a possible identifier. Synthetic text only.");
     const { callAcuity } = await import("./acuity.server");
     return projectDecision(
-      await callAcuity("/v1/decisions", { method: "POST", body: data }),
+      await callAcuity("/v1/decisions", { method: "POST", body: toDecisionRequest(data) }),
       data.text,
     );
   });
 
+/* Reviewer verdict on a decision: structured labels only, no free text. */
 export const sendFeedback = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => feedbackSchema.parse(input))
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
-    if (data.note && detectIdentifiers(data.note).length)
-      throw new Error("Rejected: note contains a possible identifier.");
     const { callAcuity } = await import("./acuity.server");
     const r = (await callAcuity("/v1/feedback", { method: "POST", body: data })) as {
       accepted?: unknown;
@@ -110,10 +129,5 @@ export const stageTrainingBatch = createServerFn({ method: "POST" })
         `Rejected: ${flagged.length} example(s) contain possible identifiers. Only synthetic or approved deidentified text may be staged.`,
       );
     const { callAcuity } = await import("./acuity.server");
-    return projectIntake(
-      await callAcuity("/v1/training-intake", {
-        method: "POST",
-        body: { ...data, promote: false },
-      }),
-    );
+    return projectIntake(await callAcuity("/v1/training-intake", { method: "POST", body: data }));
   });
