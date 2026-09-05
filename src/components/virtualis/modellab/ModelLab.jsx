@@ -324,6 +324,20 @@ function TestModel() {
               style={inputStyle}
             />
           </Field>
+          <Field label="Legacy score band">
+            <select
+              value={form.legacy_score_band}
+              onChange={(e) => set("legacy_score_band", e.target.value)}
+              style={inputStyle}
+            >
+              <option value="">none</option>
+              {[1, 2, 3, 4, 5].map((n) => (
+                <option key={n} value={n}>
+                  {n} · {n === 1 ? "low" : n <= 3 ? "moderate" : "high"}
+                </option>
+              ))}
+            </select>
+          </Field>
         </div>
         <div
           style={{
