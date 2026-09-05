@@ -38,19 +38,26 @@
 
 ## Blocked on user (AWS side)
 
-- Authorizer now accepts the ES256 session token (401 resolved), but the service behind
-  the gateway answers `404 {"detail":"Not Found"}` for all four canonical paths
-  (`GET /v1/info`, `POST /v1/decisions|feedback|training-intake`) while unknown paths get
-  the gateway's own `{"message":"Not Found"}` — so routes exist on the gateway and the
-  request reaches the app, which does not recognise the path. Most likely the `/model-lab`
-  stage prefix is being passed through to the app (FastAPI/Mangum: set
-  `api_gateway_base_path="/model-lab"` or `root_path`). Until fixed, `/model-lab` shows
-  "Runtime unreachable" and `Model runtime returned 404`.
+- 2026-09-05 re-check after the Lambda-authorizer deploy: unsigned → 401, forged ES256 →
+  403, real admin session → accepted. But every canonical route
+  (`GET /model-lab/v1/info`, `POST /model-lab/v1/decisions|feedback|training-intake`)
+  returns `404 {"detail":"Not Found"}` with the app's own headers
+  (`x-request-id`, `cache-control: no-store`, `x-content-type-options: nosniff`),
+  while any other path gets the gateway's `{"message":"Not Found"}`. So the gateway routes
+  and integration are correct and the request reaches the FastAPI app, whose router does
+  not match the path it is handed — the `/model-lab` stage segment is not being
+  reconciled (Mangum `api_gateway_base_path="/model-lab"` / FastAPI `root_path`, or the
+  app was smoke-tested by direct Lambda invoke / a `$default` stage, which bypasses the
+  stage prefix). No `$default` stage exists (`/v1/info` at the origin → gateway 404).
+  Until fixed, `/model-lab` shows "Runtime unreachable" and `Model runtime returned 404`;
+  model version, routing, feedback persistence and `awaiting_adjudication` remain
+  unverified from this app.
 - Unverifiable from here (backend schema not accessible): exact `channel` enum, feedback
   body field names, `label_quality` scale (sent as high|medium|low) and the intake
   envelope key (`examples`). A 422 from the runtime after the 404 is fixed will name any
   mismatch; the schemas live in `acuity.schemas.ts`. Re-run
-  `/tmp/browser/modellab/check_modellab.py` after the AWS change.
+  `/tmp/browser/modellab/live_flow.py` (decision → verdict → intake, echo check) after
+  the AWS change.
 
 ## Accepted residual scanner findings
 
