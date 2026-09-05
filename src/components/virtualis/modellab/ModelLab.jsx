@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { T, font, mono, card, inputStyle, KEYFRAMES } from "../theme";
@@ -131,9 +131,9 @@ const ValidationBanner = () => (
   >
     <span style={{ width: 4, borderRadius: 2, background: T.amber, flexShrink: 0 }} />
     <div style={{ fontSize: 12.5, lineHeight: 1.55, color: "#7A4A05" }}>
-      <strong>Engineering validation — human review required.</strong> clinically_validated =
-      false. Output is not production-ready, is not medical advice, and must not drive patient
-      care. Use synthetic or approved deidentified data only.
+      <strong>Engineering validation — human review required.</strong> clinically_validated = false.
+      Output is not production-ready, is not medical advice, and must not drive patient care. Use
+      synthetic or approved deidentified data only.
     </div>
   </div>
 );
@@ -149,7 +149,13 @@ function ProbBar({ label, value }) {
         <span style={{ fontFamily: mono, fontWeight: 660, color: T.ink }}>{pct}%</span>
       </div>
       <div
-        style={{ height: 8, borderRadius: 6, background: T.ghost, marginTop: 5, overflow: "hidden" }}
+        style={{
+          height: 8,
+          borderRadius: 6,
+          background: T.ghost,
+          marginTop: 5,
+          overflow: "hidden",
+        }}
       >
         <div
           style={{
@@ -160,6 +166,24 @@ function ProbBar({ label, value }) {
           }}
         />
       </div>
+    </div>
+  );
+}
+
+/* Runtime connection status, fetched once per visit. Only the projected
+   version strings ever reach the browser. */
+function RuntimeStatus({ status }) {
+  const tone = { connected: T.green, unconfigured: T.amber, unreachable: T.red }[status.kind];
+  const text = {
+    checking: "Checking runtime…",
+    connected: `Runtime connected · ${status.model || "model version unknown"}`,
+    unconfigured: "Runtime not configured for this environment",
+    unreachable: "Runtime unreachable — sign-in token or endpoint rejected",
+  }[status.kind];
+  return (
+    <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12.5, color: T.sub }}>
+      <span style={{ width: 8, height: 8, borderRadius: 4, background: tone || T.faint }} />
+      {text}
     </div>
   );
 }
@@ -175,30 +199,43 @@ function TestModel() {
     use_case: "triage",
     specialty_hint: "",
   });
-  const [state, setState] = useState({ busy: false, result: null, error: null, info: null });
+  const [state, setState] = useState({ busy: false, result: null, error: null });
+  const [status, setStatus] = useState({ kind: "checking" });
   const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
+
+  useEffect(() => {
+    info()
+      .then((m) =>
+        setStatus(
+          m.configured
+            ? { kind: "connected", model: m.info?.model_version }
+            : { kind: "unconfigured" },
+        ),
+      )
+      .catch(() => setStatus({ kind: "unreachable" }));
+  }, [info]);
 
   const run = async () => {
     setState((s) => ({ ...s, busy: true, error: null }));
     try {
-      const [result, meta] = await Promise.all([
-        decide({ data: { ...form, specialty_hint: form.specialty_hint || undefined } }),
-        info().catch(() => null),
-      ]);
-      setState({ busy: false, result, error: null, info: meta });
+      const result = await decide({
+        data: { ...form, specialty_hint: form.specialty_hint || undefined },
+      });
+      setState({ busy: false, result, error: null });
     } catch (e) {
+      const m = e?.message || "";
       setState((s) => ({
         ...s,
         busy: false,
-        error: e?.message?.includes("not configured")
-          ? "Model runtime is not configured for this environment."
+        error: /not configured|Rejected|rejected/.test(m)
+          ? m
           : "Analysis failed. Check the runtime connection and try again.",
       }));
     }
   };
 
   const r = state.result || {};
-  const probs = r.probabilities || r.class_probabilities || {};
+  const probs = r.probabilities || {};
   const routing = r.routing || {};
 
   return (
@@ -247,10 +284,22 @@ function TestModel() {
             />
           </Field>
         </div>
-        <div style={{ marginTop: 14, display: "flex", gap: 10, alignItems: "center" }}>
-          <Primary onClick={run} disabled={state.busy || !form.text.trim()}>
+        <div
+          style={{
+            marginTop: 14,
+            display: "flex",
+            gap: 12,
+            alignItems: "center",
+            flexWrap: "wrap",
+          }}
+        >
+          <Primary
+            onClick={run}
+            disabled={state.busy || !form.text.trim() || status.kind === "unconfigured"}
+          >
             {state.busy ? "Analyzing…" : "Run analysis"}
           </Primary>
+          <RuntimeStatus status={status} />
           {state.error && <span style={{ fontSize: 12.5, color: T.red }}>{state.error}</span>}
         </div>
       </Section>
@@ -281,24 +330,15 @@ function TestModel() {
               <div style={{ fontSize: 11, fontWeight: 700, color: T.faint, marginBottom: 4 }}>
                 ROUTING & GOVERNANCE
               </div>
-              <KV k="Predicted class" v={r.label || r.predicted_label} />
-              <KV
-                k="Review required"
-                v={r.review_required === false ? "no" : "yes — human review"}
-              />
+              <KV k="Predicted class" v={r.label} />
+              <KV k="Review required" v="yes — human review" />
               <KV k="Model version" v={r.model_version} />
               <KV k="Policy version" v={r.policy_version} />
               <KV k="Destination" v={routing.destination} />
               <KV k="Service line" v={routing.service_line} />
               <KV k="Priority" v={routing.priority} />
               <KV k="Fallback" v={routing.fallback} />
-              <KV
-                k="Clinically validated"
-                v={r.clinically_validated ? "true" : "false — engineering only"}
-              />
-              {state.info?.info?.model_version && (
-                <KV k="Runtime model" v={state.info.info.model_version} />
-              )}
+              <KV k="Clinically validated" v="false — engineering only" />
             </div>
           </div>
         </Section>
@@ -488,7 +528,9 @@ function TrainingData() {
                       {r.rawLabel ? ` · raw ${r.rawLabel}` : ""}
                     </span>
                     {r.duplicateOf && (
-                      <span style={{ fontSize: 11, color: T.sub }}>duplicate of {r.duplicateOf}</span>
+                      <span style={{ fontSize: 11, color: T.sub }}>
+                        duplicate of {r.duplicateOf}
+                      </span>
                     )}
                     <span style={{ fontSize: 11, color: T.sub }}>group {r.groupId}</span>
                   </div>
@@ -522,7 +564,11 @@ function TrainingData() {
                       </Chip>
                     ))}
                     {["good", "needs_work"].map((q) => (
-                      <Chip key={q} on={r.quality === q} onClick={() => patch(r.id, { quality: q })}>
+                      <Chip
+                        key={q}
+                        on={r.quality === q}
+                        onClick={() => patch(r.id, { quality: q })}
+                      >
                         {q.replace("_", " ")}
                       </Chip>
                     ))}
