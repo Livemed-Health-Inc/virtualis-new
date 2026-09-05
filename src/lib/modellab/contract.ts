@@ -1,24 +1,63 @@
-/* Model Lab response contract. Upstream JSON is never passed through to the
-   browser: each handler projects the runtime's reply onto these fixed, short-
-   field shapes, so submitted text and identifiers cannot be echoed back, and
-   the governance clamps (clinically_validated=false, human review mandatory)
-   hold regardless of what the runtime claims. */
-import { detectIdentifiers } from "./training";
+/* Model Lab wire contract (canonical Acuity API).
+   Requests are built here so only the documented fields ever leave the
+   server; replies are projected onto fixed, short-field shapes so submitted
+   text and identifiers cannot be echoed back, and the governance clamps
+   (clinically_validated=false, human review mandatory) hold regardless of
+   what the runtime claims. */
+import { detectIdentifiers, type IntakeExample, type Label, LABELS } from "./training";
 
-export const LABELS = ["low", "medium", "high"] as const;
-export type Label = (typeof LABELS)[number];
+export { LABELS, type Label };
+export const CHANNELS = ["chat", "portal", "sms", "voice", "device"] as const;
+export const SETTINGS = ["ed", "inpatient", "clinic", "telehealth", "home"] as const;
+export const SENDERS = ["patient", "nurse", "provider", "device"] as const;
 
 type Str = string | undefined;
+type Num = number | undefined;
+
+/* POST /v1/decisions → { message, context } and nothing else. */
+export interface DecisionInput {
+  text: string;
+  channel: (typeof CHANNELS)[number];
+  sender_role: (typeof SENDERS)[number];
+  care_setting: (typeof SETTINGS)[number];
+  use_case: IntakeExample["use_case"];
+  specialty_hint?: string | undefined;
+  legacy_score_band?: number | undefined;
+}
+
+export const toDecisionRequest = ({ text, specialty_hint, legacy_score_band, ...c }: DecisionInput) => ({
+  message: text,
+  context: {
+    channel: c.channel,
+    sender_role: c.sender_role,
+    care_setting: c.care_setting,
+    use_case: c.use_case,
+    ...(specialty_hint ? { specialty_hint } : {}),
+    ...(legacy_score_band ? { legacy_score_band } : {}),
+  },
+});
 
 export interface Decision {
   decision_id?: Str;
-  label?: Label | undefined;
-  probabilities: Partial<Record<Label, number>>;
-  review_required: true;
-  clinically_validated: false;
   model_version?: Str;
   policy_version?: Str;
-  routing: { destination?: Str; service_line?: Str; priority?: Str; fallback?: Str };
+  acuity: {
+    level?: Label | undefined;
+    score?: Num;
+    confidence?: Num;
+    probabilities: Partial<Record<Label, number>>;
+  };
+  route: {
+    destination?: Str;
+    service_line?: Str;
+    priority?: Str;
+    sla_seconds?: Num;
+    escalation_after_seconds?: Num;
+    fallback?: Str;
+  };
+  reason_codes: string[];
+  review_required: true;
+  clinically_validated: false;
 }
 
 export interface RuntimeInfo {
@@ -31,7 +70,7 @@ export interface IntakeReceipt {
   accepted: boolean;
   batch_id?: Str;
   object_key?: Str;
-  example_count?: number | undefined;
+  example_count?: Num;
   sha256?: Str;
   state?: Str;
 }
@@ -41,9 +80,15 @@ const obj = (v: unknown): Raw =>
   v && typeof v === "object" && !Array.isArray(v) ? (v as Raw) : {};
 const short = (v: unknown, max = 64) =>
   typeof v === "string" && v.length > 0 && v.length <= max ? v : undefined;
-const prob = (v: unknown) => (typeof v === "number" && v >= 0 && v <= 1 ? v : undefined);
+const num = (v: unknown, max = Number.MAX_SAFE_INTEGER) =>
+  typeof v === "number" && Number.isFinite(v) && v >= 0 && v <= max ? v : undefined;
 const label = (v: unknown): Label | undefined =>
   LABELS.includes(v as Label) ? (v as Label) : undefined;
+/* Reason codes are machine slugs: bounded count, bounded length, slug charset. */
+const codes = (v: unknown) =>
+  (Array.isArray(v) ? v : [])
+    .slice(0, 12)
+    .filter((c): c is string => typeof c === "string" && /^[a-z0-9_.:-]{1,48}$/i.test(c));
 
 /* Fail closed: a reply that carries the submitted text or anything that looks
    like an identifier is rejected outright rather than partially displayed. */
@@ -58,24 +103,32 @@ function assertClean(out: unknown, submitted?: string) {
 
 export function projectDecision(raw: unknown, submitted: string): Decision {
   const r = obj(raw);
-  const p = obj(r["probabilities"] ?? r["class_probabilities"]);
-  const rt = obj(r["routing"]);
+  const a = obj(r["acuity"]);
+  const p = obj(a["probabilities"]);
+  const rt = obj(r["route"]);
   const out: Decision = {
     decision_id: short(r["decision_id"], 128),
-    label: label(r["label"]) ?? label(r["predicted_label"]),
-    probabilities: Object.fromEntries(
-      LABELS.map((l) => [l, prob(p[l])]).filter(([, v]) => v !== undefined),
-    ),
-    review_required: true,
-    clinically_validated: false,
     model_version: short(r["model_version"]),
     policy_version: short(r["policy_version"]),
-    routing: {
+    acuity: {
+      level: label(a["level"]),
+      score: num(a["score"], 5),
+      confidence: num(a["confidence"], 1),
+      probabilities: Object.fromEntries(
+        LABELS.map((l) => [l, num(p[l], 1)]).filter(([, v]) => v !== undefined),
+      ),
+    },
+    route: {
       destination: short(rt["destination"]),
       service_line: short(rt["service_line"]),
       priority: short(rt["priority"]),
+      sla_seconds: num(rt["sla_seconds"]),
+      escalation_after_seconds: num(rt["escalation_after_seconds"]),
       fallback: short(rt["fallback"]),
     },
+    reason_codes: codes(r["reason_codes"]),
+    review_required: true,
+    clinically_validated: false,
   };
   assertClean(out, submitted);
   return out;
@@ -99,7 +152,7 @@ export function projectIntake(raw: unknown): IntakeReceipt {
     accepted: r["accepted"] === true,
     batch_id: short(r["batch_id"], 128),
     object_key: short(r["object_key"], 200),
-    example_count: typeof n === "number" && Number.isInteger(n) && n >= 0 ? n : undefined,
+    example_count: Number.isInteger(n) ? num(n) : undefined,
     sha256: short(r["sha256"], 64),
     state: short(r["state"]),
   };
