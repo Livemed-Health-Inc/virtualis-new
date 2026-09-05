@@ -1,22 +1,12 @@
 /* Model Lab RPC surface. Every call is authenticated with the clinician's
    Supabase session and re-verified as admin; only that session token is
    forwarded to the runtime, and every reply is projected onto the fixed
-   contract in ./contract.ts before it reaches the browser. Input schemas are
-   strict: fields outside the canonical API contract are rejected, not dropped. */
+   contract in ./contract.ts before it reaches the browser. */
 import { createServerFn } from "@tanstack/react-start";
-import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { detectIdentifiers, LABELS, ROUTES, SPLITS, USE_CASES } from "./training";
-import {
-  CHANNELS,
-  SENDERS,
-  SETTINGS,
-  projectDecision,
-  projectInfo,
-  projectIntake,
-  toDecisionRequest,
-  type RuntimeInfo,
-} from "./contract";
+import { detectIdentifiers } from "./training";
+import { decisionSchema, feedbackSchema, intakeSchema } from "./acuity.schemas";
+import { projectDecision, projectInfo, projectIntake, toDecisionRequest, type RuntimeInfo } from "./contract";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/integrations/supabase/types";
 
@@ -30,50 +20,6 @@ async function assertAdmin(context: { userId: string; supabase: SupabaseClient<D
   });
   if (error || !data) throw new Error("Forbidden");
 }
-
-export const decisionSchema = z
-  .object({
-    text: z.string().min(1).max(4000),
-    channel: z.enum(CHANNELS),
-    sender_role: z.enum(SENDERS),
-    care_setting: z.enum(SETTINGS),
-    use_case: z.enum(USE_CASES),
-    specialty_hint: z.string().max(64).optional(),
-    legacy_score_band: z.number().int().min(1).max(5).optional(),
-  })
-  .strict();
-
-export const feedbackSchema = z
-  .object({
-    decision_id: z.string().min(1).max(128),
-    acuity: z.enum(LABELS),
-    routes: z.array(z.enum(ROUTES)).max(ROUTES.length),
-  })
-  .strict();
-
-export const intakeSchema = z
-  .object({
-    examples: z
-      .array(
-        z
-          .object({
-            record_id: z.string().min(1).max(128),
-            text: z.string().min(1).max(4000),
-            acuity: z.enum(LABELS),
-            use_case: z.enum(USE_CASES),
-            routes: z.array(z.enum(ROUTES)).max(ROUTES.length),
-            label_quality: z.enum(["high", "medium", "low"]),
-            sample_weight: z.number().min(0).max(10),
-            include_in_training: z.literal(true),
-            group_id: z.string().min(1).max(128),
-            split: z.enum(SPLITS),
-          })
-          .strict(),
-      )
-      .min(1)
-      .max(5000),
-  })
-  .strict();
 
 export const getModelInfo = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
