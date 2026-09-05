@@ -1,9 +1,12 @@
 /* Model Lab RPC surface. Every call is authenticated with the clinician's
-   Supabase session; the runtime credentials stay in the server context. */
+   Supabase session and re-verified as admin; only that session token is
+   forwarded to the runtime, and every reply is projected onto the fixed
+   contract in ./contract.ts before it reaches the browser. */
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { detectIdentifiers } from "./training";
+import { projectDecision, projectInfo, projectIntake, type RuntimeInfo } from "./contract";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/integrations/supabase/types";
 
@@ -25,22 +28,6 @@ const contextSchema = z.object({
   use_case: z.enum(["triage", "routing", "escalation", "quality_review"]),
   specialty_hint: z.string().max(64).optional(),
 });
-
-export interface DecisionResult {
-  decision_id?: string;
-  label?: string;
-  probabilities?: { low?: number; medium?: number; high?: number };
-  review_required?: boolean;
-  model_version?: string;
-  policy_version?: string;
-  clinically_validated?: boolean;
-  routing?: {
-    destination?: string;
-    service_line?: string;
-    priority?: string;
-    fallback?: string;
-  };
-}
 
 const feedbackSchema = z.object({
   decision_id: z.string().min(1).max(128),
@@ -72,16 +59,10 @@ export const getModelInfo = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     await assertAdmin(context);
-    const { callAcuity } = await import("./acuity.server");
-    if (!process.env["ACUITY_API_URL"])
-      return {
-        configured: false as const,
-        info: undefined as { model_version?: string } | undefined,
-      };
-    const info = await callAcuity<{ model_version?: string; policy_version?: string }>("/v1/info", {
-      method: "GET",
-    });
-    return { configured: true as const, info };
+    const { callAcuity, isConfigured } = await import("./acuity.server");
+    if (!isConfigured())
+      return { configured: false as const, info: undefined as RuntimeInfo | undefined };
+    return { configured: true as const, info: projectInfo(await callAcuity("/v1/info")) };
   });
 
 export const runDecision = createServerFn({ method: "POST" })
@@ -89,8 +70,15 @@ export const runDecision = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => contextSchema.parse(input))
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
+    /* Synthetic/deidentified only — the server refuses anything that looks
+       like a real identifier before it can reach the runtime. */
+    if (detectIdentifiers(data.text).length)
+      throw new Error("Rejected: input contains a possible identifier. Synthetic text only.");
     const { callAcuity } = await import("./acuity.server");
-    return await callAcuity<DecisionResult>("/v1/decisions", { method: "POST", body: data });
+    return projectDecision(
+      await callAcuity("/v1/decisions", { method: "POST", body: data }),
+      data.text,
+    );
   });
 
 export const sendFeedback = createServerFn({ method: "POST" })
@@ -98,11 +86,13 @@ export const sendFeedback = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => feedbackSchema.parse(input))
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
+    if (data.note && detectIdentifiers(data.note).length)
+      throw new Error("Rejected: note contains a possible identifier.");
     const { callAcuity } = await import("./acuity.server");
-    return await callAcuity<{ accepted: boolean; feedback_id?: string }>("/v1/feedback", {
-      method: "POST",
-      body: data,
-    });
+    const r = (await callAcuity("/v1/feedback", { method: "POST", body: data })) as {
+      accepted?: unknown;
+    };
+    return { accepted: r?.accepted === true };
   });
 
 /* Staging only. The runtime stores the batch; it never retrains or promotes
@@ -120,12 +110,10 @@ export const stageTrainingBatch = createServerFn({ method: "POST" })
         `Rejected: ${flagged.length} example(s) contain possible identifiers. Only synthetic or approved deidentified text may be staged.`,
       );
     const { callAcuity } = await import("./acuity.server");
-    return await callAcuity<{
-      accepted: boolean;
-      batch_id: string;
-      object_key: string;
-      example_count: number;
-      sha256: string;
-      state: string;
-    }>("/v1/training-intake", { method: "POST", body: { ...data, promote: false } });
+    return projectIntake(
+      await callAcuity("/v1/training-intake", {
+        method: "POST",
+        body: { ...data, promote: false },
+      }),
+    );
   });
