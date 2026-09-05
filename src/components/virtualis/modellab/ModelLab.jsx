@@ -664,12 +664,12 @@ function TrainingData() {
                     >
                       {r.approved ? "Approved" : "Approve"}
                     </Chip>
-                    {["low", "medium", "high"].map((l) => (
+                    {LABELS.map((l) => (
                       <Chip key={l} on={r.label === l} onClick={() => patch(r.id, { label: l })}>
                         {l}
                       </Chip>
                     ))}
-                    {["train", "validation", "test"].map((s) => (
+                    {SPLITS.map((s) => (
                       <Chip key={s} on={r.split === s} onClick={() => patch(r.id, { split: s })}>
                         {s}
                       </Chip>
@@ -683,7 +683,7 @@ function TrainingData() {
                         {q.replace("_", " ")}
                       </Chip>
                     ))}
-                    {["self_serve", "nurse_line", "provider", "escalate"].map((rt) => (
+                    {ROUTES.map((rt) => (
                       <Chip
                         key={rt}
                         on={r.routeLabel === rt}
