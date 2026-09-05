@@ -513,11 +513,7 @@ function TrainingData() {
     setBusy(true);
     try {
       const res = await stage({
-        data: {
-          batch_label: batchLabel,
-          provenance: "synthetic_or_approved_deidentified",
-          examples: jsonl.split("\n").map((l) => JSON.parse(l)),
-        },
+        data: { examples: jsonl.split("\n").map((l) => JSON.parse(l)) },
       });
       setMsg({
         tone: "ok",
