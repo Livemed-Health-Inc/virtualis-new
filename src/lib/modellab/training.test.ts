@@ -92,7 +92,18 @@ describe("governed JSONL export", () => {
     const { jsonl, blocked } = exportJsonl(ready);
     const lines = jsonl.split("\n").filter(Boolean);
     expect(lines).toHaveLength(1);
-    expect(JSON.parse(lines[0]!)).toMatchObject({ id: "a", label: "high", split: "train" });
+    expect(JSON.parse(lines[0]!)).toEqual({
+      record_id: "a",
+      text: "Chest pain radiating",
+      acuity: "high",
+      use_case: "triage",
+      routes: [],
+      label_quality: "medium",
+      sample_weight: 1,
+      include_in_training: true,
+      group_id: "a",
+      split: "train",
+    });
     expect(blocked).toEqual([]);
   });
 });
