@@ -27,7 +27,12 @@ describe("POST /v1/decisions request", () => {
     });
     expect(toDecisionRequest(INPUT)).toEqual({
       message: TEXT,
-      context: { channel: "chat", sender_role: "nurse", care_setting: "inpatient", use_case: "triage" },
+      context: {
+        channel: "chat",
+        sender_role: "nurse",
+        care_setting: "inpatient",
+        use_case: "triage",
+      },
     });
   });
 
@@ -46,7 +51,12 @@ describe("projectDecision", () => {
         decision_id: "d_1",
         model_version: "rc3",
         policy_version: "p1",
-        acuity: { level: "medium", score: 2.6, confidence: 0.71, probabilities: { low: 0.1, medium: 0.7, high: 0.2 } },
+        acuity: {
+          level: "medium",
+          score: 2.6,
+          confidence: 0.71,
+          probabilities: { low: 0.1, medium: 0.7, high: 0.2 },
+        },
         route: {
           destination: "nurse_line",
           service_line: "ortho",
@@ -66,7 +76,12 @@ describe("projectDecision", () => {
       decision_id: "d_1",
       model_version: "rc3",
       policy_version: "p1",
-      acuity: { level: "medium", score: 2.6, confidence: 0.71, probabilities: { low: 0.1, medium: 0.7, high: 0.2 } },
+      acuity: {
+        level: "medium",
+        score: 2.6,
+        confidence: 0.71,
+        probabilities: { low: 0.1, medium: 0.7, high: 0.2 },
+      },
       route: {
         destination: "nurse_line",
         service_line: "ortho",
@@ -152,8 +167,12 @@ describe("feedback and training-intake payloads", () => {
   it("refuses the retired fields instead of forwarding them", () => {
     for (const extra of [{ promote: false }, { batch_label: "b" }, { provenance: "synthetic" }])
       expect(intakeSchema.safeParse({ examples: [example], ...extra }).success).toBe(false);
-    expect(intakeSchema.safeParse({ examples: [{ ...example, provenance: "x" }] }).success).toBe(false);
-    expect(intakeSchema.safeParse({ examples: [{ ...example, include_in_training: false }] }).success).toBe(false);
+    expect(intakeSchema.safeParse({ examples: [{ ...example, provenance: "x" }] }).success).toBe(
+      false,
+    );
+    expect(
+      intakeSchema.safeParse({ examples: [{ ...example, include_in_training: false }] }).success,
+    ).toBe(false);
 
     const fb = { decision_id: "d_1", acuity: "high", routes: ["escalate"] };
     expect(feedbackSchema.safeParse(fb).success).toBe(true);

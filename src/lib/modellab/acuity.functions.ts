@@ -6,7 +6,13 @@ import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { detectIdentifiers } from "./training";
 import { decisionSchema, feedbackSchema, intakeSchema } from "./acuity.schemas";
-import { projectDecision, projectInfo, projectIntake, toDecisionRequest, type RuntimeInfo } from "./contract";
+import {
+  projectDecision,
+  projectInfo,
+  projectIntake,
+  toDecisionRequest,
+  type RuntimeInfo,
+} from "./contract";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/integrations/supabase/types";
 

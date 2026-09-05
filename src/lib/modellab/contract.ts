@@ -25,7 +25,12 @@ export interface DecisionInput {
   legacy_score_band?: number | undefined;
 }
 
-export const toDecisionRequest = ({ text, specialty_hint, legacy_score_band, ...c }: DecisionInput) => ({
+export const toDecisionRequest = ({
+  text,
+  specialty_hint,
+  legacy_score_band,
+  ...c
+}: DecisionInput) => ({
   message: text,
   context: {
     channel: c.channel,
