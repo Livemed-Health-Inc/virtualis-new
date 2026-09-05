@@ -4,13 +4,23 @@ import { useServerFn } from "@tanstack/react-start";
 import { T, font, mono, card, inputStyle, KEYFRAMES } from "../theme";
 import { VMark } from "../ui";
 import {
+  LABELS,
+  ROUTES,
+  SPLITS,
+  USE_CASES,
   assignSplits,
   buildExamples,
   datasetStats,
   exportJsonl,
   parseRecords,
 } from "@/lib/modellab/training";
-import { getModelInfo, runDecision, stageTrainingBatch } from "@/lib/modellab/acuity.functions";
+import { CHANNELS, SENDERS, SETTINGS } from "@/lib/modellab/contract";
+import {
+  getModelInfo,
+  runDecision,
+  sendFeedback,
+  stageTrainingBatch,
+} from "@/lib/modellab/acuity.functions";
 
 /* ═══ VIRTUALIS® MODEL LAB ════════════════════════════════════════
    Engineering surface for the acuity model. Synthetic or approved
@@ -27,10 +37,13 @@ const SAMPLES = {
 };
 
 const SELECTS = {
-  care_setting: ["ed", "inpatient", "clinic", "telehealth", "home"],
-  sender_role: ["patient", "nurse", "provider", "device"],
-  use_case: ["triage", "routing", "escalation", "quality_review"],
+  channel: CHANNELS,
+  care_setting: SETTINGS,
+  sender_role: SENDERS,
+  use_case: USE_CASES,
 };
+
+const secs = (n) => (n == null ? undefined : n >= 60 ? `${Math.round(n / 60)} min` : `${n} s`);
 
 const Section = ({ title, hint, children, style }) => (
   <div style={{ ...card(), padding: 18, marginBottom: 14, ...style }}>
@@ -192,15 +205,19 @@ function RuntimeStatus({ status }) {
 function TestModel() {
   const decide = useServerFn(runDecision);
   const info = useServerFn(getModelInfo);
+  const feedback = useServerFn(sendFeedback);
   const [form, setForm] = useState({
     text: SAMPLES.moderate,
+    channel: "chat",
     care_setting: "inpatient",
     sender_role: "nurse",
     use_case: "triage",
     specialty_hint: "",
+    legacy_score_band: "",
   });
   const [state, setState] = useState({ busy: false, result: null, error: null });
   const [status, setStatus] = useState({ kind: "checking" });
+  const [review, setReview] = useState({ acuity: null, phase: "idle" });
   const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
 
   useEffect(() => {
@@ -217,9 +234,15 @@ function TestModel() {
 
   const run = async () => {
     setState((s) => ({ ...s, busy: true, error: null }));
+    setReview({ acuity: null, phase: "idle" });
     try {
+      const { specialty_hint, legacy_score_band, ...rest } = form;
       const result = await decide({
-        data: { ...form, specialty_hint: form.specialty_hint || undefined },
+        data: {
+          ...rest,
+          specialty_hint: specialty_hint || undefined,
+          legacy_score_band: legacy_score_band ? Number(legacy_score_band) : undefined,
+        },
       });
       setState({ busy: false, result, error: null });
     } catch (e) {
@@ -235,8 +258,26 @@ function TestModel() {
   };
 
   const r = state.result || {};
-  const probs = r.probabilities || {};
-  const routing = r.routing || {};
+  const a = r.acuity || {};
+  const rt = r.route || {};
+  const probs = a.probabilities || {};
+
+  /* Reviewer verdict: structured labels only — no free text can leave the lab. */
+  const submitReview = async (acuity) => {
+    setReview({ acuity, phase: "busy" });
+    try {
+      const res = await feedback({
+        data: {
+          decision_id: r.decision_id,
+          acuity,
+          routes: ROUTES.includes(rt.destination) ? [rt.destination] : [],
+        },
+      });
+      setReview({ acuity, phase: res.accepted ? "sent" : "failed" });
+    } catch {
+      setReview({ acuity, phase: "failed" });
+    }
+  };
 
   return (
     <>
@@ -283,6 +324,20 @@ function TestModel() {
               style={inputStyle}
             />
           </Field>
+          <Field label="Legacy score band">
+            <select
+              value={form.legacy_score_band}
+              onChange={(e) => set("legacy_score_band", e.target.value)}
+              style={inputStyle}
+            >
+              <option value="">none</option>
+              {[1, 2, 3, 4, 5].map((n) => (
+                <option key={n} value={n}>
+                  {n} · {n === 1 ? "low" : n <= 3 ? "moderate" : "high"}
+                </option>
+              ))}
+            </select>
+          </Field>
         </div>
         <div
           style={{
@@ -321,26 +376,86 @@ function TestModel() {
               <div style={{ fontSize: 11, fontWeight: 700, color: T.faint, marginBottom: 10 }}>
                 CLASS PROBABILITIES
               </div>
-              {["low", "medium", "high"].map((c) => (
+              {LABELS.map((c) => (
                 <ProbBar key={c} label={c} value={probs[c]} />
               ))}
               <div style={{ fontSize: 11.5, color: T.faint, marginTop: 6 }}>{SCALE}</div>
+              {r.reason_codes?.length > 0 && (
+                <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginTop: 12 }}>
+                  {r.reason_codes.map((c) => (
+                    <span
+                      key={c}
+                      style={{
+                        fontFamily: mono,
+                        fontSize: 11,
+                        color: T.blueDeep,
+                        background: T.blueSoft,
+                        borderRadius: 8,
+                        padding: "3px 8px",
+                      }}
+                    >
+                      {c}
+                    </span>
+                  ))}
+                </div>
+              )}
             </div>
             <div>
               <div style={{ fontSize: 11, fontWeight: 700, color: T.faint, marginBottom: 4 }}>
                 ROUTING & GOVERNANCE
               </div>
-              <KV k="Predicted class" v={r.label} />
+              <KV k="Acuity level" v={a.level} />
+              <KV
+                k="Confidence"
+                v={a.confidence == null ? undefined : `${Math.round(a.confidence * 100)}%`}
+              />
               <KV k="Review required" v="yes — human review" />
               <KV k="Model version" v={r.model_version} />
               <KV k="Policy version" v={r.policy_version} />
-              <KV k="Destination" v={routing.destination} />
-              <KV k="Service line" v={routing.service_line} />
-              <KV k="Priority" v={routing.priority} />
-              <KV k="Fallback" v={routing.fallback} />
+              <KV k="Destination" v={rt.destination} />
+              <KV k="Service line" v={rt.service_line} />
+              <KV k="Priority" v={rt.priority} />
+              <KV k="Response SLA" v={secs(rt.sla_seconds)} />
+              <KV k="Escalate after" v={secs(rt.escalation_after_seconds)} />
+              <KV k="Fallback" v={rt.fallback} />
               <KV k="Clinically validated" v="false — engineering only" />
             </div>
           </div>
+          {r.decision_id && (
+            <div
+              style={{
+                display: "flex",
+                gap: 8,
+                alignItems: "center",
+                flexWrap: "wrap",
+                marginTop: 16,
+                paddingTop: 14,
+                borderTop: "1px solid " + T.line,
+              }}
+            >
+              <span style={{ fontSize: 12.5, color: T.sub, marginRight: 4 }}>Reviewer acuity</span>
+              {LABELS.map((l) => (
+                <Chip
+                  key={l}
+                  on={review.acuity === l}
+                  disabled={review.phase === "busy"}
+                  onClick={() => submitReview(l)}
+                >
+                  {l}
+                </Chip>
+              ))}
+              <span style={{ fontSize: 12, color: review.phase === "failed" ? T.red : T.faint }}>
+                {
+                  {
+                    idle: "Record the human verdict for this decision",
+                    busy: "Recording…",
+                    sent: "Recorded — no retraining triggered",
+                    failed: "Not recorded. The runtime rejected the review.",
+                  }[review.phase]
+                }
+              </span>
+            </div>
+          )}
         </Section>
       )}
     </>
@@ -398,11 +513,7 @@ function TrainingData() {
     setBusy(true);
     try {
       const res = await stage({
-        data: {
-          batch_label: batchLabel,
-          provenance: "synthetic_or_approved_deidentified",
-          examples: jsonl.split("\n").map((l) => JSON.parse(l)),
-        },
+        data: { examples: jsonl.split("\n").map((l) => JSON.parse(l)) },
       });
       setMsg({
         tone: "ok",
@@ -433,7 +544,8 @@ function TrainingData() {
           <input
             value={batchLabel}
             onChange={(e) => setBatchLabel(e.target.value)}
-            aria-label="Batch label"
+            aria-label="Export file name"
+            title="Local export file name only — the runtime assigns batch IDs"
             style={{ ...inputStyle, width: 220 }}
           />
           {rows.length > 0 && (
@@ -553,12 +665,12 @@ function TrainingData() {
                     >
                       {r.approved ? "Approved" : "Approve"}
                     </Chip>
-                    {["low", "medium", "high"].map((l) => (
+                    {LABELS.map((l) => (
                       <Chip key={l} on={r.label === l} onClick={() => patch(r.id, { label: l })}>
                         {l}
                       </Chip>
                     ))}
-                    {["train", "validation", "test"].map((s) => (
+                    {SPLITS.map((s) => (
                       <Chip key={s} on={r.split === s} onClick={() => patch(r.id, { split: s })}>
                         {s}
                       </Chip>
@@ -572,7 +684,7 @@ function TrainingData() {
                         {q.replace("_", " ")}
                       </Chip>
                     ))}
-                    {["self_serve", "nurse_line", "provider", "escalate"].map((rt) => (
+                    {ROUTES.map((rt) => (
                       <Chip
                         key={rt}
                         on={r.routeLabel === rt}

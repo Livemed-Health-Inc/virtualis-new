@@ -2,8 +2,12 @@
    Pure functions: no network, no PHI storage. Synthetic or approved
    deidentified data only. */
 
-export type Label = "low" | "medium" | "high";
-export type RouteLabel = "self_serve" | "nurse_line" | "provider" | "escalate";
+export const LABELS = ["low", "medium", "high"] as const;
+export const ROUTES = ["self_serve", "nurse_line", "provider", "escalate"] as const;
+export const USE_CASES = ["triage", "routing", "escalation", "quality_review"] as const;
+export const SPLITS = ["train", "validation", "test"] as const;
+export type Label = (typeof LABELS)[number];
+export type RouteLabel = (typeof ROUTES)[number];
 
 export interface TrainingExample {
   id: string;
@@ -11,14 +15,44 @@ export interface TrainingExample {
   label: Label | null;
   rawLabel: string;
   routeLabel: RouteLabel | null;
+  useCase: (typeof USE_CASES)[number];
   groupId: string;
-  split: "train" | "validation" | "test";
+  split: (typeof SPLITS)[number];
   include: boolean;
   approved: boolean;
   quality: "unrated" | "good" | "needs_work";
   duplicateOf: string | null;
   warnings: string[];
 }
+
+/* Canonical POST /v1/training-intake example record. */
+export interface IntakeExample {
+  record_id: string;
+  text: string;
+  acuity: Label;
+  use_case: (typeof USE_CASES)[number];
+  routes: RouteLabel[];
+  label_quality: "high" | "medium" | "low";
+  sample_weight: number;
+  include_in_training: true;
+  group_id: string;
+  split: (typeof SPLITS)[number];
+}
+
+const QUALITY = { good: "high", unrated: "medium", needs_work: "low" } as const;
+
+export const toIntakeExample = (e: TrainingExample & { label: Label }): IntakeExample => ({
+  record_id: e.id,
+  text: e.text,
+  acuity: e.label,
+  use_case: e.useCase,
+  routes: e.routeLabel ? [e.routeLabel] : [],
+  label_quality: QUALITY[e.quality],
+  sample_weight: e.quality === "needs_work" ? 0.5 : 1,
+  include_in_training: true,
+  group_id: e.groupId,
+  split: e.split,
+});
 
 /* 1 = low, 2-3 = moderate (medium), 4-5 = high. */
 export function normalizeLabel(raw: unknown): Label | null {
@@ -36,9 +70,7 @@ export function normalizeRouteLabel(raw: unknown): RouteLabel | null {
     .trim()
     .toLowerCase()
     .replace(/[\s-]+/g, "_");
-  return (["self_serve", "nurse_line", "provider", "escalate"] as const).includes(v as RouteLabel)
-    ? (v as RouteLabel)
-    : null;
+  return ROUTES.includes(v as RouteLabel) ? (v as RouteLabel) : null;
 }
 
 /* RFC4180-ish CSV: quoted fields, escaped "" quotes, embedded commas/newlines. */
@@ -131,16 +163,17 @@ export function buildExamples(records: Record<string, string>[]): TrainingExampl
     const warnings = detectIdentifiers(text);
     if (!label && rawLabel) warnings.push(`unrecognized label "${rawLabel}"`);
     if (!text.trim()) warnings.push("empty text");
+    const pick = <T extends string>(list: readonly T[], v: unknown, fallback: T): T =>
+      list.includes(v as T) ? (v as T) : fallback;
     return {
       id,
       text,
       label,
       rawLabel: String(rawLabel),
       routeLabel: normalizeRouteLabel(rec["route"] ?? rec["route_label"]),
+      useCase: pick(USE_CASES, rec["use_case"], "triage"),
       groupId: rec["group_id"] || rec["group"] || id,
-      split: (["train", "validation", "test"] as const).includes((rec["split"] ?? "") as "train")
-        ? (rec["split"] as TrainingExample["split"])
-        : "train",
+      split: pick(SPLITS, rec["split"], "train"),
       include: !duplicateOf,
       approved: false,
       quality: "unrated",
@@ -196,22 +229,11 @@ export function exportJsonl(examples: TrainingExample[]): {
     "unresolved identifier warning",
     candidates.filter((e) => e.warnings.length > 0),
   );
-  const ready = candidates.filter((e) => e.approved && e.label && e.warnings.length === 0);
-  const jsonl = ready
-    .map((e) =>
-      JSON.stringify({
-        id: e.id,
-        text: e.text,
-        label: e.label,
-        route_label: e.routeLabel,
-        group_id: e.groupId,
-        split: e.split,
-        quality: e.quality,
-        provenance: "synthetic_or_approved_deidentified",
-      }),
-    )
-    .join("\n");
-  return { jsonl, blocked };
+  const ready = candidates.filter(
+    (e): e is TrainingExample & { label: Label } =>
+      e.approved && !!e.label && e.warnings.length === 0,
+  );
+  return { jsonl: ready.map((e) => JSON.stringify(toIntakeExample(e))).join("\n"), blocked };
 }
 
 export function datasetStats(examples: TrainingExample[]) {

@@ -25,16 +25,32 @@
         signed-in users, but 13 RLS policies evaluate it as the caller → every clinician
         read of threads/messages/care_team/shifts/presence failed 403. Grant restored
         (`20260904…` follow-up migration) and verified live: inbox loads, anon still 401.
+12. [x] Model Lab canonical contract: `POST /v1/decisions` sends `{message, context{channel,
+        sender_role, care_setting, use_case, specialty_hint, legacy_score_band}}`; response
+        projected from `{decision_id, model_version, policy_version, acuity{level, score,
+        confidence, probabilities}, route{destination, service_line, priority, sla_seconds,
+        escalation_after_seconds, fallback}, reason_codes}`. Feedback = `{decision_id,
+        acuity, routes}`; intake = `{examples:[{record_id, text, acuity, use_case, routes,
+        label_quality, sample_weight, include_in_training:true, group_id, split}]}`. All
+        input schemas `.strict()` (`acuity.schemas.ts`): `promote`, `batch_label`,
+        `provenance`, `agrees`, `note` are rejected, never forwarded. Reviewer verdict UI
+        added (structured labels only). JSONL export emits the same intake record.
 
 ## Blocked on user (AWS side)
 
-- API Gateway's built-in JWT authorizer validates only RSA-signed tokens (AWS docs:
-  "Currently, only RSA-based algorithms are supported"). Lovable Cloud signs sessions
-  with ES256 and offers no RSA option, so `/model-lab` currently gets
-  `401 "signing method ES256 is invalid"`. Fix: replace the JWT authorizer with a Lambda
-  authorizer that verifies ES256 against the auth JWKS (issuer = the auth URL already
-  configured on the authorizer, `aud=authenticated`). Then re-run
-  `/tmp/browser/modellab/check_modellab.py` — status dot should turn green.
+- Authorizer now accepts the ES256 session token (401 resolved), but the service behind
+  the gateway answers `404 {"detail":"Not Found"}` for all four canonical paths
+  (`GET /v1/info`, `POST /v1/decisions|feedback|training-intake`) while unknown paths get
+  the gateway's own `{"message":"Not Found"}` — so routes exist on the gateway and the
+  request reaches the app, which does not recognise the path. Most likely the `/model-lab`
+  stage prefix is being passed through to the app (FastAPI/Mangum: set
+  `api_gateway_base_path="/model-lab"` or `root_path`). Until fixed, `/model-lab` shows
+  "Runtime unreachable" and `Model runtime returned 404`.
+- Unverifiable from here (backend schema not accessible): exact `channel` enum, feedback
+  body field names, `label_quality` scale (sent as high|medium|low) and the intake
+  envelope key (`examples`). A 422 from the runtime after the 404 is fixed will name any
+  mismatch; the schemas live in `acuity.schemas.ts`. Re-run
+  `/tmp/browser/modellab/check_modellab.py` after the AWS change.
 
 ## Accepted residual scanner findings
 
