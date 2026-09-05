@@ -205,15 +205,19 @@ function RuntimeStatus({ status }) {
 function TestModel() {
   const decide = useServerFn(runDecision);
   const info = useServerFn(getModelInfo);
+  const feedback = useServerFn(sendFeedback);
   const [form, setForm] = useState({
     text: SAMPLES.moderate,
+    channel: "chat",
     care_setting: "inpatient",
     sender_role: "nurse",
     use_case: "triage",
     specialty_hint: "",
+    legacy_score_band: "",
   });
   const [state, setState] = useState({ busy: false, result: null, error: null });
   const [status, setStatus] = useState({ kind: "checking" });
+  const [review, setReview] = useState({ acuity: null, phase: "idle" });
   const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
 
   useEffect(() => {
@@ -230,9 +234,15 @@ function TestModel() {
 
   const run = async () => {
     setState((s) => ({ ...s, busy: true, error: null }));
+    setReview({ acuity: null, phase: "idle" });
     try {
+      const { specialty_hint, legacy_score_band, ...rest } = form;
       const result = await decide({
-        data: { ...form, specialty_hint: form.specialty_hint || undefined },
+        data: {
+          ...rest,
+          specialty_hint: specialty_hint || undefined,
+          legacy_score_band: legacy_score_band ? Number(legacy_score_band) : undefined,
+        },
       });
       setState({ busy: false, result, error: null });
     } catch (e) {
@@ -248,8 +258,26 @@ function TestModel() {
   };
 
   const r = state.result || {};
-  const probs = r.probabilities || {};
-  const routing = r.routing || {};
+  const a = r.acuity || {};
+  const rt = r.route || {};
+  const probs = a.probabilities || {};
+
+  /* Reviewer verdict: structured labels only — no free text can leave the lab. */
+  const submitReview = async (acuity) => {
+    setReview({ acuity, phase: "busy" });
+    try {
+      const res = await feedback({
+        data: {
+          decision_id: r.decision_id,
+          acuity,
+          routes: ROUTES.includes(rt.destination) ? [rt.destination] : [],
+        },
+      });
+      setReview({ acuity, phase: res.accepted ? "sent" : "failed" });
+    } catch {
+      setReview({ acuity, phase: "failed" });
+    }
+  };
 
   return (
     <>
