@@ -98,7 +98,7 @@ describe("governed JSONL export", () => {
       acuity: "high",
       use_case: "triage",
       routes: [],
-      label_quality: "medium",
+      label_quality: "single_reviewed",
       sample_weight: 1,
       include_in_training: true,
       group_id: "a",

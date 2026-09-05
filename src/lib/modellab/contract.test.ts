@@ -210,11 +210,12 @@ describe("feedback and training-intake payloads", () => {
       feedbackSchema.safeParse({ decision_id: id, acuity: "high", routes: ["escalate"] }).success,
     ).toBe(false);
     expect(
-      feedbackSchema.safeParse({ decision_id: id, route_accepted: true, note: "free text" }).success,
+      feedbackSchema.safeParse({ decision_id: id, route_accepted: true, note: "free text" })
+        .success,
     ).toBe(false);
-    expect(
-      feedbackSchema.safeParse({ decision_id: id, outcome_code: "lower case" }).success,
-    ).toBe(false);
+    expect(feedbackSchema.safeParse({ decision_id: id, outcome_code: "lower case" }).success).toBe(
+      false,
+    );
   });
 });
 
