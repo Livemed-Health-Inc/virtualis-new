@@ -14,7 +14,6 @@ import {
   exportJsonl,
   parseRecords,
 } from "@/lib/modellab/training";
-import { CHANNELS, SENDERS, SETTINGS } from "@/lib/modellab/contract";
 import {
   getModelInfo,
   runDecision,
@@ -36,12 +35,9 @@ const SAMPLES = {
   high: "Synthetic: 68yo with crushing substernal chest pain radiating to left arm, diaphoretic, BP 84/52.",
 };
 
-const SELECTS = {
-  channel: CHANNELS,
-  care_setting: SETTINGS,
-  sender_role: SENDERS,
-  use_case: USE_CASES,
-};
+const SETTINGS = ["ed", "inpatient", "clinic", "telehealth", "home"];
+const SENDERS = ["patient", "nurse", "provider", "device"];
+const SELECTS = { use_case: USE_CASES, care_setting: SETTINGS, sender_role: SENDERS };
 
 const secs = (n) => (n == null ? undefined : n >= 60 ? `${Math.round(n / 60)} min` : `${n} s`);
 
@@ -208,12 +204,10 @@ function TestModel() {
   const feedback = useServerFn(sendFeedback);
   const [form, setForm] = useState({
     text: SAMPLES.moderate,
-    channel: "chat",
+    use_case: "triage",
     care_setting: "inpatient",
     sender_role: "nurse",
-    use_case: "triage",
     specialty_hint: "",
-    legacy_score_band: "",
   });
   const [state, setState] = useState({ busy: false, result: null, error: null });
   const [status, setStatus] = useState({ kind: "checking" });
@@ -236,12 +230,12 @@ function TestModel() {
     setState((s) => ({ ...s, busy: true, error: null }));
     setReview({ acuity: null, phase: "idle" });
     try {
-      const { specialty_hint, legacy_score_band, ...rest } = form;
+      const { specialty_hint, ...rest } = form;
       const result = await decide({
         data: {
           ...rest,
+          message_id: `ml-${Date.now().toString(36)}`,
           specialty_hint: specialty_hint || undefined,
-          legacy_score_band: legacy_score_band ? Number(legacy_score_band) : undefined,
         },
       });
       setState({ busy: false, result, error: null });
@@ -269,8 +263,10 @@ function TestModel() {
       const res = await feedback({
         data: {
           decision_id: r.decision_id,
-          acuity,
-          routes: ROUTES.includes(rt.destination) ? [rt.destination] : [],
+          corrected_acuity: acuity,
+          route_accepted: acuity === a.level,
+          reviewer_role: "model_lab_reviewer",
+          observed_at: new Date().toISOString(),
         },
       });
       setReview({ acuity, phase: res.accepted ? "sent" : "failed" });
@@ -324,20 +320,6 @@ function TestModel() {
               style={inputStyle}
             />
           </Field>
-          <Field label="Legacy score band">
-            <select
-              value={form.legacy_score_band}
-              onChange={(e) => set("legacy_score_band", e.target.value)}
-              style={inputStyle}
-            >
-              <option value="">none</option>
-              {[1, 2, 3, 4, 5].map((n) => (
-                <option key={n} value={n}>
-                  {n} · {n === 1 ? "low" : n <= 3 ? "moderate" : "high"}
-                </option>
-              ))}
-            </select>
-          </Field>
         </div>
         <div
           style={{
@@ -380,9 +362,9 @@ function TestModel() {
                 <ProbBar key={c} label={c} value={probs[c]} />
               ))}
               <div style={{ fontSize: 11.5, color: T.faint, marginTop: 6 }}>{SCALE}</div>
-              {r.reason_codes?.length > 0 && (
+              {a.reason_codes?.length > 0 && (
                 <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginTop: 12 }}>
-                  {r.reason_codes.map((c) => (
+                  {a.reason_codes.map((c) => (
                     <span
                       key={c}
                       style={{
@@ -404,20 +386,20 @@ function TestModel() {
               <div style={{ fontSize: 11, fontWeight: 700, color: T.faint, marginBottom: 4 }}>
                 ROUTING & GOVERNANCE
               </div>
-              <KV k="Acuity level" v={a.level} />
+              <KV k="Acuity level" v={a.display_label || a.level} />
               <KV
                 k="Confidence"
                 v={a.confidence == null ? undefined : `${Math.round(a.confidence * 100)}%`}
               />
               <KV k="Review required" v="yes — human review" />
-              <KV k="Model version" v={r.model_version} />
-              <KV k="Policy version" v={r.policy_version} />
+              <KV k="Model version" v={a.model_version} />
+              <KV k="Policy version" v={rt.policy_version} />
               <KV k="Destination" v={rt.destination} />
               <KV k="Service line" v={rt.service_line} />
               <KV k="Priority" v={rt.priority} />
-              <KV k="Response SLA" v={secs(rt.sla_seconds)} />
               <KV k="Escalate after" v={secs(rt.escalation_after_seconds)} />
-              <KV k="Fallback" v={rt.fallback} />
+              <KV k="Notify" v={rt.notify?.join(", ") || undefined} />
+              <KV k="Fallback" v={rt.fallback_destination} />
               <KV k="Clinically validated" v="false — engineering only" />
             </div>
           </div>
