@@ -70,3 +70,10 @@
   (facility membership or admin, plus valid state transition).
 - 7 lint warnings, all `react-refresh/only-export-components` in shadcn UI primitives and
   the stethoscope provider — dev-only fast-refresh hints, no runtime effect.
+
+13. [x] Use cases corrected to the deployed routing policy (`GET /v1/info`):
+        `clinical_message | specialist_consult | diagnostic_result | care_coordination`,
+        replacing the invented `triage/routing/escalation/quality_review` set across the
+        server Zod enums, decision UI (default `specialist_consult`), CSV/JSONL import
+        fallback, training examples and tests. Verified live 2026-09-06 with one synthetic
+        specialist_consult decision — no PHI, no feedback or intake submitted.
