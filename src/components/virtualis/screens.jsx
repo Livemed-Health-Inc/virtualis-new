@@ -2,6 +2,15 @@ import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useVirtualis } from "@/lib/virtualis/store";
 import { completePasswordSetup } from "@/lib/invites.functions";
+import {
+  RECOVERY_MESSAGE,
+  RECOVERY_INVALID_MESSAGE,
+  isValidEmail,
+  passwordErrorMessage,
+  recoveryRedirectUrl,
+  validateNewPassword,
+} from "@/lib/recovery";
+
 
 
 
@@ -35,6 +44,7 @@ export function Login() {
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState("");
   const [note, setNote] = useState("");
+  const [forgot, setForgot] = useState(false);
 
   const submit = async () => {
     setErr("");
@@ -44,6 +54,24 @@ export function Login() {
     setBusy(false);
     if (error) return setErr(error.message);
   };
+
+  /* Recovery request. The outcome is identical for every address so the form
+     cannot be used to discover which clinicians hold an account, and neither
+     the address nor the provider's reply is ever logged. */
+  const requestReset = async () => {
+    setErr("");
+    setNote("");
+    if (!isValidEmail(email)) return setErr("Enter your work email address.");
+    setBusy(true);
+    await supabase.auth
+      .resetPasswordForEmail(email.trim(), {
+        redirectTo: recoveryRedirectUrl(window.location.origin),
+      })
+      .catch(() => {});
+    setBusy(false);
+    setNote(RECOVERY_MESSAGE);
+  };
+
 
   const wide = useMediaQuery(
     "(min-width: 900px), (orientation: landscape) and (min-width: 700px)",
