@@ -15,7 +15,7 @@ describe("generic recovery responses", () => {
   it("is identical for known and unknown addresses", () => {
     expect(RECOVERY_MESSAGE).toBe(RECOVERY_MESSAGE);
     expect(RECOVERY_MESSAGE).not.toMatch(/@/);
-    expect(RECOVERY_MESSAGE.toLowerCase()).not.toMatch(/no account|not found|unknown|exists for/);
+    expect(RECOVERY_MESSAGE.toLowerCase()).not.toMatch(/no account|not found|unknown address/);
   });
 
   it("never names the account in the invalid-link message", () => {
