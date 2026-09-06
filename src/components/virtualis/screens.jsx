@@ -1937,7 +1937,8 @@ export { credentialedFacilities, Wordmark };
 
 /* Invite acceptance — the link from an admin invitation lands here so the
    clinician sets their own password before entering the workstation. */
-export function SetPassword({ onDone }) {
+export function SetPassword({ onDone, mode = "invite" }) {
+  const recovery = mode === "recovery";
   const [pw, setPw] = useState("");
   const [pw2, setPw2] = useState("");
   const [busy, setBusy] = useState(false);
@@ -1947,20 +1948,22 @@ export function SetPassword({ onDone }) {
     setErr("");
     /* Clinical accounts carry PHI access, so setup enforces a real passphrase
        rather than the auth provider's minimum. */
-    if (pw.length < 12) return setErr("Use at least 12 characters.");
-    if (!/[a-z]/.test(pw) || !/[A-Z]/.test(pw) || !/[0-9]/.test(pw))
-      return setErr("Include upper case, lower case and a number.");
-    if (pw !== pw2) return setErr("Passwords do not match.");
+    const check = validateNewPassword(pw, pw2);
+    if (!check.ok) return setErr(passwordErrorMessage(check.reason));
     setBusy(true);
+    /* The recovery grant already established the session; the update runs as
+       that authenticated user. A rejected update means the link is spent or
+       expired — reported generically, with no token or account detail. */
     const { error } = await supabase.auth.updateUser({ password: pw });
     if (error) {
       setBusy(false);
-      return setErr(error.message);
+      return setErr(recovery ? RECOVERY_INVALID_MESSAGE : error.message);
     }
     await completePasswordSetup().catch(() => {});
     setBusy(false);
     onDone?.();
   };
+
 
   return (
     <div
