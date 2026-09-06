@@ -77,3 +77,7 @@
         server Zod enums, decision UI (default `specialist_consult`), CSV/JSONL import
         fallback, training examples and tests. Verified live 2026-09-06 with one synthetic
         specialist_consult decision — no PHI, no feedback or intake submitted.
+14. [x] Password recovery now follows the auth client's verified recovery event, including
+        modern code-based reset links, instead of relying only on a legacy URL fragment.
+15. [x] Agent integration restored as an OAuth-protected, read-only connection check only.
+        It exposes no patient, clinical message, facility, device, or Model Lab data.
