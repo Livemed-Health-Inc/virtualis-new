@@ -260,18 +260,49 @@ export function Login() {
             placeholder="name@hospital.org"
             style={{ ...inputStyle, borderColor: email ? T.blue : T.line }}
           />
-          <div style={{ fontSize: 14, fontWeight: 620, color: T.ink, margin: "18px 0 8px" }}>
-            Password
-          </div>
-          <input
-            type="password"
-            value={pw}
-            onChange={(e) => setPw(e.target.value)}
-            placeholder="Password"
-            style={inputStyle}
-          />
-          <div style={{ fontSize: 12.5, color: T.sub, marginTop: 12, textAlign: "right" }}>
-            Access is provisioned by your organization.
+          {!forgot && (
+            <>
+              <div style={{ fontSize: 14, fontWeight: 620, color: T.ink, margin: "18px 0 8px" }}>
+                Password
+              </div>
+              <input
+                type="password"
+                value={pw}
+                onChange={(e) => setPw(e.target.value)}
+                placeholder="Password"
+                style={inputStyle}
+              />
+            </>
+          )}
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              gap: 12,
+              fontSize: 12.5,
+              color: T.sub,
+              marginTop: 12,
+            }}
+          >
+            <button
+              type="button"
+              onClick={() => {
+                setForgot(!forgot);
+                setErr("");
+                setNote("");
+              }}
+              style={{
+                all: "unset",
+                cursor: "pointer",
+                color: T.blue,
+                fontWeight: 620,
+                fontSize: 12.5,
+              }}
+            >
+              {forgot ? "Back to sign in" : "Forgot password?"}
+            </button>
+            <span style={{ textAlign: "right" }}>Access is provisioned by your organization.</span>
           </div>
           {err && (
             <div style={{ fontSize: 13, color: T.red, marginTop: 12, fontWeight: 560 }}>{err}</div>
@@ -282,8 +313,8 @@ export function Login() {
             </div>
           )}
           <button
-            onClick={submit}
-            disabled={busy || !email || !pw}
+            onClick={forgot ? requestReset : submit}
+            disabled={busy || !email || (!forgot && !pw)}
             style={{
               all: "unset",
               boxSizing: "border-box",
@@ -297,12 +328,14 @@ export function Login() {
               fontWeight: 650,
               borderRadius: 16,
               padding: "15px 0",
-              opacity: busy || !email || !pw ? 0.6 : 1,
+              opacity: busy || !email || (!forgot && !pw) ? 0.6 : 1,
               boxShadow: "0 8px 20px rgba(41,112,255,.3)",
             }}
           >
-            {busy ? "…" : "Sign in"}
+            {busy ? "…" : forgot ? "Send reset link" : "Sign in"}
           </button>
+
+
 
 
 
