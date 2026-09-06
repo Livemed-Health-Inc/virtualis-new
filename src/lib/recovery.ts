@@ -28,9 +28,8 @@ export function recoveryRedirectUrl(origin: string): string {
   return new URL("/", origin).toString();
 }
 
-export type NewPasswordCheck =
-  | { ok: true }
-  | { ok: false; reason: NonNullable<PasswordCheck["reason"]> | "mismatch" };
+export type PasswordReason = NonNullable<PasswordCheck["reason"]> | "mismatch";
+export type NewPasswordCheck = { ok: true } | { ok: false; reason: PasswordReason };
 
 /** Strength plus confirmation. Reason codes only — never the candidate. */
 export function validateNewPassword(candidate: string, confirm: string): NewPasswordCheck {
@@ -40,7 +39,8 @@ export function validateNewPassword(candidate: string, confirm: string): NewPass
   return { ok: true };
 }
 
-export function passwordErrorMessage(reason: NewPasswordCheck extends never ? never : string) {
+export function passwordErrorMessage(reason: string): string {
+
   switch (reason) {
     case "mismatch":
       return "Passwords do not match.";
