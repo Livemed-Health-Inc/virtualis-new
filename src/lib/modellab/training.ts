@@ -4,7 +4,13 @@
 
 export const LABELS = ["low", "medium", "high"] as const;
 export const ROUTES = ["self_serve", "nurse_line", "provider", "escalate"] as const;
-export const USE_CASES = ["triage", "routing", "escalation", "quality_review"] as const;
+/* Configured use cases of the deployed routing policy (GET /v1/info). */
+export const USE_CASES = [
+  "clinical_message",
+  "specialist_consult",
+  "diagnostic_result",
+  "care_coordination",
+] as const;
 export const SPLITS = ["train", "validation", "test"] as const;
 export type Label = (typeof LABELS)[number];
 export type RouteLabel = (typeof ROUTES)[number];
@@ -179,7 +185,7 @@ export function buildExamples(records: Record<string, string>[]): TrainingExampl
       label,
       rawLabel: String(rawLabel),
       routeLabel: normalizeRouteLabel(rec["route"] ?? rec["route_label"]),
-      useCase: pick(USE_CASES, rec["use_case"], "triage"),
+      useCase: pick(USE_CASES, rec["use_case"], "clinical_message"),
       groupId: rec["group_id"] || rec["group"] || id,
       split: pick(SPLITS, rec["split"], "train"),
       include: !duplicateOf,
