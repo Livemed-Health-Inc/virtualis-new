@@ -40,7 +40,6 @@ export function validateNewPassword(candidate: string, confirm: string): NewPass
 }
 
 export function passwordErrorMessage(reason: string): string {
-
   switch (reason) {
     case "mismatch":
       return "Passwords do not match.";
