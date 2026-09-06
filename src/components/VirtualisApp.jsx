@@ -821,6 +821,8 @@ function Workstation() {
     markRead,
     signOut,
     mustChangePassword,
+    passwordRecovery,
+    finishPasswordRecovery,
     refreshProfile,
   } = useVirtualis();
 
@@ -875,7 +877,7 @@ function Workstation() {
   );
   /* The server flag is authoritative — the link hint only covers the moment
      before the profile arrives, and a completed setup clears both. */
-  const needsPassword = linkGrant || mustChangePassword;
+  const needsPassword = linkGrant || passwordRecovery || mustChangePassword;
   useEffect(() => {
     if (linkGrant && typeof window !== "undefined")
       window.history.replaceState(null, "", window.location.pathname);
@@ -1212,9 +1214,10 @@ function Workstation() {
   } else if (needsPassword) {
     content = (
       <SetPassword
-        mode={recoveryGrant ? "recovery" : "invite"}
+        mode={recoveryGrant || passwordRecovery ? "recovery" : "invite"}
         onDone={() => {
           setLinkGrant(false);
+          finishPasswordRecovery?.();
           refreshProfile?.();
         }}
       />

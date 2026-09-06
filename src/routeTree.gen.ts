@@ -11,7 +11,10 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DeviceRouteImport } from './routes/device'
+import { Route as McpRouteImport } from './routes/mcp'
 import { Route as ModelLabRouteImport } from './routes/model-lab'
+import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
+import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.oauth.consent'
 import { Route as ApiPublicDeviceRouteImport } from './routes/api/public/device'
 import { Route as ApiPublicEncounterRouteImport } from './routes/api/public/encounter'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
@@ -27,9 +30,25 @@ const DeviceRoute = DeviceRouteImport.update({
   path: '/device',
   getParentRoute: () => rootRouteImport,
 } as any)
+const McpRoute = McpRouteImport.update({
+  id: '/mcp',
+  path: '/mcp',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ModelLabRoute = ModelLabRouteImport.update({
   id: '/model-lab',
   path: '/model-lab',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const Char91DotwellKnownChar93OauthProtectedResourceRoute =
+  Char91DotwellKnownChar93OauthProtectedResourceRouteImport.update({
+    id: '/.well-known/oauth-protected-resource',
+    path: '/.well-known/oauth-protected-resource',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const DotlovableOauthConsentRoute = DotlovableOauthConsentRouteImport.update({
+  id: '/.lovable/oauth/consent',
+  path: '/.lovable/oauth/consent',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiPublicDeviceRoute = ApiPublicDeviceRouteImport.update({
@@ -56,7 +75,10 @@ const LovableEmailAuthWebhookRoute = LovableEmailAuthWebhookRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/device': typeof DeviceRoute
+  '/mcp': typeof McpRoute
   '/model-lab': typeof ModelLabRoute
+  '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/api/public/device': typeof ApiPublicDeviceRoute
   '/api/public/encounter': typeof ApiPublicEncounterRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
@@ -65,7 +87,10 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/device': typeof DeviceRoute
+  '/mcp': typeof McpRoute
   '/model-lab': typeof ModelLabRoute
+  '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/api/public/device': typeof ApiPublicDeviceRoute
   '/api/public/encounter': typeof ApiPublicEncounterRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
@@ -75,7 +100,10 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/device': typeof DeviceRoute
+  '/mcp': typeof McpRoute
   '/model-lab': typeof ModelLabRoute
+  '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/api/public/device': typeof ApiPublicDeviceRoute
   '/api/public/encounter': typeof ApiPublicEncounterRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
@@ -86,7 +114,10 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/device'
+    | '/mcp'
     | '/model-lab'
+    | '/.well-known/oauth-protected-resource'
+    | '/.lovable/oauth/consent'
     | '/api/public/device'
     | '/api/public/encounter'
     | '/lovable/email/auth/preview'
@@ -95,7 +126,10 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/device'
+    | '/mcp'
     | '/model-lab'
+    | '/.well-known/oauth-protected-resource'
+    | '/.lovable/oauth/consent'
     | '/api/public/device'
     | '/api/public/encounter'
     | '/lovable/email/auth/preview'
@@ -104,7 +138,10 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/device'
+    | '/mcp'
     | '/model-lab'
+    | '/.well-known/oauth-protected-resource'
+    | '/.lovable/oauth/consent'
     | '/api/public/device'
     | '/api/public/encounter'
     | '/lovable/email/auth/preview'
@@ -114,7 +151,10 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   DeviceRoute: typeof DeviceRoute
+  McpRoute: typeof McpRoute
   ModelLabRoute: typeof ModelLabRoute
+  Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  DotlovableOauthConsentRoute: typeof DotlovableOauthConsentRoute
   ApiPublicDeviceRoute: typeof ApiPublicDeviceRoute
   ApiPublicEncounterRoute: typeof ApiPublicEncounterRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
@@ -137,11 +177,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DeviceRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/mcp': {
+      id: '/mcp'
+      path: '/mcp'
+      fullPath: '/mcp'
+      preLoaderRoute: typeof McpRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/model-lab': {
       id: '/model-lab'
       path: '/model-lab'
       fullPath: '/model-lab'
       preLoaderRoute: typeof ModelLabRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/.well-known/oauth-protected-resource': {
+      id: '/.well-known/oauth-protected-resource'
+      path: '/.well-known/oauth-protected-resource'
+      fullPath: '/.well-known/oauth-protected-resource'
+      preLoaderRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/.lovable/oauth/consent': {
+      id: '/.lovable/oauth/consent'
+      path: '/.lovable/oauth/consent'
+      fullPath: '/.lovable/oauth/consent'
+      preLoaderRoute: typeof DotlovableOauthConsentRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/device': {
@@ -178,7 +239,11 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   DeviceRoute: DeviceRoute,
+  McpRoute: McpRoute,
   ModelLabRoute: ModelLabRoute,
+  Char91DotwellKnownChar93OauthProtectedResourceRoute:
+    Char91DotwellKnownChar93OauthProtectedResourceRoute,
+  DotlovableOauthConsentRoute: DotlovableOauthConsentRoute,
   ApiPublicDeviceRoute: ApiPublicDeviceRoute,
   ApiPublicEncounterRoute: ApiPublicEncounterRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,

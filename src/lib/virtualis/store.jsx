@@ -67,6 +67,7 @@ function shapeThread(row, messages, userId, lastRead) {
 
 export function VirtualisProvider({ children }) {
   const [session, setSession] = useState(null);
+  const [passwordRecovery, setPasswordRecovery] = useState(false);
   const [ready, setReady] = useState(false);
   const [profile, setProfile] = useState(null);
   const [credentials, setCredentials] = useState([]);
@@ -81,8 +82,9 @@ export function VirtualisProvider({ children }) {
   const resetDone = useRef(null);
 
   useEffect(() => {
-    const { data: sub } = supabase.auth.onAuthStateChange((_e, s) => {
+    const { data: sub } = supabase.auth.onAuthStateChange((event, s) => {
       setSession(s);
+      if (event === "PASSWORD_RECOVERY") setPasswordRecovery(true);
     });
     supabase.auth.getSession().then(({ data }) => {
       setSession(data.session);
@@ -328,6 +330,8 @@ export function VirtualisProvider({ children }) {
     userId,
     /* Server-authoritative: the same flag the RLS policies read. */
     mustChangePassword: !!profile?.must_change_password,
+    passwordRecovery,
+    finishPasswordRecovery: () => setPasswordRecovery(false),
     refreshProfile,
     profileLoaded: !!profile,
     me,
