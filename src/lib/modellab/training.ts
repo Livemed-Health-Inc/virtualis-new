@@ -185,7 +185,7 @@ export function buildExamples(records: Record<string, string>[]): TrainingExampl
       label,
       rawLabel: String(rawLabel),
       routeLabel: normalizeRouteLabel(rec["route"] ?? rec["route_label"]),
-      useCase: pick(USE_CASES, rec["use_case"], "triage"),
+      useCase: pick(USE_CASES, rec["use_case"], "clinical_message"),
       groupId: rec["group_id"] || rec["group"] || id,
       split: pick(SPLITS, rec["split"], "train"),
       include: !duplicateOf,

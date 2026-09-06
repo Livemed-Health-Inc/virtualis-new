@@ -7,7 +7,7 @@ const TEXT = "Synthetic: post-op day 3 knee replacement, incision warm with mild
 const INPUT = {
   message_id: "ml-test-01",
   text: TEXT,
-  use_case: "triage",
+  use_case: "specialist_consult",
   care_setting: "inpatient",
   sender_role: "nurse",
 } as const;
@@ -15,12 +15,12 @@ const INPUT = {
 describe("POST /v1/decisions request", () => {
   it("is exactly {use_case, message, context} per the deployed schema", () => {
     expect(toDecisionRequest({ ...INPUT, specialty_hint: "ortho" })).toEqual({
-      use_case: "triage",
+      use_case: "specialist_consult",
       message: { message_id: "ml-test-01", text: TEXT, channel: "synthetic_model_lab" },
       context: { care_setting: "inpatient", sender_role: "nurse", specialty_hint: "ortho" },
     });
-    expect(toDecisionRequest({ message_id: "m1", text: TEXT, use_case: "triage" })).toEqual({
-      use_case: "triage",
+    expect(toDecisionRequest({ message_id: "m1", text: TEXT, use_case: "specialist_consult" })).toEqual({
+      use_case: "specialist_consult",
       message: { message_id: "m1", text: TEXT, channel: "synthetic_model_lab" },
       context: {},
     });
@@ -145,7 +145,7 @@ describe("feedback and training-intake payloads", () => {
     label: "medium",
     rawLabel: "3",
     routeLabel: "nurse_line",
-    useCase: "triage",
+    useCase: "specialist_consult",
     groupId: "g1",
     split: "train",
     include: true,
@@ -160,7 +160,7 @@ describe("feedback and training-intake payloads", () => {
       record_id: "a",
       text: TEXT,
       acuity: "medium",
-      use_case: "triage",
+      use_case: "specialist_consult",
       routes: ["nurse_line"],
       label_quality: "adjudicated",
       sample_weight: 1,
