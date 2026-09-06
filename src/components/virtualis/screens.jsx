@@ -1977,11 +1977,15 @@ export function SetPassword({ onDone, mode = "invite" }) {
       }}
     >
       <div style={{ width: "100%", maxWidth: 380 }}>
-        <div style={{ fontSize: 22, fontWeight: 720, color: T.ink }}>Set your password</div>
+        <div style={{ fontSize: 22, fontWeight: 720, color: T.ink }}>
+          {recovery ? "Choose a new password" : "Set your password"}
+        </div>
         <p style={{ fontSize: 13.5, color: T.sub, margin: "6px 0 18px", lineHeight: 1.6 }}>
-          Your Virtualis access has been provisioned. Choose a password of at least 12 characters
-          to finish activating your account.
+          {recovery
+            ? "Your reset link has been verified. Choose a new password of at least 12 characters to regain access."
+            : "Your Virtualis access has been provisioned. Choose a password of at least 12 characters to finish activating your account."}
         </p>
+
         <input
           type="password"
           value={pw}
