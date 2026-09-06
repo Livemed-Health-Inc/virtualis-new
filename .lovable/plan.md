@@ -1,51 +1,64 @@
-# Model Lab false-negative evidence record
+# Model Lab live verification — result and one contract gap
 
-## What I can confirm now (read-only)
+## Live run (read-only, nothing edited, committed or published)
 
-The Model Lab does not store anything in this app: no decision, input, or result is written
-to the project database. The only durable copies of the last authenticated run live in your
-AWS backend (DynamoDB feedback table, S3 training intake, gateway/app logs). The temporary
-run artifacts from that session (Playwright scripts, console output, screenshots under the
-sandbox temp folder) no longer exist — the sandbox was reset since that run.
-
-Confirmed synthetic: the run used only the three built-in synthetic presets shipped in the
-Model Lab screen, and the server refuses any text containing a possible identifier before a
-call is made. The severe preset — the one that came back as `low` — is verbatim:
+Signed in as the administrator test account, one synthetic decision submitted, no feedback and
+no training intake. Input, verbatim and synthetic:
 
 ```text
 Synthetic: 68yo with crushing substernal chest pain radiating to left arm, diaphoretic, BP 84/52.
 ```
 
-The other two presets used:
+Runtime check (`/v1/info`): connected — model `sagemaker:virtualis-acuity-qwen3-1-7b-rc4m-validation`,
+policy `routing-example-2026-08-18`, `clinically_validated = false`.
+
+Decision returned (complete projected payload):
 
 ```text
-Synthetic: patient asks whether to take their evening statin with food. No symptoms reported.
-Synthetic: post-op day 3 knee replacement, incision warm with mild drainage, temp 100.2F, ambulating.
+decision_id                ec9b0bab-1891-4e51-8f80-7a49a248d330
+request_id                 2c4b5115-ad6d-4b06-9d10-ce18edb0a5cc
+use_case                   triage        (see gap below — specialist_consult was not selectable)
+created_at                 2026-09-06T05:29:13.008491Z
+acuity.level               high
+acuity.display_label       high
+acuity.legacy_score_band   [4, 5]
+acuity.probabilities       low 0.00031091 · medium 0.06109219 · high 0.93859684
+acuity.confidence          0.93859684
+acuity.reason_codes        MODEL_CLASSIFICATION, RELEASE_GATE_HUMAN_REVIEW_REQUIRED
+acuity.model_version       virtualis-qwen3-1.7b-rc4m-20260829
+route.destination          clinical_review_queue
+route.service_line         cardiology
+route.priority             10
+route.escalation_after_seconds  0
+route.notify               assigned_team, clinical_reviewer
+route.reason_codes         ROUTE_CARDIOLOGY, ROUTE_REQUIRES_CLINICAL_REVIEW
+route.fallback_destination urgent_clinical_queue
+route.policy_version       routing-example-2026-08-18
+review_required            true  (clamped server-side)
+clinically_validated       false (clamped server-side)
 ```
 
-What I reported from the run at the time (model `virtualis-qwen3-1.7b-rc4m-20260829`, policy
-`routing-example-2026-08-18`, destination `standard_clinical_queue`, fallback
-`standard_clinical_queue`, escalation 3600s, review required, clinically validated false,
-severe case returned acuity `low` at ~0.76 confidence) is a summary, not a field-complete
-record. I will not present it as the adjudication artifact.
+Echo/leak check: no part of the submitted text appears in any server response, and the server
+log contains zero occurrences of the submitted wording. No console errors.
 
-## Proposed: capture a proper evidence record
+Immutable model version confirmed: `virtualis-qwen3-1.7b-rc4m-20260829`.
 
-1. Re-run the authenticated synthetic flow against the live gateway with the same three
-   preset inputs, capturing the full projected decision payload for each (all acuity and
-   routing fields, reason codes, decision_id, request_id, created_at, model/policy version).
-2. Write the results to a single evidence file in your documents area: input text, exact
-   response fields, timestamps, model version, and the synthetic-only attestation. No tokens,
-   no credentials, no identifiers.
-3. Record the false-negative case as a regression fixture in the repo tests (expected-vs-
-   observed, marked as a known model gap, not a code assertion) so it is tracked.
+Note on the earlier false negative: the same severe input now classifies as `high` at 94%, so
+the earlier `low`/76% observation does not reproduce on this build. The original run's raw
+artifacts no longer exist in the sandbox, so the only durable copy of that record is in your
+AWS backend logs.
 
-Note: step 1 issues new decision calls, so new synthetic records will be created in your AWS
-backend. Nothing is published and no app code changes beyond step 3 (which is optional).
+## The one gap found
 
-## Technical notes
+The screen's use-case list is `triage | routing | escalation | quality_review`. The deployed
+contract's example uses `specialist_consult`, which cannot be selected or sent, so the
+requested run went out as `triage`.
 
-- Decision responses are projected in `src/lib/modellab/contract.ts`; the evidence file will
-  contain exactly those whitelisted fields, which is also what the UI shows.
-- `review_required=true` and `clinically_validated=false` are clamped server-side regardless
-  of the runtime reply, so those two values in any record are ours, not the model's.
+## Proposed change (needs build mode)
+
+1. Add `specialist_consult` to the use-case list in `src/lib/modellab/training.ts` (it feeds the
+   server Zod enum, the screen's picker, and CSV/JSONL import), and confirm the full accepted
+   set with the deployed schema so no other value is missing.
+2. Re-run the same single synthetic case with `use_case: specialist_consult` and record the
+   projected result the same way.
+3. Run typecheck, lint, tests and a production build. No publish.
