@@ -19,7 +19,9 @@ describe("POST /v1/decisions request", () => {
       message: { message_id: "ml-test-01", text: TEXT, channel: "synthetic_model_lab" },
       context: { care_setting: "inpatient", sender_role: "nurse", specialty_hint: "ortho" },
     });
-    expect(toDecisionRequest({ message_id: "m1", text: TEXT, use_case: "specialist_consult" })).toEqual({
+    expect(
+      toDecisionRequest({ message_id: "m1", text: TEXT, use_case: "specialist_consult" }),
+    ).toEqual({
       use_case: "specialist_consult",
       message: { message_id: "m1", text: TEXT, channel: "synthetic_model_lab" },
       context: {},
