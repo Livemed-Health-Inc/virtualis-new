@@ -96,7 +96,7 @@ describe("governed JSONL export", () => {
       record_id: "a",
       text: "Chest pain radiating",
       acuity: "high",
-      use_case: "triage",
+      use_case: "clinical_message",
       routes: [],
       label_quality: "single_reviewed",
       sample_weight: 1,

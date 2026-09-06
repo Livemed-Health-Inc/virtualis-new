@@ -204,7 +204,7 @@ function TestModel() {
   const feedback = useServerFn(sendFeedback);
   const [form, setForm] = useState({
     text: SAMPLES.moderate,
-    use_case: "triage",
+    use_case: "specialist_consult",
     care_setting: "inpatient",
     sender_role: "nurse",
     specialty_hint: "",

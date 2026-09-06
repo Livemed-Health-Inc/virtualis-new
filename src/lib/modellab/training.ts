@@ -4,7 +4,13 @@
 
 export const LABELS = ["low", "medium", "high"] as const;
 export const ROUTES = ["self_serve", "nurse_line", "provider", "escalate"] as const;
-export const USE_CASES = ["triage", "routing", "escalation", "quality_review"] as const;
+/* Configured use cases of the deployed routing policy (GET /v1/info). */
+export const USE_CASES = [
+  "clinical_message",
+  "specialist_consult",
+  "diagnostic_result",
+  "care_coordination",
+] as const;
 export const SPLITS = ["train", "validation", "test"] as const;
 export type Label = (typeof LABELS)[number];
 export type RouteLabel = (typeof ROUTES)[number];
