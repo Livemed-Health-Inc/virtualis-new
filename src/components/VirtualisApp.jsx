@@ -18,6 +18,8 @@ import {
   RoutingScreen,
 } from "./virtualis/screens";
 import { Account } from "./virtualis/Account";
+import { hasRecoveryGrant } from "@/lib/recovery";
+
 import NewMessage from "./virtualis/NewMessage";
 import Devices from "./virtualis/devices/Devices";
 import OnCall from "./virtualis/OnCall";
@@ -862,10 +864,14 @@ function Workstation() {
 
   const authed = !!session;
 
-  // Invite links return here with an invite/recovery grant; the clinician sets
-  // their own password before the workstation opens.
+  // Invite and password-recovery links return here with a grant; the clinician
+  // sets their own password before the workstation opens. The fragment is
+  // consumed by the auth client and stripped immediately — never logged.
   const [linkGrant, setLinkGrant] = useState(
     () => typeof window !== "undefined" && /type=(invite|recovery)/.test(window.location.hash),
+  );
+  const [recoveryGrant] = useState(
+    () => typeof window !== "undefined" && hasRecoveryGrant(window.location.hash),
   );
   /* The server flag is authoritative — the link hint only covers the moment
      before the profile arrives, and a completed setup clears both. */
@@ -874,6 +880,7 @@ function Workstation() {
     if (linkGrant && typeof window !== "undefined")
       window.history.replaceState(null, "", window.location.pathname);
   }, [linkGrant]);
+
 
   /* Signing out must leave nothing behind: every overlay and view
      selection resets the moment the session disappears. */
@@ -1205,11 +1212,13 @@ function Workstation() {
   } else if (needsPassword) {
     content = (
       <SetPassword
+        mode={recoveryGrant ? "recovery" : "invite"}
         onDone={() => {
           setLinkGrant(false);
           refreshProfile?.();
         }}
       />
+
     );
   } else if (!multiPane) {
     content =

@@ -2,6 +2,15 @@ import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useVirtualis } from "@/lib/virtualis/store";
 import { completePasswordSetup } from "@/lib/invites.functions";
+import {
+  RECOVERY_MESSAGE,
+  RECOVERY_INVALID_MESSAGE,
+  isValidEmail,
+  passwordErrorMessage,
+  recoveryRedirectUrl,
+  validateNewPassword,
+} from "@/lib/recovery";
+
 
 
 
@@ -35,6 +44,7 @@ export function Login() {
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState("");
   const [note, setNote] = useState("");
+  const [forgot, setForgot] = useState(false);
 
   const submit = async () => {
     setErr("");
@@ -44,6 +54,24 @@ export function Login() {
     setBusy(false);
     if (error) return setErr(error.message);
   };
+
+  /* Recovery request. The outcome is identical for every address so the form
+     cannot be used to discover which clinicians hold an account, and neither
+     the address nor the provider's reply is ever logged. */
+  const requestReset = async () => {
+    setErr("");
+    setNote("");
+    if (!isValidEmail(email)) return setErr("Enter your work email address.");
+    setBusy(true);
+    await supabase.auth
+      .resetPasswordForEmail(email.trim(), {
+        redirectTo: recoveryRedirectUrl(window.location.origin),
+      })
+      .catch(() => {});
+    setBusy(false);
+    setNote(RECOVERY_MESSAGE);
+  };
+
 
   const wide = useMediaQuery(
     "(min-width: 900px), (orientation: landscape) and (min-width: 700px)",
@@ -232,18 +260,49 @@ export function Login() {
             placeholder="name@hospital.org"
             style={{ ...inputStyle, borderColor: email ? T.blue : T.line }}
           />
-          <div style={{ fontSize: 14, fontWeight: 620, color: T.ink, margin: "18px 0 8px" }}>
-            Password
-          </div>
-          <input
-            type="password"
-            value={pw}
-            onChange={(e) => setPw(e.target.value)}
-            placeholder="Password"
-            style={inputStyle}
-          />
-          <div style={{ fontSize: 12.5, color: T.sub, marginTop: 12, textAlign: "right" }}>
-            Access is provisioned by your organization.
+          {!forgot && (
+            <>
+              <div style={{ fontSize: 14, fontWeight: 620, color: T.ink, margin: "18px 0 8px" }}>
+                Password
+              </div>
+              <input
+                type="password"
+                value={pw}
+                onChange={(e) => setPw(e.target.value)}
+                placeholder="Password"
+                style={inputStyle}
+              />
+            </>
+          )}
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              gap: 12,
+              fontSize: 12.5,
+              color: T.sub,
+              marginTop: 12,
+            }}
+          >
+            <button
+              type="button"
+              onClick={() => {
+                setForgot(!forgot);
+                setErr("");
+                setNote("");
+              }}
+              style={{
+                all: "unset",
+                cursor: "pointer",
+                color: T.blue,
+                fontWeight: 620,
+                fontSize: 12.5,
+              }}
+            >
+              {forgot ? "Back to sign in" : "Forgot password?"}
+            </button>
+            <span style={{ textAlign: "right" }}>Access is provisioned by your organization.</span>
           </div>
           {err && (
             <div style={{ fontSize: 13, color: T.red, marginTop: 12, fontWeight: 560 }}>{err}</div>
@@ -254,8 +313,8 @@ export function Login() {
             </div>
           )}
           <button
-            onClick={submit}
-            disabled={busy || !email || !pw}
+            onClick={forgot ? requestReset : submit}
+            disabled={busy || !email || (!forgot && !pw)}
             style={{
               all: "unset",
               boxSizing: "border-box",
@@ -269,12 +328,14 @@ export function Login() {
               fontWeight: 650,
               borderRadius: 16,
               padding: "15px 0",
-              opacity: busy || !email || !pw ? 0.6 : 1,
+              opacity: busy || !email || (!forgot && !pw) ? 0.6 : 1,
               boxShadow: "0 8px 20px rgba(41,112,255,.3)",
             }}
           >
-            {busy ? "…" : "Sign in"}
+            {busy ? "…" : forgot ? "Send reset link" : "Sign in"}
           </button>
+
+
 
 
 
@@ -1876,7 +1937,8 @@ export { credentialedFacilities, Wordmark };
 
 /* Invite acceptance — the link from an admin invitation lands here so the
    clinician sets their own password before entering the workstation. */
-export function SetPassword({ onDone }) {
+export function SetPassword({ onDone, mode = "invite" }) {
+  const recovery = mode === "recovery";
   const [pw, setPw] = useState("");
   const [pw2, setPw2] = useState("");
   const [busy, setBusy] = useState(false);
@@ -1886,20 +1948,22 @@ export function SetPassword({ onDone }) {
     setErr("");
     /* Clinical accounts carry PHI access, so setup enforces a real passphrase
        rather than the auth provider's minimum. */
-    if (pw.length < 12) return setErr("Use at least 12 characters.");
-    if (!/[a-z]/.test(pw) || !/[A-Z]/.test(pw) || !/[0-9]/.test(pw))
-      return setErr("Include upper case, lower case and a number.");
-    if (pw !== pw2) return setErr("Passwords do not match.");
+    const check = validateNewPassword(pw, pw2);
+    if (!check.ok) return setErr(passwordErrorMessage(check.reason));
     setBusy(true);
+    /* The recovery grant already established the session; the update runs as
+       that authenticated user. A rejected update means the link is spent or
+       expired — reported generically, with no token or account detail. */
     const { error } = await supabase.auth.updateUser({ password: pw });
     if (error) {
       setBusy(false);
-      return setErr(error.message);
+      return setErr(recovery ? RECOVERY_INVALID_MESSAGE : error.message);
     }
     await completePasswordSetup().catch(() => {});
     setBusy(false);
     onDone?.();
   };
+
 
   return (
     <div
@@ -1913,11 +1977,15 @@ export function SetPassword({ onDone }) {
       }}
     >
       <div style={{ width: "100%", maxWidth: 380 }}>
-        <div style={{ fontSize: 22, fontWeight: 720, color: T.ink }}>Set your password</div>
+        <div style={{ fontSize: 22, fontWeight: 720, color: T.ink }}>
+          {recovery ? "Choose a new password" : "Set your password"}
+        </div>
         <p style={{ fontSize: 13.5, color: T.sub, margin: "6px 0 18px", lineHeight: 1.6 }}>
-          Your Virtualis access has been provisioned. Choose a password of at least 12 characters
-          to finish activating your account.
+          {recovery
+            ? "Your reset link has been verified. Choose a new password of at least 12 characters to regain access."
+            : "Your Virtualis access has been provisioned. Choose a password of at least 12 characters to finish activating your account."}
         </p>
+
         <input
           type="password"
           value={pw}
