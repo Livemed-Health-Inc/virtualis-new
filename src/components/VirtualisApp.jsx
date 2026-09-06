@@ -18,6 +18,8 @@ import {
   RoutingScreen,
 } from "./virtualis/screens";
 import { Account } from "./virtualis/Account";
+import { hasRecoveryGrant } from "@/lib/recovery";
+
 import NewMessage from "./virtualis/NewMessage";
 import Devices from "./virtualis/devices/Devices";
 import OnCall from "./virtualis/OnCall";
@@ -1210,11 +1212,13 @@ function Workstation() {
   } else if (needsPassword) {
     content = (
       <SetPassword
+        mode={recoveryGrant ? "recovery" : "invite"}
         onDone={() => {
           setLinkGrant(false);
           refreshProfile?.();
         }}
       />
+
     );
   } else if (!multiPane) {
     content =
