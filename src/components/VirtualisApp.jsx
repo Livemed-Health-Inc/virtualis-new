@@ -18,14 +18,19 @@ import {
   RoutingScreen,
 } from "./virtualis/screens";
 import { Account } from "./virtualis/Account";
-import { hasRecoveryGrant } from "@/lib/recovery";
+import { capturedAuthGrant } from "@/lib/recovery";
 
 import NewMessage from "./virtualis/NewMessage";
 import Devices from "./virtualis/devices/Devices";
 import OnCall from "./virtualis/OnCall";
 import SessionWorkspace from "./virtualis/devices/SessionWorkspace";
 import { useDeviceFleet } from "./virtualis/devices/useDeviceFleet";
-import { hellocareConfig, buildLaunchUrl, newNonce, hellocareTrust } from "@/lib/telehealth/hellocare";
+import {
+  hellocareConfig,
+  buildLaunchUrl,
+  newNonce,
+  hellocareTrust,
+} from "@/lib/telehealth/hellocare";
 import { minttiTrust } from "@/lib/telehealth/status";
 import { hasNativeHost } from "@/sdk/stethoscope";
 
@@ -149,7 +154,6 @@ const TABS = [
     ),
   },
   {
-
     k: "more",
     label: "More",
     icon: (c) => (
@@ -867,14 +871,13 @@ function Workstation() {
   const authed = !!session;
 
   // Invite and password-recovery links return here with a grant; the clinician
-  // sets their own password before the workstation opens. The fragment is
-  // consumed by the auth client and stripped immediately — never logged.
+  // sets their own password before the workstation opens. The grant is captured
+  // at load, before the auth client strips it — never logged.
   const [linkGrant, setLinkGrant] = useState(
-    () => typeof window !== "undefined" && /type=(invite|recovery)/.test(window.location.hash),
+    () => capturedAuthGrant().invite || capturedAuthGrant().recovery,
   );
-  const [recoveryGrant] = useState(
-    () => typeof window !== "undefined" && hasRecoveryGrant(window.location.hash),
-  );
+  const [recoveryGrant] = useState(() => capturedAuthGrant().recovery);
+
   /* The server flag is authoritative — the link hint only covers the moment
      before the profile arrives, and a completed setup clears both. */
   const needsPassword = linkGrant || passwordRecovery || mustChangePassword;
@@ -882,7 +885,6 @@ function Workstation() {
     if (linkGrant && typeof window !== "undefined")
       window.history.replaceState(null, "", window.location.pathname);
   }, [linkGrant]);
-
 
   /* Signing out must leave nothing behind: every overlay and view
      selection resets the moment the session disappears. */
@@ -1221,7 +1223,6 @@ function Workstation() {
           refreshProfile?.();
         }}
       />
-
     );
   } else if (!multiPane) {
     content =

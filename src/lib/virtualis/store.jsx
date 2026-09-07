@@ -10,6 +10,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { claimInvite } from "@/lib/invites.functions";
 import { logAudit } from "@/lib/audit.functions";
+import { capturedAuthGrant } from "@/lib/recovery";
 
 /* A clinical workstation is often left unattended at a nurses' station, so an
    idle session signs itself out rather than waiting for the token to expire. */
@@ -67,7 +68,7 @@ function shapeThread(row, messages, userId, lastRead) {
 
 export function VirtualisProvider({ children }) {
   const [session, setSession] = useState(null);
-  const [passwordRecovery, setPasswordRecovery] = useState(false);
+  const [passwordRecovery, setPasswordRecovery] = useState(() => capturedAuthGrant().recovery);
   const [ready, setReady] = useState(false);
   const [profile, setProfile] = useState(null);
   const [credentials, setCredentials] = useState([]);
