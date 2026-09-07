@@ -25,7 +25,12 @@ import Devices from "./virtualis/devices/Devices";
 import OnCall from "./virtualis/OnCall";
 import SessionWorkspace from "./virtualis/devices/SessionWorkspace";
 import { useDeviceFleet } from "./virtualis/devices/useDeviceFleet";
-import { hellocareConfig, buildLaunchUrl, newNonce, hellocareTrust } from "@/lib/telehealth/hellocare";
+import {
+  hellocareConfig,
+  buildLaunchUrl,
+  newNonce,
+  hellocareTrust,
+} from "@/lib/telehealth/hellocare";
 import { minttiTrust } from "@/lib/telehealth/status";
 import { hasNativeHost } from "@/sdk/stethoscope";
 
@@ -149,7 +154,6 @@ const TABS = [
     ),
   },
   {
-
     k: "more",
     label: "More",
     icon: (c) => (
@@ -882,7 +886,6 @@ function Workstation() {
       window.history.replaceState(null, "", window.location.pathname);
   }, [linkGrant]);
 
-
   /* Signing out must leave nothing behind: every overlay and view
      selection resets the moment the session disappears. */
   useEffect(() => {
@@ -1220,7 +1223,6 @@ function Workstation() {
           refreshProfile?.();
         }}
       />
-
     );
   } else if (!multiPane) {
     content =

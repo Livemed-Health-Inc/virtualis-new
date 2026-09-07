@@ -12,7 +12,6 @@ import { claimInvite } from "@/lib/invites.functions";
 import { logAudit } from "@/lib/audit.functions";
 import { capturedAuthGrant } from "@/lib/recovery";
 
-
 /* A clinical workstation is often left unattended at a nurses' station, so an
    idle session signs itself out rather than waiting for the token to expire. */
 const IDLE_LIMIT_MS = 15 * 60 * 1000;

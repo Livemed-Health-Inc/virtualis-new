@@ -45,7 +45,6 @@ export function capturedAuthGrant(): AuthGrant {
   return captured;
 }
 
-
 /** Recovery must land on a public same-origin URL — never a protected route. */
 export function recoveryRedirectUrl(origin: string): string {
   return new URL("/", origin).toString();

@@ -10,7 +10,6 @@ import {
   validateNewPassword,
 } from "./recovery";
 
-
 const STRONG = "Kestrel-Harbour-72";
 
 describe("generic recovery responses", () => {
@@ -81,7 +80,6 @@ describe("invite and recovery grant capture", () => {
     });
   });
 });
-
 
 describe("new password validation", () => {
   it("accepts a strong password with matching confirmation", () => {
