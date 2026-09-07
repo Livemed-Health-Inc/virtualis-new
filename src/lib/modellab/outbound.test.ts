@@ -88,7 +88,7 @@ describe("bounded vocabularies", () => {
 
 describe("intake payload ceiling", () => {
   it("caps the example count well below the old 5,000", () => {
-    expect(MAX_INTAKE_EXAMPLES).toBe(1000);
+    expect(MAX_INTAKE_EXAMPLES).toBe(1200);
     const many = { examples: Array.from({ length: MAX_INTAKE_EXAMPLES + 1 }, () => EXAMPLE) };
     expect(intakeSchema.safeParse(many).success).toBe(false);
   });

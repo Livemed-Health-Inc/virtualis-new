@@ -70,7 +70,7 @@ export const feedbackSchema = z
    413 above it. The server refuses oversized batches before any upstream call,
    with headroom for the JSON envelope. */
 export const MAX_INTAKE_BYTES = 5_000_000;
-export const MAX_INTAKE_EXAMPLES = 1000;
+export const MAX_INTAKE_EXAMPLES = 1200;
 
 export const intakeSchema = z
   .object({
