@@ -228,7 +228,7 @@ export default function ClinicalReview() {
           <select
             value={filters.use_case ?? ""}
             onChange={(e) => setFilters((f) => ({ ...f, use_case: e.target.value || undefined }))}
-            style={{ ...inputStyle(), width: 190 }}
+            style={{ ...inputStyle, width: 190 }}
           >
             <option value="">All use cases</option>
             {USE_CASES.map((u) => (
@@ -282,7 +282,7 @@ export default function ClinicalReview() {
               />
               <Stat label="Model version" value={current.model_version} />
             </div>
-            <div style={{ ...mono, fontSize: 11.5, color: T.sub, marginTop: 8 }}>
+            <div style={{ fontFamily: mono, fontSize: 11.5, color: T.sub, marginTop: 8 }}>
               reason codes: {current.reason_codes?.join(", ") || "—"}
             </div>
 
