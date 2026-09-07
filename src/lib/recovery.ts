@@ -23,6 +23,29 @@ export function hasRecoveryGrant(hash: string): boolean {
   return /(^|[#&?])type=recovery(&|$)/.test(hash);
 }
 
+export type AuthGrant = { invite: boolean; recovery: boolean };
+
+/** Invite and recovery links may deliver the grant in the fragment (implicit)
+    or in the query string (PKCE/verify redirects). Both are recognised; no part
+    of the URL is returned. */
+export function parseAuthGrant(hash: string, search = ""): AuthGrant {
+  const has = (t: string) => new RegExp(`(^|[#&?])type=${t}(&|$)`).test(hash + "&" + search);
+  return { invite: has("invite"), recovery: has("recovery") };
+}
+
+/* Captured at module load: the auth client strips the grant from the address
+   bar asynchronously once it has consumed it, which happens before React
+   renders. Reading it later would always come back empty. */
+const captured: AuthGrant =
+  typeof window === "undefined"
+    ? { invite: false, recovery: false }
+    : parseAuthGrant(window.location.hash, window.location.search);
+
+export function capturedAuthGrant(): AuthGrant {
+  return captured;
+}
+
+
 /** Recovery must land on a public same-origin URL — never a protected route. */
 export function recoveryRedirectUrl(origin: string): string {
   return new URL("/", origin).toString();
