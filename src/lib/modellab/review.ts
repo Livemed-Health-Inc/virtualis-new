@@ -155,3 +155,9 @@ export function exportAdjudicated(cases: ReviewCase[]): ExportResult {
   }
   return { jsonl: lines.join("\n"), exported: lines.length, blocked };
 }
+
+/** Defence in depth for reviewer independence: a case still awaiting verdicts
+    must never travel to a reviewer with a label attached, whatever the
+    database returned. Terminal cases keep their resolved label. */
+export const redactUnresolved = (c: ReviewCase): ReviewCase =>
+  isResolved(c.state) ? c : { ...c, final_acuity: null };
