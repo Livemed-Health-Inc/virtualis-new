@@ -1,0 +1,1 @@
+DROP POLICY IF EXISTS "Facility staff read devices" ON public.devices;
