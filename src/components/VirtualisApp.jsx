@@ -18,7 +18,7 @@ import {
   RoutingScreen,
 } from "./virtualis/screens";
 import { Account } from "./virtualis/Account";
-import { hasRecoveryGrant } from "@/lib/recovery";
+import { capturedAuthGrant } from "@/lib/recovery";
 
 import NewMessage from "./virtualis/NewMessage";
 import Devices from "./virtualis/devices/Devices";
@@ -867,14 +867,13 @@ function Workstation() {
   const authed = !!session;
 
   // Invite and password-recovery links return here with a grant; the clinician
-  // sets their own password before the workstation opens. The fragment is
-  // consumed by the auth client and stripped immediately — never logged.
+  // sets their own password before the workstation opens. The grant is captured
+  // at load, before the auth client strips it — never logged.
   const [linkGrant, setLinkGrant] = useState(
-    () => typeof window !== "undefined" && /type=(invite|recovery)/.test(window.location.hash),
+    () => capturedAuthGrant().invite || capturedAuthGrant().recovery,
   );
-  const [recoveryGrant] = useState(
-    () => typeof window !== "undefined" && hasRecoveryGrant(window.location.hash),
-  );
+  const [recoveryGrant] = useState(() => capturedAuthGrant().recovery);
+
   /* The server flag is authoritative — the link hint only covers the moment
      before the profile arrives, and a completed setup clears both. */
   const needsPassword = linkGrant || passwordRecovery || mustChangePassword;
