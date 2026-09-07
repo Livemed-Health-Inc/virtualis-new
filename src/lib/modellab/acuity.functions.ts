@@ -57,8 +57,46 @@ export const runDecision = createServerFn({ method: "POST" })
     const body = toDecisionRequest(data);
     assertScreened(body);
     const { callAcuity } = await import("./acuity.server");
-    return projectDecision(await callAcuity("/v1/decisions", { method: "POST", body }), data.text);
+    const decision = projectDecision(
+      await callAcuity("/v1/decisions", { method: "POST", body }),
+      data.text,
+    );
+    await enqueueForReview(context, data, decision);
+    return decision;
   });
+
+/* Every Model Lab decision joins the clinical review queue so labels can be
+   adjudicated later. The text is the synthetic input that was already screened
+   above. A queue failure never breaks the decision the user asked for. */
+async function enqueueForReview(
+  context: AuthedContext,
+  input: ReturnType<typeof decisionSchema.parse>,
+  d: Decision,
+) {
+  try {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    await supabaseAdmin.from("review_cases").upsert(
+      {
+        decision_id: d.decision_id,
+        use_case: input.use_case,
+        message_text: input.text,
+        predicted_acuity: d.acuity.level,
+        confidence: d.acuity.confidence ?? null,
+        probabilities: d.acuity.probabilities,
+        reason_codes: d.acuity.reason_codes,
+        route_destination: d.route.destination ?? null,
+        policy_version: d.route.policy_version ?? null,
+        model_version: d.acuity.model_version,
+        care_setting: input.care_setting ?? null,
+        sender_role: input.sender_role ?? null,
+        created_by: context.userId,
+      },
+      { onConflict: "decision_id", ignoreDuplicates: true },
+    );
+  } catch {
+    /* Non-fatal by design. */
+  }
+}
 
 /* Reviewer verdict on a decision: structured labels only, no free text. */
 export const sendFeedback = createServerFn({ method: "POST" })
