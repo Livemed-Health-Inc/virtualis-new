@@ -45,9 +45,66 @@ export function capturedAuthGrant(): AuthGrant {
   return captured;
 }
 
-/** Recovery must land on a public same-origin URL — never a protected route. */
+export const RESET_PATH = "/reset-password";
+
+/** Recovery must land on the public, unprotected password page. */
 export function recoveryRedirectUrl(origin: string): string {
-  return new URL("/", origin).toString();
+  return new URL(RESET_PATH, origin).toString();
+}
+
+export type GrantType = "recovery" | "invite";
+
+/** Every shape a password link can arrive in. `otp` is our own first-party
+    shape: the one-time code travels in the fragment, so it never reaches a
+    server log, and it is redeemed only after a deliberate click. */
+export type RecoveryLink =
+  | { kind: "otp"; type: GrantType; email: string; token: string }
+  | { kind: "tokens"; type: GrantType; accessToken: string; refreshToken: string }
+  | { kind: "hash"; type: GrantType; tokenHash: string }
+  | { kind: "code"; code: string }
+  | { kind: "error" }
+  | { kind: "none" };
+
+const params = (s: string) => new URLSearchParams(s.replace(/^[#?]/, ""));
+const grantType = (v: string | null): GrantType => (v === "invite" ? "invite" : "recovery");
+
+/** Reads the link without trusting it: nothing here grants access — the auth
+    server still has to accept the credential the link carries. */
+export function parseRecoveryLink(hash: string, search: string): RecoveryLink {
+  const h = params(hash);
+  const q = params(search);
+  const get = (k: string) => h.get(k) ?? q.get(k);
+
+  if (get("error") || get("error_code")) return { kind: "error" };
+
+  const token = get("t");
+  const email = get("e");
+  if (token && email) return { kind: "otp", type: grantType(get("type")), email, token };
+
+  const accessToken = get("access_token");
+  const refreshToken = get("refresh_token");
+  if (accessToken && refreshToken)
+    return { kind: "tokens", type: grantType(get("type")), accessToken, refreshToken };
+
+  const tokenHash = get("token_hash");
+  if (tokenHash) return { kind: "hash", type: grantType(get("type")), tokenHash };
+
+  const code = get("code");
+  if (code) return { kind: "code", code };
+
+  return { kind: "none" };
+}
+
+/** First-party link used by the branded emails. Falls back to the auth
+    provider's own URL when no one-time code was supplied. */
+export function buildAuthLinkUrl(
+  siteUrl: string,
+  opts: { type: GrantType; email: string; token: string | null; fallbackUrl: string },
+): string {
+  if (!opts.token) return opts.fallbackUrl;
+  const url = new URL(RESET_PATH, siteUrl);
+  url.hash = `type=${opts.type}&t=${encodeURIComponent(opts.token)}&e=${encodeURIComponent(opts.email)}`;
+  return url.toString();
 }
 
 export type PasswordReason = NonNullable<PasswordCheck["reason"]> | "mismatch";

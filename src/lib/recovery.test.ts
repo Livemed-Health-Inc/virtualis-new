@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import {
   RECOVERY_MESSAGE,
+  buildAuthLinkUrl,
+  parseRecoveryLink,
   RECOVERY_INVALID_MESSAGE,
   hasRecoveryGrant,
   isValidEmail,
@@ -44,7 +46,9 @@ describe("recovery grant detection", () => {
   });
 
   it("returns a same-origin public redirect", () => {
-    expect(recoveryRedirectUrl("https://virtualischat.com")).toBe("https://virtualischat.com/");
+    expect(recoveryRedirectUrl("https://virtualischat.com")).toBe(
+      "https://virtualischat.com/reset-password",
+    );
   });
 });
 
@@ -105,5 +109,72 @@ describe("new password validation", () => {
     expect(msg).not.toContain(STRONG);
     expect(msg).not.toContain("different");
     expect(msg).toBe("Passwords do not match.");
+  });
+});
+
+describe("password link parsing", () => {
+  it("reads a first-party one-time link from the fragment", () => {
+    expect(parseRecoveryLink("#type=recovery&t=123456&e=dr%40x.org", "")).toEqual({
+      kind: "otp",
+      type: "recovery",
+      email: "dr@x.org",
+      token: "123456",
+    });
+    expect(parseRecoveryLink("#type=invite&t=999&e=a%40b.co", "").kind).toBe("otp");
+  });
+
+  it("still accepts implicit, token-hash and PKCE links", () => {
+    expect(parseRecoveryLink("#access_token=a&refresh_token=r&type=recovery", "")).toEqual({
+      kind: "tokens",
+      type: "recovery",
+      accessToken: "a",
+      refreshToken: "r",
+    });
+    expect(parseRecoveryLink("", "?token_hash=abc&type=invite")).toEqual({
+      kind: "hash",
+      type: "invite",
+      tokenHash: "abc",
+    });
+    expect(parseRecoveryLink("", "?code=xyz")).toEqual({ kind: "code", code: "xyz" });
+  });
+
+  it("treats expired or unrelated loads as no grant", () => {
+    expect(parseRecoveryLink("#error=access_denied&error_code=otp_expired", "").kind).toBe("error");
+    expect(parseRecoveryLink("", "").kind).toBe("none");
+    expect(parseRecoveryLink("#type=recovery", "").kind).toBe("none");
+  });
+
+  it("builds a first-party link that keeps the code out of the request path", () => {
+    const url = buildAuthLinkUrl("https://virtualischat.com", {
+      type: "recovery",
+      email: "dr@x.org",
+      token: "123456",
+      fallbackUrl: "https://auth.example/verify?token=zzz",
+    });
+    expect(url.startsWith("https://virtualischat.com/reset-password#")).toBe(true);
+    expect(new URL(url).search).toBe("");
+    expect(parseRecoveryLink(new URL(url).hash, "")).toEqual({
+      kind: "otp",
+      type: "recovery",
+      email: "dr@x.org",
+      token: "123456",
+    });
+  });
+
+  it("falls back to the provider link when no one-time code is supplied", () => {
+    expect(
+      buildAuthLinkUrl("https://virtualischat.com", {
+        type: "invite",
+        email: "dr@x.org",
+        token: null,
+        fallbackUrl: "https://auth.example/verify?token=zzz",
+      }),
+    ).toBe("https://auth.example/verify?token=zzz");
+  });
+
+  it("sends recovery to the public password page, not the app shell", () => {
+    expect(recoveryRedirectUrl("https://virtualischat.com")).toBe(
+      "https://virtualischat.com/reset-password",
+    );
   });
 });

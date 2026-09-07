@@ -7,6 +7,7 @@ import { MagicLinkEmail } from "@/lib/email-templates/magic-link";
 import { RecoveryEmail } from "@/lib/email-templates/recovery";
 import { EmailChangeEmail } from "@/lib/email-templates/email-change";
 import { ReauthenticationEmail } from "@/lib/email-templates/reauthentication";
+import { buildAuthLinkUrl } from "@/lib/recovery";
 
 // Configuration
 const SITE_NAME = "Virtualis Nue";
@@ -43,7 +44,15 @@ export const Route = createFileRoute("/lovable/email/auth/webhook")({
                 React.createElement(InviteEmail, {
                   siteName: SITE_NAME,
                   siteUrl: SITE_URL,
-                  confirmationUrl: data.url,
+                  // First-party link: the one-time code rides in the fragment
+                  // and is redeemed only by a deliberate click on our page,
+                  // so a mailbox scanner cannot burn the invitation.
+                  confirmationUrl: buildAuthLinkUrl(SITE_URL, {
+                    type: "invite",
+                    email: data.email,
+                    token: data.token,
+                    fallbackUrl: data.url,
+                  }),
                 }),
             },
             magiclink: {
@@ -59,7 +68,12 @@ export const Route = createFileRoute("/lovable/email/auth/webhook")({
               render: (data) =>
                 React.createElement(RecoveryEmail, {
                   siteName: SITE_NAME,
-                  confirmationUrl: data.url,
+                  confirmationUrl: buildAuthLinkUrl(SITE_URL, {
+                    type: "recovery",
+                    email: data.email,
+                    token: data.token,
+                    fallbackUrl: data.url,
+                  }),
                 }),
             },
             email_change: {

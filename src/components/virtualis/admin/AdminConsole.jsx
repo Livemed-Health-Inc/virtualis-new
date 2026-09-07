@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { recoveryRedirectUrl } from "@/lib/recovery";
 import { T, mono, inputStyle } from "../theme";
 import {
   getAdminData,
@@ -356,7 +357,7 @@ export function AdminConsole({ onBack }) {
               disabled={busy || !invite.email || invite.facility_ids.length === 0}
               onClick={async () => {
                 const r = await run(() =>
-                  inviteStaff({ data: { ...invite, redirectTo: origin } }),
+                  inviteStaff({ data: { ...invite, redirectTo: recoveryRedirectUrl(origin) } }),
                 );
                 if (r?.ok)
                   setInvite({ ...invite, email: "", full_name: "", title: "", department: "" });
@@ -391,7 +392,13 @@ export function AdminConsole({ onBack }) {
               {i.status === "pending" && (
                 <button
                   onClick={() => run(() => revokeInvite({ data: { id: i.id } }))}
-                  style={{ all: "unset", cursor: "pointer", fontSize: 12, fontWeight: 620, color: T.red }}
+                  style={{
+                    all: "unset",
+                    cursor: "pointer",
+                    fontSize: 12,
+                    fontWeight: 620,
+                    color: T.red,
+                  }}
                 >
                   Revoke
                 </button>
@@ -462,7 +469,13 @@ export function AdminConsole({ onBack }) {
               sub={`${f.short} · ${f.emr} · ${state.devices.filter((d) => d.facility_id === f.id).length} devices`}
               right={
                 <span
-                  style={{ width: 10, height: 10, borderRadius: 5, background: f.hue, display: "block" }}
+                  style={{
+                    width: 10,
+                    height: 10,
+                    borderRadius: 5,
+                    background: f.hue,
+                    display: "block",
+                  }}
                 />
               }
             />
@@ -582,7 +595,9 @@ export function AdminConsole({ onBack }) {
                 d.unit,
                 d.floating ? "Floating" : d.room ? `Rm ${d.room}` : null,
                 d.has_mintti ? "Stethoscope" : null,
-                d.last_seen_at ? `Seen ${new Date(d.last_seen_at).toLocaleString()}` : "Never paired",
+                d.last_seen_at
+                  ? `Seen ${new Date(d.last_seen_at).toLocaleString()}`
+                  : "Never paired",
               ]
                 .filter(Boolean)
                 .join(" · ")}
@@ -602,7 +617,13 @@ export function AdminConsole({ onBack }) {
                   onClick={() =>
                     run(() => setDeviceStatus({ data: { device_id: d.id, status: "revoked" } }))
                   }
-                  style={{ all: "unset", cursor: "pointer", fontSize: 12, fontWeight: 620, color: T.red }}
+                  style={{
+                    all: "unset",
+                    cursor: "pointer",
+                    fontSize: 12,
+                    fontWeight: 620,
+                    color: T.red,
+                  }}
                 >
                   Revoke
                 </button>
@@ -619,8 +640,19 @@ function Head({ onBack }) {
   return (
     <>
       <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 4 }}>
-        <button onClick={onBack} aria-label="Back" style={{ all: "unset", cursor: "pointer", padding: 4 }}>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={T.ink} strokeWidth="2">
+        <button
+          onClick={onBack}
+          aria-label="Back"
+          style={{ all: "unset", cursor: "pointer", padding: 4 }}
+        >
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke={T.ink}
+            strokeWidth="2"
+          >
             <path d="M15 5l-7 7 7 7" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         </button>
