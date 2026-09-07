@@ -5,6 +5,7 @@ import {
   exportAdjudicated,
   highAcuityProgress,
   queueFilterSchema,
+  redactUnresolved,
   toIntakeRecord,
   verdictSchema,
   type ReviewCase,
@@ -136,5 +137,32 @@ describe("governed export", () => {
     expect(out.exported).toBe(2);
     expect(out.jsonl.split("\n")).toHaveLength(2);
     expect(JSON.parse(out.jsonl.split("\n")[0]!).label_quality).toBe("adjudicated");
+  });
+});
+
+describe("reviewer independence", () => {
+  it("strips a label from a case still awaiting verdicts", () => {
+    const c = redactUnresolved(
+      mkCase({ state: "single_reviewed", label_quality: "single_reviewed", final_acuity: "high" }),
+    );
+    expect(c.final_acuity).toBeNull();
+    expect(JSON.stringify({ ...c, message_text: "", predicted_acuity: "", probabilities: {} })).not.toMatch(
+      /high/,
+    );
+  });
+
+  it("strips a label from a disagreement awaiting adjudication", () => {
+    expect(
+      redactUnresolved(mkCase({ state: "disagreement", label_quality: null, final_acuity: "low" }))
+        .final_acuity,
+    ).toBeNull();
+  });
+
+  it("keeps the resolved label on terminal cases", () => {
+    expect(redactUnresolved(mkCase()).final_acuity).toBe("high");
+    expect(
+      redactUnresolved(mkCase({ state: "expert_reviewed", label_quality: "expert_reviewed" }))
+        .final_acuity,
+    ).toBe("high");
   });
 });
