@@ -26,7 +26,8 @@ export const getReviewAccess = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     const role = async (r: "admin" | "clinical_reviewer") =>
-      (await context.supabase.rpc("has_role", { _user_id: context.userId, _role: r })).data === true;
+      (await context.supabase.rpc("has_role", { _user_id: context.userId, _role: r })).data ===
+      true;
     const [isAdmin, isReviewer] = [await role("admin"), await role("clinical_reviewer")];
     return { allowed: isAdmin || isReviewer, isAdmin };
   });

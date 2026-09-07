@@ -115,7 +115,9 @@ describe("governed export", () => {
   });
 
   it("refuses to export a case that is not adjudicated", () => {
-    const out = exportAdjudicated([mkCase({ label_quality: "single_reviewed", state: "single_reviewed" })]);
+    const out = exportAdjudicated([
+      mkCase({ label_quality: "single_reviewed", state: "single_reviewed" }),
+    ]);
     expect(out.exported).toBe(0);
     expect(out.blocked[0]?.reason).toBe("not adjudicated");
     expect(out.jsonl).toBe("");

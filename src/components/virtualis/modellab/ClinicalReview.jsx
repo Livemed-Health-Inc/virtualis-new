@@ -94,7 +94,9 @@ export default function ClinicalReview() {
       setQueue(q);
       setStats(s);
     } catch (e) {
-      setNote(e?.message === "Forbidden" ? "You are not a clinical reviewer." : "Queue unavailable.");
+      setNote(
+        e?.message === "Forbidden" ? "You are not a clinical reviewer." : "Queue unavailable.",
+      );
     } finally {
       setBusy(false);
     }
@@ -198,7 +200,10 @@ export default function ClinicalReview() {
         </button>
       </Section>
 
-      <Section title="Queue" hint="Least confident first. You never see another reviewer's verdict.">
+      <Section
+        title="Queue"
+        hint="Least confident first. You never see another reviewer's verdict."
+      >
         <div style={{ display: "flex", gap: 7, flexWrap: "wrap", marginBottom: 10 }}>
           {LABELS.map((l) => (
             <Chip
@@ -222,9 +227,7 @@ export default function ClinicalReview() {
           ))}
           <select
             value={filters.use_case ?? ""}
-            onChange={(e) =>
-              setFilters((f) => ({ ...f, use_case: e.target.value || undefined }))
-            }
+            onChange={(e) => setFilters((f) => ({ ...f, use_case: e.target.value || undefined }))}
             style={{ ...inputStyle(), width: 190 }}
           >
             <option value="">All use cases</option>
@@ -268,9 +271,9 @@ export default function ClinicalReview() {
               />
               <Stat
                 label="Probabilities"
-                value={LABELS.map((l) => `${l[0].toUpperCase()} ${pct(current.probabilities?.[l])}`).join(
-                  "  ",
-                )}
+                value={LABELS.map(
+                  (l) => `${l[0].toUpperCase()} ${pct(current.probabilities?.[l])}`,
+                ).join("  ")}
               />
               <Stat
                 label="Proposed route"
