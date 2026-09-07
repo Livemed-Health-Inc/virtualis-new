@@ -49,6 +49,40 @@ describe("recovery grant detection", () => {
   });
 });
 
+describe("invite and recovery grant capture", () => {
+  it("recognises grants delivered in the fragment", () => {
+    expect(parseAuthGrant("#access_token=x&type=recovery")).toEqual({
+      invite: false,
+      recovery: true,
+    });
+    expect(parseAuthGrant("#access_token=x&type=invite")).toEqual({
+      invite: true,
+      recovery: false,
+    });
+  });
+
+  it("recognises grants delivered in the query string", () => {
+    expect(parseAuthGrant("", "?type=recovery&code=abc")).toEqual({
+      invite: false,
+      recovery: true,
+    });
+    expect(parseAuthGrant("", "?type=invite")).toEqual({ invite: true, recovery: false });
+  });
+
+  it("reports no grant for ordinary and failed loads", () => {
+    expect(parseAuthGrant("", "")).toEqual({ invite: false, recovery: false });
+    expect(parseAuthGrant("#error=access_denied&error_code=otp_expired", "")).toEqual({
+      invite: false,
+      recovery: false,
+    });
+    expect(parseAuthGrant("#type=recoveryish", "?type=invitee")).toEqual({
+      invite: false,
+      recovery: false,
+    });
+  });
+});
+
+
 describe("new password validation", () => {
   it("accepts a strong password with matching confirmation", () => {
     expect(validateNewPassword(STRONG, STRONG)).toEqual({ ok: true });
