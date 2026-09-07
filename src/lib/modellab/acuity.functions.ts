@@ -12,6 +12,7 @@ import {
   projectIntake,
   toDecisionRequest,
   type RuntimeInfo,
+  type Decision,
 } from "./contract";
 import { assertAdmin, throttle as consumeBudget, type AuthedContext } from "./guards";
 
