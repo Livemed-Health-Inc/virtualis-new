@@ -36,8 +36,7 @@ export type ReviewState = (typeof REVIEW_STATES)[number];
 
 /* A case only carries a resolved label in these states. */
 export const TERMINAL_STATES = ["expert_reviewed", "adjudicated"] as const;
-export const isResolved = (state: string) =>
-  (TERMINAL_STATES as readonly string[]).includes(state);
+export const isResolved = (state: string) => (TERMINAL_STATES as readonly string[]).includes(state);
 
 export interface ReviewCase {
   id: string;

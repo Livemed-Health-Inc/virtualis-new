@@ -146,9 +146,9 @@ describe("reviewer independence", () => {
       mkCase({ state: "single_reviewed", label_quality: "single_reviewed", final_acuity: "high" }),
     );
     expect(c.final_acuity).toBeNull();
-    expect(JSON.stringify({ ...c, message_text: "", predicted_acuity: "", probabilities: {} })).not.toMatch(
-      /high/,
-    );
+    expect(
+      JSON.stringify({ ...c, message_text: "", predicted_acuity: "", probabilities: {} }),
+    ).not.toMatch(/high/);
   });
 
   it("strips a label from a disagreement awaiting adjudication", () => {
