@@ -5,12 +5,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { screenOutbound } from "./training";
-import {
-  decisionSchema,
-  feedbackSchema,
-  intakeSchema,
-  intakeTooLarge,
-} from "./acuity.schemas";
+import { decisionSchema, feedbackSchema, intakeSchema, intakeTooLarge } from "./acuity.schemas";
 import {
   projectDecision,
   projectInfo,
@@ -86,10 +81,7 @@ export const runDecision = createServerFn({ method: "POST" })
     const body = toDecisionRequest(data);
     assertScreened(body);
     const { callAcuity } = await import("./acuity.server");
-    return projectDecision(
-      await callAcuity("/v1/decisions", { method: "POST", body }),
-      data.text,
-    );
+    return projectDecision(await callAcuity("/v1/decisions", { method: "POST", body }), data.text);
   });
 
 /* Reviewer verdict on a decision: structured labels only, no free text. */

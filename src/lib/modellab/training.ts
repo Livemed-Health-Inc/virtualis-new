@@ -178,14 +178,10 @@ export function detectIdentifiers(text: string): string[] {
     Nothing leaves the server unscreened just because it sits in a field other
     than `text`. Returns the flagged field paths; values are never returned. */
 export function screenOutbound(value: unknown, path = ""): string[] {
-  if (typeof value === "string")
-    return detectIdentifiers(value).length ? [path || "value"] : [];
-  if (Array.isArray(value))
-    return value.flatMap((v, i) => screenOutbound(v, `${path}[${i}]`));
+  if (typeof value === "string") return detectIdentifiers(value).length ? [path || "value"] : [];
+  if (Array.isArray(value)) return value.flatMap((v, i) => screenOutbound(v, `${path}[${i}]`));
   if (value && typeof value === "object")
-    return Object.entries(value).flatMap(([k, v]) =>
-      screenOutbound(v, path ? `${path}.${k}` : k),
-    );
+    return Object.entries(value).flatMap(([k, v]) => screenOutbound(v, path ? `${path}.${k}` : k));
   return [];
 }
 
