@@ -8,6 +8,7 @@ import { assertReviewer, throttle } from "./guards";
 import {
   exportAdjudicated,
   queueFilterSchema,
+  redactUnresolved,
   verdictSchema,
   type ReviewCase,
   type ReviewStats,
@@ -50,7 +51,9 @@ export const listReviewQueue = createServerFn({ method: "POST" })
       _limit: data.limit ?? 50,
     });
     if (error) throw new Error("Review queue unavailable");
-    return (rows ?? []).map(asCase);
+    /* Queue rows never carry a label: a case in flight has none, and the
+       redaction holds even if a future change reintroduces one. */
+    return (rows ?? []).map((r) => redactUnresolved(asCase(r)));
   });
 
 export const getReviewStats = createServerFn({ method: "GET" })

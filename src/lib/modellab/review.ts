@@ -34,6 +34,10 @@ export const REVIEW_STATES = [
 ] as const;
 export type ReviewState = (typeof REVIEW_STATES)[number];
 
+/* A case only carries a resolved label in these states. */
+export const TERMINAL_STATES = ["expert_reviewed", "adjudicated"] as const;
+export const isResolved = (state: string) => (TERMINAL_STATES as readonly string[]).includes(state);
+
 export interface ReviewCase {
   id: string;
   decision_id: string;
@@ -150,3 +154,9 @@ export function exportAdjudicated(cases: ReviewCase[]): ExportResult {
   }
   return { jsonl: lines.join("\n"), exported: lines.length, blocked };
 }
+
+/** Defence in depth for reviewer independence: a case still awaiting verdicts
+    must never travel to a reviewer with a label attached, whatever the
+    database returned. Terminal cases keep their resolved label. */
+export const redactUnresolved = (c: ReviewCase): ReviewCase =>
+  isResolved(c.state) ? c : { ...c, final_acuity: null };
