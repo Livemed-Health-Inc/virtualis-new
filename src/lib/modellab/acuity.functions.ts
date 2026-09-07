@@ -12,20 +12,9 @@ import {
   projectIntake,
   toDecisionRequest,
   type RuntimeInfo,
+  type Decision,
 } from "./contract";
-import type { SupabaseClient } from "@supabase/supabase-js";
-import type { Database } from "@/integrations/supabase/types";
-
-/* Model Lab is an engineering surface, not a clinical one: every handler
-   re-verifies the admin role server-side. Hiding the tab is not access
-   control. */
-async function assertAdmin(context: { userId: string; supabase: SupabaseClient<Database> }) {
-  const { data, error } = await context.supabase.rpc("has_role", {
-    _user_id: context.userId,
-    _role: "admin",
-  });
-  if (error || !data) throw new Error("Forbidden");
-}
+import { assertAdmin, throttle as consumeBudget, type AuthedContext } from "./guards";
 
 /* Per-user budgets. Training intake stages a whole dataset, so it is far more
    expensive than a single decision and gets a much tighter allowance. */
@@ -36,20 +25,8 @@ const BUDGETS = {
   intake: { limit: 3, windowSeconds: 600, lockSeconds: 600 },
 } as const;
 
-const THROTTLED = "Too many Model Lab requests right now. Try again shortly.";
-
-/* Fails closed: an unavailable or erroring limiter blocks the call, and the
-   message never reveals the budget, the window or the remaining attempts. */
-async function throttle(userId: string, scope: keyof typeof BUDGETS) {
-  const { consume } = await import("@/lib/security/ratelimit.server");
-  let allowed = false;
-  try {
-    allowed = await consume(`modellab:${scope}`, userId, BUDGETS[scope]);
-  } catch {
-    allowed = false;
-  }
-  if (!allowed) throw new Error(THROTTLED);
-}
+const throttle = (userId: string, scope: keyof typeof BUDGETS) =>
+  consumeBudget(userId, `modellab:${scope}`, BUDGETS[scope]);
 
 /* Synthetic/deidentified only. Every string in the outbound payload is
    scanned, not just the message text. */
@@ -81,8 +58,46 @@ export const runDecision = createServerFn({ method: "POST" })
     const body = toDecisionRequest(data);
     assertScreened(body);
     const { callAcuity } = await import("./acuity.server");
-    return projectDecision(await callAcuity("/v1/decisions", { method: "POST", body }), data.text);
+    const decision = projectDecision(
+      await callAcuity("/v1/decisions", { method: "POST", body }),
+      data.text,
+    );
+    await enqueueForReview(context, data, decision);
+    return decision;
   });
+
+/* Every Model Lab decision joins the clinical review queue so labels can be
+   adjudicated later. The text is the synthetic input that was already screened
+   above. A queue failure never breaks the decision the user asked for. */
+async function enqueueForReview(
+  context: AuthedContext,
+  input: ReturnType<typeof decisionSchema.parse>,
+  d: Decision,
+) {
+  try {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    await supabaseAdmin.from("review_cases").upsert(
+      {
+        decision_id: d.decision_id,
+        use_case: input.use_case,
+        message_text: input.text,
+        predicted_acuity: d.acuity.level,
+        confidence: d.acuity.confidence ?? null,
+        probabilities: d.acuity.probabilities,
+        reason_codes: d.acuity.reason_codes,
+        route_destination: d.route.destination ?? null,
+        policy_version: d.route.policy_version ?? null,
+        model_version: d.acuity.model_version,
+        care_setting: input.care_setting ?? null,
+        sender_role: input.sender_role ?? null,
+        created_by: context.userId,
+      },
+      { onConflict: "decision_id", ignoreDuplicates: true },
+    );
+  } catch {
+    /* Non-fatal by design. */
+  }
+}
 
 /* Reviewer verdict on a decision: structured labels only, no free text. */
 export const sendFeedback = createServerFn({ method: "POST" })

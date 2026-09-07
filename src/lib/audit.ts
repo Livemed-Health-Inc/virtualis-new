@@ -25,7 +25,9 @@ export type AuditAction =
   | "admin_device_status"
   | "modellab_decision"
   | "modellab_feedback"
-  | "modellab_stage";
+  | "modellab_stage"
+  | "review_verdict"
+  | "review_export";
 
 export type AuditEntity =
   | "thread"
@@ -37,7 +39,8 @@ export type AuditEntity =
   | "facility"
   | "profile"
   | "model"
-  | "session";
+  | "session"
+  | "review_case";
 
 export interface AuditEvent {
   action: AuditAction;

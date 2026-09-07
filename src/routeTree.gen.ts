@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ClinicalReviewRouteImport } from './routes/clinical-review'
 import { Route as DeviceRouteImport } from './routes/device'
 import { Route as McpRouteImport } from './routes/mcp'
 import { Route as ModelLabRouteImport } from './routes/model-lab'
@@ -24,6 +25,11 @@ import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/em
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ClinicalReviewRoute = ClinicalReviewRouteImport.update({
+  id: '/clinical-review',
+  path: '/clinical-review',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DeviceRoute = DeviceRouteImport.update({
@@ -80,6 +86,7 @@ const LovableEmailAuthWebhookRoute = LovableEmailAuthWebhookRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/clinical-review': typeof ClinicalReviewRoute
   '/device': typeof DeviceRoute
   '/mcp': typeof McpRoute
   '/model-lab': typeof ModelLabRoute
@@ -93,6 +100,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/clinical-review': typeof ClinicalReviewRoute
   '/device': typeof DeviceRoute
   '/mcp': typeof McpRoute
   '/model-lab': typeof ModelLabRoute
@@ -107,6 +115,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/clinical-review': typeof ClinicalReviewRoute
   '/device': typeof DeviceRoute
   '/mcp': typeof McpRoute
   '/model-lab': typeof ModelLabRoute
@@ -122,6 +131,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/clinical-review'
     | '/device'
     | '/mcp'
     | '/model-lab'
@@ -135,6 +145,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/clinical-review'
     | '/device'
     | '/mcp'
     | '/model-lab'
@@ -148,6 +159,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/clinical-review'
     | '/device'
     | '/mcp'
     | '/model-lab'
@@ -162,6 +174,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ClinicalReviewRoute: typeof ClinicalReviewRoute
   DeviceRoute: typeof DeviceRoute
   McpRoute: typeof McpRoute
   ModelLabRoute: typeof ModelLabRoute
@@ -181,6 +194,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/clinical-review': {
+      id: '/clinical-review'
+      path: '/clinical-review'
+      fullPath: '/clinical-review'
+      preLoaderRoute: typeof ClinicalReviewRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/device': {
@@ -258,6 +278,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ClinicalReviewRoute: ClinicalReviewRoute,
   DeviceRoute: DeviceRoute,
   McpRoute: McpRoute,
   ModelLabRoute: ModelLabRoute,
