@@ -86,3 +86,16 @@
         on all four Model Lab calls (tighter budget for training intake); aggregate intake
         byte ceiling under the runtime cap; reject malformed model replies instead of
         projecting partial decisions; pin the CI runtime version.
+
+17. [x] Clinical Review console (review only, not published): new `clinical_reviewer` role
+        alongside admin, enforced server-side in every review call through `has_role`.
+        Uncertainty-ordered review queue with acuity/use-case/state filters showing the
+        model's prediction, confidence, full probability distribution, reason codes,
+        proposed route, and model/policy versions. Structured verdicts only (acuity,
+        route accepted, fixed outcome code), persisted locally and forwarded on the
+        existing feedback contract. Independence and the single/expert/adjudicated ladder
+        are enforced inside guarded database routines — a reviewer can never read another
+        reviewer's verdict. Reviewer statistics include inter-rater agreement, the
+        disagreement queue and adjudicated high-acuity progress toward the 126-case gate.
+        Governed JSONL export of adjudicated labels through the existing identifier
+        screening; nothing here validates or promotes a model.
