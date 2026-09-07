@@ -1,4 +1,5 @@
-/* Persistent, atomic throttling for the unauthenticated kiosk endpoints.
+/* Persistent, atomic throttling for the kiosk endpoints and the per-user
+   Model Lab budgets.
 
    The rate-limit key is a pseudonymous HMAC of the trusted edge client IP —
    the raw address is never stored, logged or returned. RATE_LIMIT_SECRET is
