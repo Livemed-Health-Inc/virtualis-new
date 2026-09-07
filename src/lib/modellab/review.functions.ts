@@ -8,6 +8,7 @@ import { assertReviewer, throttle } from "./guards";
 import {
   exportAdjudicated,
   queueFilterSchema,
+  redactUnresolved,
   verdictSchema,
   type ReviewCase,
   type ReviewStats,
