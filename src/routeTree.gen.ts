@@ -19,7 +19,6 @@ import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } fr
 import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.oauth.consent'
 import { Route as ApiPublicDeviceRouteImport } from './routes/api/public/device'
 import { Route as ApiPublicEncounterRouteImport } from './routes/api/public/encounter'
-import { Route as ApiPublicEnvcheckRouteImport } from './routes/api/public/envcheck'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
 
@@ -74,11 +73,6 @@ const ApiPublicEncounterRoute = ApiPublicEncounterRouteImport.update({
   path: '/api/public/encounter',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiPublicEnvcheckRoute = ApiPublicEnvcheckRouteImport.update({
-  id: '/api/public/envcheck',
-  path: '/api/public/envcheck',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const LovableEmailAuthPreviewRoute = LovableEmailAuthPreviewRouteImport.update({
   id: '/lovable/email/auth/preview',
   path: '/lovable/email/auth/preview',
@@ -101,7 +95,6 @@ export interface FileRoutesByFullPath {
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/api/public/device': typeof ApiPublicDeviceRoute
   '/api/public/encounter': typeof ApiPublicEncounterRoute
-  '/api/public/envcheck': typeof ApiPublicEnvcheckRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
 }
@@ -116,7 +109,6 @@ export interface FileRoutesByTo {
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/api/public/device': typeof ApiPublicDeviceRoute
   '/api/public/encounter': typeof ApiPublicEncounterRoute
-  '/api/public/envcheck': typeof ApiPublicEnvcheckRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
 }
@@ -132,7 +124,6 @@ export interface FileRoutesById {
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/api/public/device': typeof ApiPublicDeviceRoute
   '/api/public/encounter': typeof ApiPublicEncounterRoute
-  '/api/public/envcheck': typeof ApiPublicEnvcheckRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
 }
@@ -149,7 +140,6 @@ export interface FileRouteTypes {
     | '/.lovable/oauth/consent'
     | '/api/public/device'
     | '/api/public/encounter'
-    | '/api/public/envcheck'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
   fileRoutesByTo: FileRoutesByTo
@@ -164,7 +154,6 @@ export interface FileRouteTypes {
     | '/.lovable/oauth/consent'
     | '/api/public/device'
     | '/api/public/encounter'
-    | '/api/public/envcheck'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
   id:
@@ -179,7 +168,6 @@ export interface FileRouteTypes {
     | '/.lovable/oauth/consent'
     | '/api/public/device'
     | '/api/public/encounter'
-    | '/api/public/envcheck'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
   fileRoutesById: FileRoutesById
@@ -195,7 +183,6 @@ export interface RootRouteChildren {
   DotlovableOauthConsentRoute: typeof DotlovableOauthConsentRoute
   ApiPublicDeviceRoute: typeof ApiPublicDeviceRoute
   ApiPublicEncounterRoute: typeof ApiPublicEncounterRoute
-  ApiPublicEnvcheckRoute: typeof ApiPublicEnvcheckRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
   LovableEmailAuthWebhookRoute: typeof LovableEmailAuthWebhookRoute
 }
@@ -272,13 +259,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicEncounterRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/public/envcheck': {
-      id: '/api/public/envcheck'
-      path: '/api/public/envcheck'
-      fullPath: '/api/public/envcheck'
-      preLoaderRoute: typeof ApiPublicEnvcheckRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/lovable/email/auth/preview': {
       id: '/lovable/email/auth/preview'
       path: '/lovable/email/auth/preview'
@@ -308,7 +288,6 @@ const rootRouteChildren: RootRouteChildren = {
   DotlovableOauthConsentRoute: DotlovableOauthConsentRoute,
   ApiPublicDeviceRoute: ApiPublicDeviceRoute,
   ApiPublicEncounterRoute: ApiPublicEncounterRoute,
-  ApiPublicEnvcheckRoute: ApiPublicEnvcheckRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
   LovableEmailAuthWebhookRoute: LovableEmailAuthWebhookRoute,
 }
