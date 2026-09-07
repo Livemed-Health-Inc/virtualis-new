@@ -12,6 +12,18 @@ export const USE_CASES = [
   "care_coordination",
 ] as const;
 export const SPLITS = ["train", "validation", "test"] as const;
+/* Decision context vocabularies. Closed sets, so no free text reaches the
+   runtime through the context fields. */
+export const CARE_SETTINGS = ["ed", "inpatient", "clinic", "telehealth", "home"] as const;
+export const SENDER_ROLES = ["patient", "nurse", "provider", "device"] as const;
+/* Reviewer identity is a role, never a person. */
+export const REVIEWER_ROLES = [
+  "model_lab_reviewer",
+  "physician",
+  "nurse",
+  "quality",
+  "engineer",
+] as const;
 export type Label = (typeof LABELS)[number];
 export type RouteLabel = (typeof ROUTES)[number];
 
@@ -160,6 +172,17 @@ const IDENTIFIER_RULES: [string, RegExp][] = [
 
 export function detectIdentifiers(text: string): string[] {
   return IDENTIFIER_RULES.filter(([, re]) => re.test(text)).map(([label]) => label);
+}
+
+/** Every string anywhere in an outbound payload, scanned with the same rules.
+    Nothing leaves the server unscreened just because it sits in a field other
+    than `text`. Returns the flagged field paths; values are never returned. */
+export function screenOutbound(value: unknown, path = ""): string[] {
+  if (typeof value === "string") return detectIdentifiers(value).length ? [path || "value"] : [];
+  if (Array.isArray(value)) return value.flatMap((v, i) => screenOutbound(v, `${path}[${i}]`));
+  if (value && typeof value === "object")
+    return Object.entries(value).flatMap(([k, v]) => screenOutbound(v, path ? `${path}.${k}` : k));
+  return [];
 }
 
 const normText = (s: string) => s.toLowerCase().replace(/\s+/g, " ").trim();
