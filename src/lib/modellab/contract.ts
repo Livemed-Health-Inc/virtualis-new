@@ -34,18 +34,18 @@ export const toDecisionRequest = (d: DecisionInput) => ({
 });
 
 export interface Decision {
-  decision_id?: Str;
+  decision_id: string;
   request_id?: Str;
   use_case?: Str;
   created_at?: Str;
   acuity: {
-    level?: Label | undefined;
+    level: Label;
     display_label?: Str;
     legacy_score_band: number[];
     probabilities: Partial<Record<Label, number>>;
     confidence?: Num;
     reason_codes: string[];
-    model_version?: Str;
+    model_version: string;
   };
   route: {
     destination?: Str;
@@ -102,18 +102,29 @@ function assertClean(out: unknown, submitted?: string) {
     throw new Error("Model runtime response rejected: possible identifier");
 }
 
+/* A decision without an id, an acuity level or a model version cannot be
+   reviewed, audited or reproduced. Rather than render a partial object as if
+   it were a real decision, the malformed reply is refused outright. */
+export const MALFORMED_DECISION = "Model runtime response rejected: incomplete decision";
+
 export function projectDecision(raw: unknown, submitted: string): Decision {
   const r = obj(raw);
   const a = obj(r["acuity"]);
   const p = obj(a["probabilities"]);
   const rt = obj(r["route"]);
+
+  const decisionId = short(r["decision_id"], 128);
+  const level = label(a["level"]);
+  const modelVersion = short(a["model_version"]);
+  if (!decisionId || !level || !modelVersion) throw new Error(MALFORMED_DECISION);
+
   const out: Decision = {
-    decision_id: short(r["decision_id"], 128),
+    decision_id: decisionId,
     request_id: short(r["request_id"], 128),
     use_case: short(r["use_case"]),
     created_at: short(r["created_at"]),
     acuity: {
-      level: label(a["level"]),
+      level,
       display_label: short(a["display_label"]),
       legacy_score_band: (Array.isArray(a["legacy_score_band"]) ? a["legacy_score_band"] : [])
         .map((v) => num(v, 5))
@@ -124,7 +135,7 @@ export function projectDecision(raw: unknown, submitted: string): Decision {
       ),
       confidence: num(a["confidence"], 1),
       reason_codes: codes(a["reason_codes"]),
-      model_version: short(a["model_version"]),
+      model_version: modelVersion,
     },
     route: {
       destination: short(rt["destination"]),

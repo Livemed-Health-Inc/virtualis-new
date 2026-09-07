@@ -81,3 +81,8 @@
         modern code-based reset links, instead of relying only on a legacy URL fragment.
 15. [x] Agent integration restored as an OAuth-protected, read-only connection check only.
         It exposes no patient, clinical message, facility, device, or Model Lab data.
+16. [ ] Model Lab hardening (review only, not published): screen every outbound free-text
+        field for identifiers and constrain them to vocabularies/slugs; per-user throttling
+        on all four Model Lab calls (tighter budget for training intake); aggregate intake
+        byte ceiling under the runtime cap; reject malformed model replies instead of
+        projecting partial decisions; pin the CI runtime version.

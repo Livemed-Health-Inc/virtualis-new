@@ -100,8 +100,16 @@ describe("projectDecision", () => {
     expect(JSON.stringify(out)).not.toContain("knee replacement");
   });
 
+  const MINIMAL = {
+    decision_id: RAW.decision_id,
+    acuity: { level: "medium", model_version: "rc4m" },
+  };
+
   it("clamps governance flags even when the runtime claims otherwise", () => {
-    const out = projectDecision({ review_required: false, clinically_validated: true }, TEXT);
+    const out = projectDecision(
+      { ...MINIMAL, review_required: false, clinically_validated: true },
+      TEXT,
+    );
     expect(out.review_required).toBe(true);
     expect(out.clinically_validated).toBe(false);
     expect(out.route.escalation_after_seconds).toBeNull();
@@ -110,8 +118,9 @@ describe("projectDecision", () => {
   it("discards malformed values and free-text reason codes", () => {
     const out = projectDecision(
       {
+        ...MINIMAL,
         acuity: {
-          level: "urgent",
+          ...MINIMAL.acuity,
           probabilities: { high: 1.4, low: -0.1, medium: 0.5 },
           reason_codes: ["ok_code", `patient said ${TEXT}`, 42],
           legacy_score_band: [2, "x"],
@@ -119,23 +128,35 @@ describe("projectDecision", () => {
       },
       TEXT,
     );
-    expect(out.acuity.level).toBeUndefined();
     expect(out.acuity.probabilities).toEqual({ medium: 0.5 });
     expect(out.acuity.reason_codes).toEqual(["ok_code"]);
     expect(out.acuity.legacy_score_band).toEqual([2]);
   });
 
+  it("refuses an incomplete decision instead of rendering it as real", () => {
+    const cases: unknown[] = [
+      { ...MINIMAL, decision_id: undefined },
+      { ...MINIMAL, acuity: { model_version: "rc4m" } },
+      { ...MINIMAL, acuity: { level: "urgent", model_version: "rc4m" } }, // level off-vocabulary
+      { ...MINIMAL, acuity: { level: "medium" } },
+      "not an object",
+      null,
+      [],
+    ];
+    for (const c of cases) expect(() => projectDecision(c, TEXT)).toThrow(/incomplete decision/);
+  });
+
   it("rejects a reply whose short fields echo the submitted text", () => {
     const short = "chest pain now";
-    expect(() => projectDecision({ route: { destination: `re: ${short}` } }, short)).toThrow(
-      /echoed input/,
-    );
+    expect(() =>
+      projectDecision({ ...MINIMAL, route: { destination: `re: ${short}` } }, short),
+    ).toThrow(/echoed input/);
   });
 
   it("rejects a reply carrying a possible identifier", () => {
-    expect(() => projectDecision({ route: { service_line: "MRN 00412-77" } }, TEXT)).toThrow(
-      /identifier/,
-    );
+    expect(() =>
+      projectDecision({ ...MINIMAL, route: { service_line: "MRN 00412-77" } }, TEXT),
+    ).toThrow(/identifier/);
     expect(() => projectInfo({ model_version: "call 555-123-4567" })).toThrow(/identifier/);
   });
 });

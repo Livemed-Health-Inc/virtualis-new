@@ -4,8 +4,10 @@ import { useServerFn } from "@tanstack/react-start";
 import { T, font, mono, card, inputStyle, KEYFRAMES } from "../theme";
 import { VMark } from "../ui";
 import {
+  CARE_SETTINGS,
   LABELS,
   ROUTES,
+  SENDER_ROLES,
   SPLITS,
   USE_CASES,
   assignSplits,
@@ -35,9 +37,7 @@ const SAMPLES = {
   high: "Synthetic: 68yo with crushing substernal chest pain radiating to left arm, diaphoretic, BP 84/52.",
 };
 
-const SETTINGS = ["ed", "inpatient", "clinic", "telehealth", "home"];
-const SENDERS = ["patient", "nurse", "provider", "device"];
-const SELECTS = { use_case: USE_CASES, care_setting: SETTINGS, sender_role: SENDERS };
+const SELECTS = { use_case: USE_CASES, care_setting: CARE_SETTINGS, sender_role: SENDER_ROLES };
 
 const secs = (n) => (n == null ? undefined : n >= 60 ? `${Math.round(n / 60)} min` : `${n} s`);
 
