@@ -551,6 +551,116 @@ export type Database = {
         }
         Relationships: []
       }
+      review_cases: {
+        Row: {
+          care_setting: string | null
+          confidence: number | null
+          created_at: string
+          created_by: string | null
+          decision_id: string
+          final_acuity: string | null
+          id: string
+          label_quality: string | null
+          message_text: string
+          model_version: string
+          policy_version: string | null
+          predicted_acuity: string
+          probabilities: Json
+          reason_codes: string[]
+          route_destination: string | null
+          sender_role: string | null
+          state: string
+          updated_at: string
+          use_case: string
+        }
+        Insert: {
+          care_setting?: string | null
+          confidence?: number | null
+          created_at?: string
+          created_by?: string | null
+          decision_id: string
+          final_acuity?: string | null
+          id?: string
+          label_quality?: string | null
+          message_text: string
+          model_version: string
+          policy_version?: string | null
+          predicted_acuity: string
+          probabilities?: Json
+          reason_codes?: string[]
+          route_destination?: string | null
+          sender_role?: string | null
+          state?: string
+          updated_at?: string
+          use_case: string
+        }
+        Update: {
+          care_setting?: string | null
+          confidence?: number | null
+          created_at?: string
+          created_by?: string | null
+          decision_id?: string
+          final_acuity?: string | null
+          id?: string
+          label_quality?: string | null
+          message_text?: string
+          model_version?: string
+          policy_version?: string | null
+          predicted_acuity?: string
+          probabilities?: Json
+          reason_codes?: string[]
+          route_destination?: string | null
+          sender_role?: string | null
+          state?: string
+          updated_at?: string
+          use_case?: string
+        }
+        Relationships: []
+      }
+      review_verdicts: {
+        Row: {
+          acuity: string
+          case_id: string
+          created_at: string
+          id: string
+          is_adjudication: boolean
+          model_version: string
+          outcome_code: string
+          reviewer_id: string
+          route_accepted: boolean
+        }
+        Insert: {
+          acuity: string
+          case_id: string
+          created_at?: string
+          id?: string
+          is_adjudication?: boolean
+          model_version: string
+          outcome_code: string
+          reviewer_id: string
+          route_accepted: boolean
+        }
+        Update: {
+          acuity?: string
+          case_id?: string
+          created_at?: string
+          id?: string
+          is_adjudication?: boolean
+          model_version?: string
+          outcome_code?: string
+          reviewer_id?: string
+          route_accepted?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "review_verdicts_case_id_fkey"
+            columns: ["case_id"]
+            isOneToOne: false
+            referencedRelation: "review_cases"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       rounding_acks: {
         Row: {
           acked_at: string
@@ -753,6 +863,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_clinical_reviewer: { Args: { _user_id: string }; Returns: boolean }
       respond_to_encounter_request: {
         Args: { _next: string; _request_id: string }
         Returns: {
@@ -777,12 +888,83 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      review_queue: {
+        Args: {
+          _limit?: number
+          _predicted?: string
+          _state?: string
+          _use_case?: string
+        }
+        Returns: {
+          care_setting: string | null
+          confidence: number | null
+          created_at: string
+          created_by: string | null
+          decision_id: string
+          final_acuity: string | null
+          id: string
+          label_quality: string | null
+          message_text: string
+          model_version: string
+          policy_version: string | null
+          predicted_acuity: string
+          probabilities: Json
+          reason_codes: string[]
+          route_destination: string | null
+          sender_role: string | null
+          state: string
+          updated_at: string
+          use_case: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "review_cases"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      review_stats: { Args: never; Returns: Json }
       setup_complete: { Args: { _user_id: string }; Returns: boolean }
       shares_facility: { Args: { _a: string; _b: string }; Returns: boolean }
+      submit_review_verdict: {
+        Args: {
+          _acuity: string
+          _case_id: string
+          _outcome_code: string
+          _route_accepted: boolean
+        }
+        Returns: {
+          care_setting: string | null
+          confidence: number | null
+          created_at: string
+          created_by: string | null
+          decision_id: string
+          final_acuity: string | null
+          id: string
+          label_quality: string | null
+          message_text: string
+          model_version: string
+          policy_version: string | null
+          predicted_acuity: string
+          probabilities: Json
+          reason_codes: string[]
+          route_destination: string | null
+          sender_role: string | null
+          state: string
+          updated_at: string
+          use_case: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "review_cases"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
     }
     Enums: {
       acuity_level: "critical" | "urgent" | "routine"
-      app_role: "admin" | "member"
+      app_role: "admin" | "member" | "clinical_reviewer"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -911,7 +1093,7 @@ export const Constants = {
   public: {
     Enums: {
       acuity_level: ["critical", "urgent", "routine"],
-      app_role: ["admin", "member"],
+      app_role: ["admin", "member", "clinical_reviewer"],
     },
   },
 } as const
