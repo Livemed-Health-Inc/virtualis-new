@@ -43,9 +43,9 @@ export const listReviewQueue = createServerFn({ method: "POST" })
       lockSeconds: 60,
     });
     const { data: rows, error } = await context.supabase.rpc("review_queue", {
-      _predicted: data.predicted ?? undefined,
-      _use_case: data.use_case ?? undefined,
-      _state: data.state ?? undefined,
+      ...(data.predicted ? { _predicted: data.predicted } : {}),
+      ...(data.use_case ? { _use_case: data.use_case } : {}),
+      ...(data.state ? { _state: data.state } : {}),
       _limit: data.limit ?? 50,
     });
     if (error) throw new Error("Review queue unavailable");
