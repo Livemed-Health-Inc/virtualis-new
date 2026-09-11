@@ -93,7 +93,12 @@ describe("parseImport", () => {
 
   it("drops imported labels and reviewer identity instead of prefilling them", () => {
     const p = parseImport(
-      line({ record_id: "r1", message: "Mild rash on forearm.", reviewed_label: 4, reviewer_id: "dr-x" }),
+      line({
+        record_id: "r1",
+        message: "Mild rash on forearm.",
+        reviewed_label: 4,
+        reviewer_id: "dr-x",
+      }),
     );
     expect(p.discardedFields).toEqual(expect.arrayContaining(["reviewed_label", "reviewer_id"]));
     expect(JSON.stringify(p.rows[0])).not.toMatch(/reviewed_label|reviewer_id|dr-x/);

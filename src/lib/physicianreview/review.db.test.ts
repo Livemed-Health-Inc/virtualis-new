@@ -28,7 +28,8 @@ async function account(tag: string, roles: string[]) {
   if (error || !data.user) throw new Error("could not provision a test account");
   users.push(data.user.id);
   ids[tag] = data.user.id;
-  for (const r of roles) await service.from("user_roles").insert({ user_id: data.user.id, role: r });
+  for (const r of roles)
+    await service.from("user_roles").insert({ user_id: data.user.id, role: r });
   const client = createClient(URL_!, ANON!, { auth: { persistSession: false } });
   const signIn = await client.auth.signInWithPassword({ email, password: PASSWORD });
   if (signIn.error) throw signIn.error;
@@ -52,7 +53,12 @@ async function importBatch(name: string, mode: string, rows: object[]) {
 const submit = (
   tag: string,
   item: string,
-  o: { acuity?: string | null; needs_info?: boolean; routes?: string[]; no_specialty?: boolean } = {},
+  o: {
+    acuity?: string | null;
+    needs_info?: boolean;
+    routes?: string[];
+    no_specialty?: boolean;
+  } = {},
 ) =>
   clients[tag]!.rpc("pr_save_review", {
     _item_id: item,
@@ -133,9 +139,9 @@ describe.skipIf(!enabled)("physician review access control", () => {
   it("refuses a physician on an item nobody assigned to them", async () => {
     const id = items["unassigned-1"]!;
     expect(await queueRow("a", id)).toBeUndefined();
-    expect((await clients["a"]!.from("pr_items").select("id").eq("id", id)).data ?? []).toHaveLength(
-      0,
-    );
+    expect(
+      (await clients["a"]!.from("pr_items").select("id").eq("id", id)).data ?? [],
+    ).toHaveLength(0);
     expect((await submit("a", id, { acuity: "low" })).error).toBeTruthy();
   }, 60_000);
 
@@ -240,7 +246,8 @@ describe.skipIf(!enabled)("disagreement and adjudication", () => {
   it("lets an independent adjudicator resolve it", async () => {
     const id = items["disagree-1"]!;
     expect(
-      (await clients["coord"]!.rpc("pr_assign_adjudicator", { _item_id: id, _who: ids["c"] })).error,
+      (await clients["coord"]!.rpc("pr_assign_adjudicator", { _item_id: id, _who: ids["c"] }))
+        .error,
     ).toBeNull();
     /* The adjudicator still cannot read the two verdicts under adjudication. */
     expect(
@@ -261,16 +268,18 @@ describe.skipIf(!enabled)("export governance", () => {
   const clinicalBatch = () => batches[0]!;
 
   it("refuses export until all three approvals are recorded", async () => {
-    expect((await clients["coord"]!.rpc("pr_export_batch", { _batch: clinicalBatch() })).error)
-      .toBeTruthy();
+    expect(
+      (await clients["coord"]!.rpc("pr_export_batch", { _batch: clinicalBatch() })).error,
+    ).toBeTruthy();
     await clients["coord"]!.rpc("pr_set_export_approval", {
       _batch: clinicalBatch(),
       _clinical: true,
       _privacy: true,
       _training: false,
     });
-    expect((await clients["coord"]!.rpc("pr_export_batch", { _batch: clinicalBatch() })).error)
-      .toBeTruthy();
+    expect(
+      (await clients["coord"]!.rpc("pr_export_batch", { _batch: clinicalBatch() })).error,
+    ).toBeTruthy();
   }, 60_000);
 
   it("exports resolved clinical rows only, excluding needs-information", async () => {
@@ -301,8 +310,9 @@ describe.skipIf(!enabled)("export governance", () => {
   }, 60_000);
 
   it("refuses export to a physician who is not a coordinator", async () => {
-    expect((await clients["a"]!.rpc("pr_export_batch", { _batch: clinicalBatch() })).error)
-      .toBeTruthy();
+    expect(
+      (await clients["a"]!.rpc("pr_export_batch", { _batch: clinicalBatch() })).error,
+    ).toBeTruthy();
     expect((await clients["a"]!.rpc("pr_list_items", {})).error).toBeTruthy();
   }, 60_000);
 });
