@@ -398,6 +398,294 @@ export type Database = {
           },
         ]
       }
+      pr_assignments: {
+        Row: {
+          assigned_by: string | null
+          created_at: string
+          id: string
+          item_id: string
+          reviewer_id: string
+          role: string
+        }
+        Insert: {
+          assigned_by?: string | null
+          created_at?: string
+          id?: string
+          item_id: string
+          reviewer_id: string
+          role: string
+        }
+        Update: {
+          assigned_by?: string | null
+          created_at?: string
+          id?: string
+          item_id?: string
+          reviewer_id?: string
+          role?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pr_assignments_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "pr_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pr_batches: {
+        Row: {
+          created_at: string
+          facility_id: string | null
+          id: string
+          imported_by: string | null
+          mode: string
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          facility_id?: string | null
+          id?: string
+          imported_by?: string | null
+          mode: string
+          name: string
+        }
+        Update: {
+          created_at?: string
+          facility_id?: string | null
+          id?: string
+          imported_by?: string | null
+          mode?: string
+          name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pr_batches_facility_id_fkey"
+            columns: ["facility_id"]
+            isOneToOne: false
+            referencedRelation: "facilities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pr_export_approvals: {
+        Row: {
+          approved_by: string | null
+          batch_id: string
+          clinical_approved: boolean
+          privacy_reviewed: boolean
+          training_use_approved: boolean
+          updated_at: string
+        }
+        Insert: {
+          approved_by?: string | null
+          batch_id: string
+          clinical_approved?: boolean
+          privacy_reviewed?: boolean
+          training_use_approved?: boolean
+          updated_at?: string
+        }
+        Update: {
+          approved_by?: string | null
+          batch_id?: string
+          clinical_approved?: boolean
+          privacy_reviewed?: boolean
+          training_use_approved?: boolean
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pr_export_approvals_batch_id_fkey"
+            columns: ["batch_id"]
+            isOneToOne: true
+            referencedRelation: "pr_batches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pr_item_flags: {
+        Row: {
+          additional_context_needed: boolean
+          context_sufficient: boolean
+          created_at: string
+          deidentification_reviewed: boolean
+          item_id: string
+        }
+        Insert: {
+          additional_context_needed?: boolean
+          context_sufficient?: boolean
+          created_at?: string
+          deidentification_reviewed?: boolean
+          item_id: string
+        }
+        Update: {
+          additional_context_needed?: boolean
+          context_sufficient?: boolean
+          created_at?: string
+          deidentification_reviewed?: boolean
+          item_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pr_item_flags_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: true
+            referencedRelation: "pr_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pr_items: {
+        Row: {
+          batch_id: string
+          context: string | null
+          created_at: string
+          facility_id: string | null
+          group_key: string
+          holdout: boolean
+          id: string
+          message: string
+          mode: string
+          record_id: string
+        }
+        Insert: {
+          batch_id: string
+          context?: string | null
+          created_at?: string
+          facility_id?: string | null
+          group_key: string
+          holdout?: boolean
+          id?: string
+          message: string
+          mode: string
+          record_id: string
+        }
+        Update: {
+          batch_id?: string
+          context?: string | null
+          created_at?: string
+          facility_id?: string | null
+          group_key?: string
+          holdout?: boolean
+          id?: string
+          message?: string
+          mode?: string
+          record_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pr_items_batch_id_fkey"
+            columns: ["batch_id"]
+            isOneToOne: false
+            referencedRelation: "pr_batches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pr_items_facility_id_fkey"
+            columns: ["facility_id"]
+            isOneToOne: false
+            referencedRelation: "facilities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pr_outcomes: {
+        Row: {
+          final_acuity: string | null
+          final_routes: string[]
+          item_id: string
+          label_quality: string | null
+          resolved_at: string | null
+          routes_state: string
+          state: string
+          updated_at: string
+        }
+        Insert: {
+          final_acuity?: string | null
+          final_routes?: string[]
+          item_id: string
+          label_quality?: string | null
+          resolved_at?: string | null
+          routes_state?: string
+          state?: string
+          updated_at?: string
+        }
+        Update: {
+          final_acuity?: string | null
+          final_routes?: string[]
+          item_id?: string
+          label_quality?: string | null
+          resolved_at?: string | null
+          routes_state?: string
+          state?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pr_outcomes_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: true
+            referencedRelation: "pr_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pr_reviews: {
+        Row: {
+          acuity: string | null
+          created_at: string
+          id: string
+          is_adjudication: boolean
+          item_id: string
+          needs_info: boolean
+          no_specialty_needed: boolean
+          rationale: string
+          reviewer_id: string
+          routes: string[]
+          status: string
+          submitted_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          acuity?: string | null
+          created_at?: string
+          id?: string
+          is_adjudication?: boolean
+          item_id: string
+          needs_info?: boolean
+          no_specialty_needed?: boolean
+          rationale?: string
+          reviewer_id: string
+          routes?: string[]
+          status?: string
+          submitted_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          acuity?: string | null
+          created_at?: string
+          id?: string
+          is_adjudication?: boolean
+          item_id?: string
+          needs_info?: boolean
+          no_specialty_needed?: boolean
+          rationale?: string
+          reviewer_id?: string
+          routes?: string[]
+          status?: string
+          submitted_at?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pr_reviews_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "pr_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           created_at: string
@@ -864,6 +1152,104 @@ export type Database = {
         Returns: boolean
       }
       is_clinical_reviewer: { Args: { _user_id: string }; Returns: boolean }
+      pr_assign_adjudicator: {
+        Args: { _item_id: string; _who: string }
+        Returns: undefined
+      }
+      pr_assign_reviewers: {
+        Args: { _a: string; _b: string; _item_ids: string[] }
+        Returns: number
+      }
+      pr_audit: {
+        Args: {
+          _action: string
+          _entity: string
+          _facility: string
+          _id: string
+        }
+        Returns: undefined
+      }
+      pr_export_batch: {
+        Args: { _batch: string }
+        Returns: {
+          acuity: string
+          group_id: string
+          label_quality: string
+          record_id: string
+          routes: string[]
+          split: string
+          text_value: string
+        }[]
+      }
+      pr_import_batch: {
+        Args: { _facility: string; _items: Json; _mode: string; _name: string }
+        Returns: string
+      }
+      pr_is_coordinator: { Args: { _uid: string }; Returns: boolean }
+      pr_is_physician: { Args: { _uid: string }; Returns: boolean }
+      pr_list_items: {
+        Args: { _batch?: string; _limit?: number; _state?: string }
+        Returns: {
+          batch_id: string
+          batch_name: string
+          facility_id: string
+          final_acuity: string
+          group_key: string
+          holdout: boolean
+          item_id: string
+          label_quality: string
+          message: string
+          mode: string
+          record_id: string
+          reviewers: string[]
+          routes_state: string
+          state: string
+          submitted: number
+        }[]
+      }
+      pr_my_queue: {
+        Args: { _include_done?: boolean }
+        Returns: {
+          assignment_role: string
+          batch_name: string
+          context: string
+          facility_id: string
+          item_id: string
+          message: string
+          mode: string
+          my_acuity: string
+          my_needs_info: boolean
+          my_no_specialty_needed: boolean
+          my_rationale: string
+          my_routes: string[]
+          my_status: string
+          record_id: string
+          updated_at: string
+        }[]
+      }
+      pr_overview: { Args: never; Returns: Json }
+      pr_recompute: { Args: { _item_id: string }; Returns: undefined }
+      pr_save_review: {
+        Args: {
+          _acuity: string
+          _item_id: string
+          _needs_info: boolean
+          _no_specialty: boolean
+          _rationale: string
+          _routes: string[]
+          _status: string
+        }
+        Returns: Json
+      }
+      pr_set_export_approval: {
+        Args: {
+          _batch: string
+          _clinical: boolean
+          _privacy: boolean
+          _training: boolean
+        }
+        Returns: undefined
+      }
       respond_to_encounter_request: {
         Args: { _next: string; _request_id: string }
         Returns: {

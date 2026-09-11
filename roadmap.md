@@ -99,3 +99,15 @@
         disagreement queue and adjudicated high-acuity progress toward the 126-case gate.
         Governed JSONL export of adjudicated labels through the existing identifier
         screening; nothing here validates or promotes a model.
+
+18. [x] Physician Review workflow at /physician-review (implemented, not published):
+        blinded physician screen (Low/Moderate/High only — no numeric acuity — plus a
+        separate "not enough information" status with no acuity, required rationale, and
+        optional specialist routes with an explicit "no specialty needed"), backend-saved
+        drafts with no PHI in browser storage, and a coordinator dashboard for JSONL
+        import, two-distinct-reviewer assignment, disagreement adjudication by a third
+        physician, approval-gated governed export, and live counts. Independence,
+        assignment scope, facility isolation, idempotent concurrent submits and export
+        gating are enforced in guarded database routines with append-only audit records;
+        practice data is isolated from clinical counts and export. Numeric 1–5 acuity
+        wording removed from the Model Lab surfaces touched.
