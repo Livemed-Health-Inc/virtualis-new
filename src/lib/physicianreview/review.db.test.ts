@@ -346,6 +346,40 @@ describe.skipIf(!enabled)("assignment limits and blinding", () => {
       (await clients["coord"]!.rpc("pr_export_batch", { _batch: batches[1] })).error,
     ).toBeTruthy();
   }, 60_000);
+
+  /* Authorization is re-read under the submission lock, so a reviewer who was
+     stood down cannot save, and a role change is honoured immediately. */
+  it("refuses a stood-down reviewer and never saves against a stale role", async () => {
+    const id = items["unassigned-1"]!;
+    await clients["coord"]!.rpc("pr_assign_reviewers", {
+      _item_ids: [id],
+      _a: ids["a"],
+      _b: ids["c"],
+    });
+    await clients["coord"]!.rpc("pr_assign_reviewers", {
+      _item_ids: [id],
+      _a: ids["a"],
+      _b: ids["b"],
+    });
+    const stale = await submit("c", id, { acuity: "low", no_specialty: true });
+    expect(stale.error).toBeTruthy();
+    expect(
+      (await service.from("pr_reviews").select("id").eq("item_id", id).eq("reviewer_id", ids["c"]!))
+        .data ?? [],
+    ).toHaveLength(0);
+
+    await submit("a", id, { acuity: "low", no_specialty: true });
+    await submit("b", id, { acuity: "high", routes: ["cardiology"] });
+    await clients["coord"]!.rpc("pr_assign_adjudicator", { _item_id: id, _who: ids["c"] });
+    expect((await submit("c", id, { acuity: "high", routes: ["cardiology"] })).error).toBeNull();
+    const { data: rec } = await service
+      .from("pr_reviews")
+      .select("is_adjudication")
+      .eq("item_id", id)
+      .eq("reviewer_id", ids["c"]!);
+    expect(rec?.[0]?.is_adjudication).toBe(true);
+    expect(await outcome(id)).toMatchObject({ state: "adjudicated", final_acuity: "high" });
+  }, 60_000);
 });
 
 describe.skipIf(!enabled)("import integrity", () => {
