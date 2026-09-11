@@ -217,7 +217,9 @@ export default function CoordinatorPane() {
             accept=".jsonl,.json,.txt"
             onChange={async (e) => {
               const f = e.target.files?.[0];
-              if (f) setImp((s) => ({ ...s, text: await f.text() }));
+              if (!f) return;
+              const text = await f.text();
+              setImp((s) => ({ ...s, text }));
             }}
             style={{ fontSize: 12.5 }}
           />
