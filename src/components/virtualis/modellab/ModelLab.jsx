@@ -725,6 +725,20 @@ export default function ModelLab() {
             </div>
           </div>
           <Link
+            to="/physician-review"
+            style={{
+              fontSize: 13,
+              fontWeight: 700,
+              color: "#0B0F1A",
+              textDecoration: "none",
+              background: "#fff",
+              borderRadius: 12,
+              padding: "8px 13px",
+            }}
+          >
+            Physician Review
+          </Link>
+          <Link
             to="/"
             style={{
               fontSize: 13,
@@ -738,6 +752,7 @@ export default function ModelLab() {
           >
             Back to workstation
           </Link>
+
         </div>
       </header>
 
