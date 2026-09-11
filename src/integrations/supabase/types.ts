@@ -510,6 +510,9 @@ export type Database = {
           created_at: string
           deidentification_reviewed: boolean
           item_id: string
+          training_use_approved: boolean
+          training_use_approved_at: string | null
+          training_use_approved_by: string | null
         }
         Insert: {
           additional_context_needed?: boolean
@@ -517,6 +520,9 @@ export type Database = {
           created_at?: string
           deidentification_reviewed?: boolean
           item_id: string
+          training_use_approved?: boolean
+          training_use_approved_at?: string | null
+          training_use_approved_by?: string | null
         }
         Update: {
           additional_context_needed?: boolean
@@ -524,6 +530,9 @@ export type Database = {
           created_at?: string
           deidentification_reviewed?: boolean
           item_id?: string
+          training_use_approved?: boolean
+          training_use_approved_at?: string | null
+          training_use_approved_by?: string | null
         }
         Relationships: [
           {
@@ -540,37 +549,49 @@ export type Database = {
           batch_id: string
           context: string | null
           created_at: string
+          encounter_group: string | null
           facility_id: string | null
           group_key: string
           holdout: boolean
           id: string
           message: string
           mode: string
+          patient_group: string | null
           record_id: string
+          split: string
+          template_group: string | null
         }
         Insert: {
           batch_id: string
           context?: string | null
           created_at?: string
+          encounter_group?: string | null
           facility_id?: string | null
           group_key: string
           holdout?: boolean
           id?: string
           message: string
           mode: string
+          patient_group?: string | null
           record_id: string
+          split?: string
+          template_group?: string | null
         }
         Update: {
           batch_id?: string
           context?: string | null
           created_at?: string
+          encounter_group?: string | null
           facility_id?: string | null
           group_key?: string
           holdout?: boolean
           id?: string
           message?: string
           mode?: string
+          patient_group?: string | null
           record_id?: string
+          split?: string
+          template_group?: string | null
         }
         Relationships: [
           {
@@ -1169,15 +1190,25 @@ export type Database = {
         }
         Returns: undefined
       }
+      pr_batch_facility: { Args: { _batch: string }; Returns: string }
+      pr_coord_scope: {
+        Args: { _facility: string; _uid: string }
+        Returns: boolean
+      }
       pr_export_batch: {
         Args: { _batch: string }
         Returns: {
           acuity: string
+          encounter_group: string
           group_id: string
           label_quality: string
+          no_specialty_needed: boolean
+          patient_group: string
           record_id: string
           routes: string[]
+          routes_state: string
           split: string
+          template_group: string
           text_value: string
         }[]
       }
@@ -1185,26 +1216,37 @@ export type Database = {
         Args: { _facility: string; _items: Json; _mode: string; _name: string }
         Returns: string
       }
+      pr_is_conflicted: {
+        Args: { _item: string; _uid: string }
+        Returns: boolean
+      }
       pr_is_coordinator: { Args: { _uid: string }; Returns: boolean }
       pr_is_physician: { Args: { _uid: string }; Returns: boolean }
+      pr_item_facility: { Args: { _item: string }; Returns: string }
       pr_list_items: {
         Args: { _batch?: string; _limit?: number; _state?: string }
         Returns: {
           batch_id: string
           batch_name: string
+          blinded: boolean
+          encounter_group: string
           facility_id: string
           final_acuity: string
           group_key: string
-          holdout: boolean
           item_id: string
           label_quality: string
           message: string
           mode: string
+          patient_group: string
+          privacy_reviewed: boolean
           record_id: string
           reviewers: string[]
           routes_state: string
+          split: string
           state: string
           submitted: number
+          template_group: string
+          training_use_approved: boolean
         }[]
       }
       pr_my_queue: {
@@ -1229,6 +1271,10 @@ export type Database = {
       }
       pr_overview: { Args: never; Returns: Json }
       pr_recompute: { Args: { _item_id: string }; Returns: undefined }
+      pr_reviewer_scope: {
+        Args: { _item: string; _uid: string }
+        Returns: boolean
+      }
       pr_save_review: {
         Args: {
           _acuity: string
@@ -1249,6 +1295,10 @@ export type Database = {
           _training: boolean
         }
         Returns: undefined
+      }
+      pr_set_item_training_use: {
+        Args: { _approved: boolean; _item_ids: string[] }
+        Returns: number
       }
       respond_to_encounter_request: {
         Args: { _next: string; _request_id: string }

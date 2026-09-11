@@ -190,20 +190,51 @@ export const importBatch = createServerFn({ method: "POST" })
       _facility: data.facility_id as string,
       _mode: data.mode,
       /* Only the fields the workflow stores are forwarded; imported labels and
-         reviewer identities never leave this boundary. */
+         reviewer identities never leave this boundary. Grouping lineage and
+         the split are preserved exactly as written. */
       _items: data.rows.map((r) => ({
         record_id: r.record_id,
         message: r.message,
         context: r.context ?? null,
         group_key: r.group_key ?? r.record_id,
-        holdout: r.holdout === true,
+        patient_group: r.patient_group ?? null,
+        encounter_group: r.encounter_group ?? null,
+        template_group: r.template_group ?? null,
+        split: r.split ?? (r.holdout === true ? "test" : "unassigned"),
+        holdout: r.holdout === true || r.split === "test",
         additional_context_needed: r.additional_context_needed === true,
         context_sufficient: r.context_sufficient === true,
         deidentification_reviewed: r.deidentification_reviewed === true,
       })),
     });
-    if (error) throw new Error("Import was refused.");
+    if (error)
+      throw new Error(
+        error.message.includes("duplicate")
+          ? "That file repeats a record id. Every record must be unique."
+          : "Import was refused.",
+      );
     return { batch_id: batchId as string, imported: data.rows.length };
+  });
+
+/** Records the coordinator's training-use attestation for the named rows only.
+    It never touches the imported privacy flags. */
+export const setItemTrainingUse = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i: unknown) =>
+    z
+      .object({ item_ids: z.array(z.string().uuid()).min(1).max(500), approved: z.boolean() })
+      .strict()
+      .parse(i),
+  )
+  .handler(async ({ data, context }) => {
+    await assertCoordinator(context);
+    await throttle(context.userId, "pr:rowapprove", BUDGET);
+    const { data: n, error } = await context.supabase.rpc("pr_set_item_training_use", {
+      _item_ids: data.item_ids,
+      _approved: data.approved,
+    });
+    if (error) throw new Error("Attestation was not saved.");
+    return { updated: (n as number) ?? 0 };
   });
 
 export const assignPair = createServerFn({ method: "POST" })

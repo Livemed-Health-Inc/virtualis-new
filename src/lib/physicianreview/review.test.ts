@@ -125,26 +125,80 @@ describe("parseImport", () => {
     const p = parseImport(line({ record_id: "r9", message: "Headache since morning." }));
     expect(p.rows[0]!.group_key).toBe("r9");
   });
+
+  it("preserves patient, encounter and template lineage", () => {
+    const p = parseImport(
+      line({
+        record_id: "r10",
+        message: "Ongoing dizziness on standing.",
+        patient_group: "pt-4",
+        encounter_group: "enc-9",
+        template_group: "tpl-2",
+      }),
+    );
+    expect(p.rows[0]).toMatchObject({
+      patient_group: "pt-4",
+      encounter_group: "enc-9",
+      template_group: "tpl-2",
+    });
+  });
+
+  it("keeps an unknown split unassigned instead of calling it training data", () => {
+    const p = parseImport(
+      [
+        line({ record_id: "s1", message: "Sore knee after a fall." }),
+        line({ record_id: "s2", message: "Cough for a week.", split: "validation" }),
+        line({ record_id: "s3", message: "Rash on the arm.", holdout: true }),
+        line({ record_id: "s4", message: "Back pain.", split: "sneaky" }),
+      ].join("\n"),
+    );
+    expect(p.rows.map((r) => r.split)).toEqual(["unassigned", "validation", "test"]);
+    expect(p.rejected).toHaveLength(1);
+  });
 });
 
 describe("toJsonl", () => {
-  const row = (o: Partial<ExportRow> = {}): ExportRow => ({
-    record_id: "r1",
-    text_value: "Fever and chills for two days.",
-    acuity: "medium",
-    routes: ["general_medicine"],
-    group_id: "g1",
-    split: "train",
-    label_quality: "adjudicated",
-    ...o,
-  });
+  const row = (o: Partial<ExportRow> = {}): ExportRow =>
+    ({
+      record_id: "r1",
+      text_value: "Fever and chills for two days.",
+      acuity: "medium",
+      routes: ["general_medicine"],
+      routes_state: "adjudicated",
+      no_specialty_needed: false,
+      group_id: "g1",
+      patient_group: "pt-1",
+      encounter_group: "enc-1",
+      template_group: "tpl-1",
+      split: "train",
+      label_quality: "adjudicated",
+      ...o,
+    }) as ExportRow;
 
-  it("emits the existing intake record shape and preserves holdout splits", () => {
+  it("emits the existing intake record shape and preserves lineage and splits", () => {
     const r = toJsonl([row(), row({ record_id: "r2", split: "test" })]);
     expect(r.exported).toBe(2);
     const records = r.jsonl.split("\n").map((l) => JSON.parse(l));
-    expect(records[0]).toMatchObject({ record_id: "r1", acuity: "medium", split: "train" });
+    expect(records[0]).toMatchObject({
+      record_id: "r1",
+      acuity: "medium",
+      split: "train",
+      patient_group: "pt-1",
+      encounter_group: "enc-1",
+      template_group: "tpl-1",
+    });
     expect(records[1]!.split).toBe("test");
+  });
+
+  it("keeps an unreviewed route distinct from no specialty needed", () => {
+    const [unreviewed, none] = toJsonl([
+      row({ routes: [], routes_state: "unreviewed" }),
+      row({ record_id: "r2", routes: [], routes_state: "agreed" }),
+    ])
+      .jsonl.split("\n")
+      .map((l) => JSON.parse(l));
+    expect(unreviewed).toMatchObject({ routes_reviewed: false, no_specialty_needed: false });
+    expect(none).toMatchObject({ routes_reviewed: true, no_specialty_needed: true });
   });
 
   it("blocks rows whose text looks like an identifier", () => {

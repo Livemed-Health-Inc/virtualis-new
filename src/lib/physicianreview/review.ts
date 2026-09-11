@@ -88,18 +88,24 @@ export function submissionProblem(d: DraftInput): string | null {
 
 /* ── Coordinator import ──────────────────────────────────────────────────── */
 
+export const SPLITS = ["train", "validation", "test", "unassigned"] as const;
+export type Split = (typeof SPLITS)[number];
+
+const slug = z.string().regex(/^[A-Za-z0-9_.:-]{1,128}$/);
+
 /** One reviewer JSONL row as produced upstream. Labels and reviewer identity
     present in the file are deliberately dropped: nothing here prefills a
     review, and they are never stored or shown in provenance. */
 export const importRowSchema = z
   .object({
-    record_id: z.string().regex(/^[A-Za-z0-9_.:-]{1,128}$/),
+    record_id: slug,
     message: z.string().min(1).max(4000),
     context: z.string().max(2000).optional(),
-    group_key: z
-      .string()
-      .regex(/^[A-Za-z0-9_.:-]{1,128}$/)
-      .optional(),
+    group_key: slug.optional(),
+    patient_group: slug.optional(),
+    encounter_group: slug.optional(),
+    template_group: slug.optional(),
+    split: z.enum(SPLITS).optional(),
     holdout: z.boolean().optional(),
     additional_context_needed: z.boolean().optional(),
     context_sufficient: z.boolean().optional(),
@@ -112,6 +118,10 @@ export interface ImportRow {
   message: string;
   context?: string;
   group_key: string;
+  patient_group?: string;
+  encounter_group?: string;
+  template_group?: string;
+  split: Split;
   holdout: boolean;
   additional_context_needed: boolean;
   context_sufficient: boolean;
@@ -130,7 +140,8 @@ const DISCARDED = ["reviewed_label", "reviewer_id", "rationale", "acuity", "labe
 const bool = (v: unknown) => v === true || v === "true" || v === 1 || v === "1";
 
 /** Parses reviewer JSONL. Per-row flags are preserved exactly as written —
-    a false flag is never turned true by a blanket setting. */
+    a false flag is never turned true by a blanket setting — and an unknown
+    split stays unassigned rather than drifting into training data. */
 export function parseImport(text: string): ImportParse {
   const rows: ImportRow[] = [];
   const rejected: ImportParse["rejected"] = [];
@@ -152,7 +163,7 @@ export function parseImport(text: string): ImportParse {
       for (const f of DISCARDED) if (f in raw) discarded.add(f);
       const parsed = importRowSchema.safeParse(raw);
       if (!parsed.success) {
-        rejected.push({ line: i + 1, reason: "missing or invalid record_id/message" });
+        rejected.push({ line: i + 1, reason: "missing or invalid record_id/message/split" });
         return;
       }
       const r = parsed.data;
@@ -165,12 +176,17 @@ export function parseImport(text: string): ImportParse {
         return;
       }
       seen.add(r.record_id);
+      const holdout = bool(raw["holdout"]);
       rows.push({
         record_id: r.record_id,
         message: r.message,
         ...(r.context ? { context: r.context } : {}),
         group_key: r.group_key || r.record_id,
-        holdout: bool(raw["holdout"]),
+        ...(r.patient_group ? { patient_group: r.patient_group } : {}),
+        ...(r.encounter_group ? { encounter_group: r.encounter_group } : {}),
+        ...(r.template_group ? { template_group: r.template_group } : {}),
+        split: r.split ?? (holdout ? "test" : "unassigned"),
+        holdout: holdout || r.split === "test",
         additional_context_needed: bool(raw["additional_context_needed"]),
         context_sufficient: bool(raw["context_sufficient"]),
         deidentification_reviewed: bool(raw["deidentification_reviewed"]),
@@ -187,8 +203,14 @@ export interface ExportRow {
   text_value: string;
   acuity: Acuity;
   routes: string[];
+  /** How the route question was settled. "unreviewed" is not a decision. */
+  routes_state: "unreviewed" | "agreed" | "adjudicated" | "disagreement" | "blinded";
+  no_specialty_needed: boolean;
   group_id: string;
-  split: "train" | "test";
+  patient_group: string | null;
+  encounter_group: string | null;
+  template_group: string | null;
+  split: Split;
   label_quality: "expert_reviewed" | "adjudicated";
 }
 
@@ -198,8 +220,9 @@ export interface ExportResult {
   blocked: { record_id: string; reason: string }[];
 }
 
-/** Governed serialization into the existing intake record shape. Holdout
-    groups keep their split, and every row is screened again on the way out. */
+/** Governed serialization into the existing intake record shape. Lineage and
+    the split are carried through untouched, the route decision keeps its
+    "never reviewed" state, and every row is screened again on the way out. */
 export function toJsonl(rows: ExportRow[]): ExportResult {
   const lines: string[] = [];
   const blocked: ExportResult["blocked"] = [];
@@ -208,17 +231,23 @@ export function toJsonl(rows: ExportRow[]): ExportResult {
       blocked.push({ record_id: r.record_id, reason: "possible identifier" });
       continue;
     }
+    const routesReviewed = r.routes_state === "agreed" || r.routes_state === "adjudicated";
     lines.push(
       JSON.stringify({
         record_id: r.record_id,
         text: r.text_value,
         acuity: r.acuity,
         use_case: "clinical_message",
-        routes: r.routes,
+        routes: routesReviewed ? r.routes : [],
+        routes_reviewed: routesReviewed,
+        no_specialty_needed: routesReviewed && r.routes.length === 0,
         label_quality: r.label_quality,
         sample_weight: 1,
         include_in_training: true,
         group_id: r.group_id,
+        patient_group: r.patient_group ?? null,
+        encounter_group: r.encounter_group ?? null,
+        template_group: r.template_group ?? null,
         split: r.split,
       }),
     );
@@ -242,6 +271,8 @@ export interface Overview {
   };
   practice: { total: number; resolved: number };
   assignments: number;
+  /** Cases hidden from this coordinator because they owe a review on them. */
+  blinded?: number;
 }
 
 export const completionRate = (o: Overview): number =>
