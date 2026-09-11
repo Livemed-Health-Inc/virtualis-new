@@ -119,6 +119,10 @@ beforeAll(async () => {
 afterAll(async () => {
   if (!enabled) return;
   await service.from("pr_batches").delete().in("id", batches);
+  /* Roles come off first: the append-only audit trail keeps a row for every
+     synthetic actor, so the account itself may legitimately refuse to delete
+     and must not be left holding a reviewer role. */
+  await service.from("user_roles").delete().in("user_id", users);
   for (const id of users) await service.auth.admin.deleteUser(id);
 });
 
