@@ -80,7 +80,7 @@ export const saveReview = createServerFn({ method: "POST" })
     const { data: row, error } = await context.supabase.rpc("pr_save_review", {
       _item_id: data.item_id,
       _status: data.submit ? "submitted" : "draft",
-      _acuity: data.acuity,
+      _acuity: data.acuity as string,
       _needs_info: data.needs_info,
       _rationale: data.rationale,
       _routes: data.routes,
@@ -187,9 +187,20 @@ export const importBatch = createServerFn({ method: "POST" })
     await throttle(context.userId, "pr:import", IMPORT_BUDGET);
     const { data: batchId, error } = await context.supabase.rpc("pr_import_batch", {
       _name: data.name,
-      _facility: data.facility_id,
+      _facility: data.facility_id as string,
       _mode: data.mode,
-      _items: data.rows,
+      /* Only the fields the workflow stores are forwarded; imported labels and
+         reviewer identities never leave this boundary. */
+      _items: data.rows.map((r) => ({
+        record_id: r.record_id,
+        message: r.message,
+        context: r.context ?? null,
+        group_key: r.group_key ?? r.record_id,
+        holdout: r.holdout === true,
+        additional_context_needed: r.additional_context_needed === true,
+        context_sufficient: r.context_sufficient === true,
+        deidentification_reviewed: r.deidentification_reviewed === true,
+      })),
     });
     if (error) throw new Error("Import was refused.");
     return { batch_id: batchId as string, imported: data.rows.length };
