@@ -28,7 +28,7 @@ import {
    deidentified data only — nothing here is production-validated and
    nothing here retrains or promotes the live model. */
 
-const SCALE = "Scale: 1 = low · 2–3 = moderate · 4–5 = high";
+const SCALE = "Acuity: Low (green) · Moderate (yellow) · High (red)";
 
 const SAMPLES = {
   low: "Synthetic: patient asks whether to take their evening statin with food. No symptoms reported.",
@@ -512,7 +512,7 @@ function TrainingData() {
       <ValidationBanner />
       <Section
         title="Import dataset"
-        hint="CSV or JSONL with text and label columns. Labels normalize 1 → low, 2–3 → medium, 4–5 → high."
+        hint="CSV or JSONL with text and label columns. Labels are read as Low, Moderate or High."
       >
         <div style={{ display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center" }}>
           <input
