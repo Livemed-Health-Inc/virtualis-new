@@ -36,7 +36,13 @@ async function account(tag: string, roles: string[]) {
   clients[tag] = client;
 }
 
-const row = (record_id: string, message: string) => ({ record_id, message, group_key: record_id });
+const row = (record_id: string, message: string, extra: Record<string, unknown> = {}) => ({
+  record_id,
+  message,
+  group_key: record_id,
+  deidentification_reviewed: true,
+  ...extra,
+});
 
 async function importBatch(name: string, mode: string, rows: object[]) {
   const { data, error } = await clients["coord"]!.rpc("pr_import_batch", {
@@ -99,18 +105,36 @@ beforeAll(async () => {
     row("disagree-1", "Synthetic: intermittent chest tightness while walking."),
     row("needsinfo-1", "Synthetic: feeling off since yesterday."),
     row("unassigned-1", "Synthetic: routine medication refill request."),
+    row("noroute-1", "Synthetic: recurring headaches in the afternoon.", {
+      patient_group: "pt-1",
+      encounter_group: "enc-1",
+      template_group: "tpl-1",
+      split: "validation",
+    }),
+    row("unflagged-1", "Synthetic: mild sunburn after a weekend outdoors.", {
+      deidentification_reviewed: false,
+    }),
+  ]);
+  const blind = await importBatch("Synthetic blinding batch", "clinical", [
+    row("blind-1", "Synthetic: shortness of breath climbing one flight."),
   ]);
   const practice = await importBatch("Synthetic practice batch", "practice", [
     row("practice-1", "Synthetic practice: mild ankle swelling after a long flight."),
   ]);
 
-  for (const b of [clinical, practice]) {
+  for (const b of [clinical, blind, practice]) {
     const { data } = await service.from("pr_items").select("id, record_id").eq("batch_id", b);
     for (const it of data ?? []) items[it.record_id] = it.id;
   }
 
   await clients["coord"]!.rpc("pr_assign_reviewers", {
-    _item_ids: [items["agree-1"], items["disagree-1"], items["needsinfo-1"]],
+    _item_ids: [
+      items["agree-1"],
+      items["disagree-1"],
+      items["needsinfo-1"],
+      items["noroute-1"],
+      items["unflagged-1"],
+    ],
     _a: ids["a"],
     _b: ids["b"],
   });
@@ -268,6 +292,107 @@ describe.skipIf(!enabled)("disagreement and adjudication", () => {
   }, 60_000);
 });
 
+describe.skipIf(!enabled)("assignment limits and blinding", () => {
+  it("refuses a third independent reviewer and will not replace one who answered", async () => {
+    const id = items["agree-1"]!;
+    const swap = await clients["coord"]!.rpc("pr_assign_reviewers", {
+      _item_ids: [id],
+      _a: ids["a"],
+      _b: ids["c"],
+    });
+    expect(swap.error).toBeTruthy();
+    /* The structural cap holds even against a direct privileged insert. */
+    const direct = await service
+      .from("pr_assignments")
+      .insert({ item_id: id, reviewer_id: ids["c"], role: "reviewer" });
+    expect(direct.error).toBeTruthy();
+    const { data: assigned } = await service
+      .from("pr_assignments")
+      .select("reviewer_id")
+      .eq("item_id", id)
+      .eq("role", "reviewer");
+    expect(assigned ?? []).toHaveLength(2);
+  }, 60_000);
+
+  it("hides every outcome from a coordinator who owes a review on the case", async () => {
+    const id = items["blind-1"]!;
+    await clients["coord"]!.rpc("pr_assign_reviewers", {
+      _item_ids: [id],
+      _a: ids["a"],
+      _b: ids["coord"],
+    });
+    expect((await submit("a", id, { acuity: "high", routes: ["cardiology"] })).error).toBeNull();
+
+    const listed = ((await clients["coord"]!.rpc("pr_list_items", { _batch: batches[1] })).data ??
+      []) as Record<string, unknown>[];
+    const seen = listed.find((r) => r["item_id"] === id)!;
+    expect(seen).toMatchObject({ blinded: true, state: "blinded", final_acuity: null });
+    expect(JSON.stringify(seen)).not.toMatch(/high|cardiology/);
+
+    expect(
+      (await clients["coord"]!.from("pr_outcomes").select("*").eq("item_id", id)).data ?? [],
+    ).toHaveLength(0);
+    expect(
+      (await clients["coord"]!.from("pr_reviews").select("*").eq("item_id", id)).data ?? [],
+    ).toHaveLength(0);
+    /* Nor may they export around it. */
+    await clients["coord"]!.rpc("pr_set_export_approval", {
+      _batch: batches[1],
+      _clinical: true,
+      _privacy: true,
+      _training: true,
+    });
+    expect(
+      (await clients["coord"]!.rpc("pr_export_batch", { _batch: batches[1] })).error,
+    ).toBeTruthy();
+  }, 60_000);
+});
+
+describe.skipIf(!enabled)("import integrity", () => {
+  it("refuses a file that repeats a record id, leaving no batch behind", async () => {
+    const name = `Synthetic duplicate ${Date.now()}`;
+    const r = await clients["coord"]!.rpc("pr_import_batch", {
+      _name: name,
+      _facility: null,
+      _mode: "clinical",
+      _items: [row("dup-1", "Synthetic: first."), row("dup-1", "Synthetic: second.")],
+    });
+    expect(r.error).toBeTruthy();
+    const { data } = await service.from("pr_batches").select("id").eq("name", name);
+    expect(data ?? []).toHaveLength(0);
+  }, 60_000);
+
+  it("keeps lineage and the declared split instead of defaulting to train", async () => {
+    const { data } = await service
+      .from("pr_items")
+      .select("split, patient_group, encounter_group, template_group")
+      .eq("id", items["noroute-1"]!);
+    expect(data?.[0]).toMatchObject({
+      split: "validation",
+      patient_group: "pt-1",
+      encounter_group: "enc-1",
+      template_group: "tpl-1",
+    });
+    const plain = await service.from("pr_items").select("split").eq("id", items["agree-1"]!);
+    expect(plain.data?.[0]?.["split"]).toBe("unassigned");
+  }, 60_000);
+});
+
+describe.skipIf(!enabled)("route decisions", () => {
+  it("never turns an unanswered route question into a decision", async () => {
+    const id = items["noroute-1"]!;
+    await submit("a", id, { acuity: "low", routes: ["neurology"] });
+    await submit("b", id, { acuity: "high" });
+    await clients["coord"]!.rpc("pr_assign_adjudicator", { _item_id: id, _who: ids["c"] });
+    expect((await submit("c", id, { acuity: "low" })).error).toBeNull();
+    expect(await outcome(id)).toMatchObject({
+      state: "adjudicated",
+      final_acuity: "low",
+      routes_state: "unreviewed",
+    });
+  }, 60_000);
+});
+
 describe.skipIf(!enabled)("export governance", () => {
   const clinicalBatch = () => batches[0]!;
 
@@ -286,23 +411,52 @@ describe.skipIf(!enabled)("export governance", () => {
     ).toBeTruthy();
   }, 60_000);
 
-  it("exports resolved clinical rows only, excluding needs-information", async () => {
+  it("holds back a row until it is privacy reviewed and approved for training use", async () => {
+    /* Resolve the row whose imported privacy flag is false. */
+    await submit("a", items["unflagged-1"]!, { acuity: "low", no_specialty: true });
+    await submit("b", items["unflagged-1"]!, { acuity: "low", no_specialty: true });
+
     await clients["coord"]!.rpc("pr_set_export_approval", {
       _batch: clinicalBatch(),
       _clinical: true,
       _privacy: true,
       _training: true,
     });
+    /* Batch approvals alone export nothing: no row is approved yet. */
+    const none = await clients["coord"]!.rpc("pr_export_batch", { _batch: clinicalBatch() });
+    expect(none.error).toBeNull();
+    expect((none.data ?? []) as unknown[]).toHaveLength(0);
+
+    /* Approving the unflagged row for training use still cannot export it,
+       because its per-row privacy flag is false. */
+    await clients["coord"]!.rpc("pr_set_item_training_use", {
+      _item_ids: [items["unflagged-1"], items["agree-1"], items["disagree-1"], items["noroute-1"]],
+      _approved: true,
+    });
     const { data, error } = await clients["coord"]!.rpc("pr_export_batch", {
       _batch: clinicalBatch(),
     });
     expect(error).toBeNull();
+    const records = (data ?? []) as { record_id: string; split: string; routes_state: string }[];
+    expect(records.map((r) => r.record_id).sort()).toEqual(["agree-1", "disagree-1", "noroute-1"]);
+    expect(records.find((r) => r.record_id === "noroute-1")).toMatchObject({
+      split: "validation",
+      routes_state: "unreviewed",
+    });
+  }, 60_000);
+
+  it("stops exporting a row once its training-use approval is withdrawn", async () => {
+    await clients["coord"]!.rpc("pr_set_item_training_use", {
+      _item_ids: [items["agree-1"]],
+      _approved: false,
+    });
+    const { data } = await clients["coord"]!.rpc("pr_export_batch", { _batch: clinicalBatch() });
     const records = (data ?? []) as { record_id: string }[];
-    expect(records.map((r) => r.record_id).sort()).toEqual(["agree-1", "disagree-1"]);
+    expect(records.map((r) => r.record_id)).not.toContain("agree-1");
   }, 60_000);
 
   it("never exports practice data", async () => {
-    const practice = batches[1]!;
+    const practice = batches[2]!;
     await clients["coord"]!.rpc("pr_set_export_approval", {
       _batch: practice,
       _clinical: true,
@@ -319,4 +473,50 @@ describe.skipIf(!enabled)("export governance", () => {
     ).toBeTruthy();
     expect((await clients["a"]!.rpc("pr_list_items", {})).error).toBeTruthy();
   }, 60_000);
+});
+
+describe.skipIf(!enabled)("facility scope is re-checked on every read", () => {
+  it("closes every read path the moment a credential is withdrawn", async () => {
+    const { data: facilities } = await service.from("facilities").select("id").limit(1);
+    const facility = facilities?.[0]?.["id"] as string | undefined;
+    if (!facility) return; // no facility configured in this environment
+
+    const credential = (user: string) =>
+      service.from("provider_credentials").insert({
+        user_id: user,
+        facility_id: facility,
+        privileges: "synthetic test",
+        expires_on: "2099-01-01",
+      });
+    await Promise.all([credential(ids["coord"]!), credential(ids["a"]!), credential(ids["b"]!)]);
+
+    const { data: batch, error } = await clients["coord"]!.rpc("pr_import_batch", {
+      _name: `Synthetic facility batch ${Date.now()}`,
+      _facility: facility,
+      _mode: "clinical",
+      _items: [row("fac-1", "Synthetic: persistent cough at a facility.")],
+    });
+    expect(error).toBeNull();
+    batches.push(batch as string);
+    const { data: rows } = await service.from("pr_items").select("id").eq("batch_id", batch);
+    const id = rows![0]!["id"] as string;
+
+    await clients["coord"]!.rpc("pr_assign_reviewers", {
+      _item_ids: [id],
+      _a: ids["a"],
+      _b: ids["b"],
+    });
+    expect(await queueRow("a", id)).toBeTruthy();
+
+    await service.from("provider_credentials").delete().eq("user_id", ids["a"]!);
+    expect(await queueRow("a", id)).toBeUndefined();
+    expect(
+      (await clients["a"]!.from("pr_items").select("id").eq("id", id)).data ?? [],
+    ).toHaveLength(0);
+    expect((await submit("a", id, { acuity: "low" })).error).toBeTruthy();
+    /* The still-credentialed reviewer is unaffected. */
+    expect(await queueRow("b", id)).toBeTruthy();
+
+    await service.from("provider_credentials").delete().in("user_id", users);
+  }, 90_000);
 });

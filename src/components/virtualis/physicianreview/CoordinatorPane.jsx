@@ -12,7 +12,9 @@ import {
   listItems,
   listPhysicians,
   setExportApproval,
+  setItemTrainingUse,
 } from "@/lib/physicianreview/review.functions";
+
 
 /* ═══ COORDINATION ═════════════════════════════════════════════════
    Import, assign two distinct physicians, adjudicate disagreements and
@@ -66,8 +68,10 @@ export default function CoordinatorPane() {
     assign: useServerFn(assignPair),
     adjudicator: useServerFn(assignAdjudicator),
     approve: useServerFn(setExportApproval),
+    rowApprove: useServerFn(setItemTrainingUse),
     export: useServerFn(exportBatch),
   };
+
 
   const [overview, setOverview] = useState(null);
   const [items, setItems] = useState([]);
@@ -175,6 +179,8 @@ export default function CoordinatorPane() {
           <Stat label="Adjudicated" value={c?.adjudicated ?? 0} />
           <Stat label="Not enough info" value={c?.needs_info ?? 0} />
           <Stat label="Practice (isolated)" value={overview?.practice?.total ?? 0} />
+          <Stat label="Hidden from you" value={overview?.blinded ?? 0} sub="Cases you owe a review on" />
+
         </div>
         <div style={{ fontSize: 12, color: T.sub, marginTop: 10 }}>
           Refreshes automatically. {error && <span style={{ color: T.red }}>{error}</span>}
@@ -269,7 +275,24 @@ export default function CoordinatorPane() {
           >
             Assign {selected.length || ""} selected
           </Action>
+          {/* Training use is attested for the named rows only; the imported
+              privacy flags are never touched by this control. */}
+          {[true, false].map((v) => (
+            <Action
+              key={String(v)}
+              disabled={busy || !selected.length}
+              onClick={() =>
+                run(
+                  (r) => `Training use ${v ? "approved" : "withdrawn"} for ${r.updated} row(s).`,
+                  () => fns.rowApprove({ data: { item_ids: selected, approved: v } }),
+                )
+              }
+            >
+              {v ? "Approve selected for training use" : "Withdraw training use"}
+            </Action>
+          ))}
         </div>
+
         {!physicians.length && (
           <div style={{ fontSize: 12.5, color: T.sub }}>
             No accounts hold the clinical reviewer role yet. Tell me who should, and I will grant it.
@@ -310,10 +333,18 @@ export default function CoordinatorPane() {
                   {it.message}
                 </div>
                 <div style={{ fontSize: 11.5, color: T.sub }}>
-                  {it.record_id} · {it.batch_name} · {STATE_LABEL[it.state]} · {it.submitted} submitted
+                  {it.record_id} · {it.batch_name} ·{" "}
+                  {it.blinded
+                    ? "Hidden until you record your own review"
+                    : `${STATE_LABEL[it.state] ?? it.state} · ${it.submitted ?? 0} submitted`}
                   {it.mode === "practice" && " · practice"}
-                  {it.holdout && " · holdout"}
+                  {it.split && it.split !== "unassigned" && ` · ${it.split}`}
+                  {" · privacy "}
+                  {it.privacy_reviewed ? "reviewed" : "not reviewed"}
+                  {" · training use "}
+                  {it.training_use_approved ? "approved" : "not approved"}
                 </div>
+
               </div>
             </label>
           ))}
@@ -356,7 +387,7 @@ export default function CoordinatorPane() {
 
       <Section
         title="Export"
-        hint="Every attestation is recorded exactly as you set it. Nothing here retrains or promotes a model."
+        hint="Batch attestations are recorded exactly as you set them, and each row must also be privacy reviewed and approved for training use before it can leave. Nothing here retrains or promotes a model."
       >
         {!batches.length && <div style={{ fontSize: 13, color: T.sub }}>No batches yet.</div>}
         {batches.map((b) => {
