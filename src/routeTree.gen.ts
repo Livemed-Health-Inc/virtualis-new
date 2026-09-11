@@ -14,6 +14,7 @@ import { Route as ClinicalReviewRouteImport } from './routes/clinical-review'
 import { Route as DeviceRouteImport } from './routes/device'
 import { Route as McpRouteImport } from './routes/mcp'
 import { Route as ModelLabRouteImport } from './routes/model-lab'
+import { Route as PhysicianReviewRouteImport } from './routes/physician-review'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
 import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.oauth.consent'
@@ -45,6 +46,11 @@ const McpRoute = McpRouteImport.update({
 const ModelLabRoute = ModelLabRouteImport.update({
   id: '/model-lab',
   path: '/model-lab',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PhysicianReviewRoute = PhysicianReviewRouteImport.update({
+  id: '/physician-review',
+  path: '/physician-review',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
@@ -90,6 +96,7 @@ export interface FileRoutesByFullPath {
   '/device': typeof DeviceRoute
   '/mcp': typeof McpRoute
   '/model-lab': typeof ModelLabRoute
+  '/physician-review': typeof PhysicianReviewRoute
   '/reset-password': typeof ResetPasswordRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
@@ -104,6 +111,7 @@ export interface FileRoutesByTo {
   '/device': typeof DeviceRoute
   '/mcp': typeof McpRoute
   '/model-lab': typeof ModelLabRoute
+  '/physician-review': typeof PhysicianReviewRoute
   '/reset-password': typeof ResetPasswordRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
@@ -119,6 +127,7 @@ export interface FileRoutesById {
   '/device': typeof DeviceRoute
   '/mcp': typeof McpRoute
   '/model-lab': typeof ModelLabRoute
+  '/physician-review': typeof PhysicianReviewRoute
   '/reset-password': typeof ResetPasswordRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
@@ -135,6 +144,7 @@ export interface FileRouteTypes {
     | '/device'
     | '/mcp'
     | '/model-lab'
+    | '/physician-review'
     | '/reset-password'
     | '/.well-known/oauth-protected-resource'
     | '/.lovable/oauth/consent'
@@ -149,6 +159,7 @@ export interface FileRouteTypes {
     | '/device'
     | '/mcp'
     | '/model-lab'
+    | '/physician-review'
     | '/reset-password'
     | '/.well-known/oauth-protected-resource'
     | '/.lovable/oauth/consent'
@@ -163,6 +174,7 @@ export interface FileRouteTypes {
     | '/device'
     | '/mcp'
     | '/model-lab'
+    | '/physician-review'
     | '/reset-password'
     | '/.well-known/oauth-protected-resource'
     | '/.lovable/oauth/consent'
@@ -178,6 +190,7 @@ export interface RootRouteChildren {
   DeviceRoute: typeof DeviceRoute
   McpRoute: typeof McpRoute
   ModelLabRoute: typeof ModelLabRoute
+  PhysicianReviewRoute: typeof PhysicianReviewRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   DotlovableOauthConsentRoute: typeof DotlovableOauthConsentRoute
@@ -222,6 +235,13 @@ declare module '@tanstack/react-router' {
       path: '/model-lab'
       fullPath: '/model-lab'
       preLoaderRoute: typeof ModelLabRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/physician-review': {
+      id: '/physician-review'
+      path: '/physician-review'
+      fullPath: '/physician-review'
+      preLoaderRoute: typeof PhysicianReviewRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/reset-password': {
@@ -282,6 +302,7 @@ const rootRouteChildren: RootRouteChildren = {
   DeviceRoute: DeviceRoute,
   McpRoute: McpRoute,
   ModelLabRoute: ModelLabRoute,
+  PhysicianReviewRoute: PhysicianReviewRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   Char91DotwellKnownChar93OauthProtectedResourceRoute:
     Char91DotwellKnownChar93OauthProtectedResourceRoute,
