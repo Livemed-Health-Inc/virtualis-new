@@ -1,39 +1,34 @@
-# Fix the model 403 — Supabase signing-key migration + verify
+# Connect the acuity model and add Virtualis Note
 
-## Verified current state (no assumptions)
+## Part 1 — Acuity model (needs one step from you on AWS)
 
-- Model endpoint `https://l0cczt4zi3.execute-api.us-east-1.amazonaws.com/model-lab`:
-  - no token → **401 Unauthorized**
-  - dr.siddiqi's real admin token → **403 Forbidden** on both `/v1/info` and `/v1/decisions`
-- Model is **NOT live**.
-- Root cause confirmed by inspecting the live token: the admin access token is **HS256** (shared-secret signature) with **no key id**. Supabase's published JWKS contains only an **ES256** asymmetric key (`e1a23916-86bc-474d-ba1f-4d8f61bf3cef`). The token the app sends and the only published verification key do not match — so the AWS authorizer has no valid key to verify any token.
-  - This **revises** the earlier "stale cached JWKS" theory. The mismatch is algorithm-level, not a stale cache.
-- The 401/403 bodies are the gateway's own (`{"message":"Unauthorized"}` / `{"message":"Forbidden"}`, no app headers), so rejection happens in the **API Gateway Lambda authorizer**, before FastAPI.
-- App code `src/lib/modellab/acuity.server.ts` correctly forwards the signed-in user's token — **no app code change is needed**.
+The app already sends each signed-in user's session to the model correctly. Your AWS gateway's sign-in check rejects every session, so nothing gets through yet.
 
-## The fix — one Supabase-side step, then verify
+1. You paste the authorizer code from AWS (the Lambda that runs before the model). I send back an exact replacement that checks sessions against the backend's current published signing keys, refreshes when keys rotate, and still verifies issuer and audience. Nothing gets weaker.
+2. You deploy it. I then test end to end from the app: model info, one synthetic decision, feedback, and training intake. I fix any field-name mismatch the model reports.
+3. Model Lab stops showing "Runtime unreachable". I update the roadmap.
 
-1. **Migrate this Lovable Cloud project's Supabase auth to asymmetric (ES256) JWT signing keys** via `supabase--migrate_signing_keys`.
-   - Idempotent; Supabase's recommended modern signing. The JWKS already has a standby ES256 key, so this activates it for token signing.
-   - Safe for the running app: the Supabase JS SDK verifies through the Auth service, not by checking JWT signatures in app code, so HS256→ES256 is transparent to the app.
-   - Non-disruptive: existing HS256 sessions keep verifying until they expire; new tokens after next sign-in are ES256 with a `kid` matching the JWKS.
-   - This is an auth-config change, **not** a code deploy — no build/typecheck/test cycle, and nothing is published.
-2. **Re-mint dr.siddiqi's admin session and re-test** `/v1/info` and `/v1/decisions`:
-   - **If 200** → the authorizer was JWKS-based; mismatch resolved; model is live. Run the full end-to-end check (info → one synthetic decision → feedback/training-intake schema match) and update `roadmap.md`.
-   - **If still 403** → the authorizer is HS256/shared-secret based with a stale secret. The fix then moves to AWS: update the Lambda authorizer to use the current Supabase JWT secret, or switch it to JWKS verification. I'll hand you the exact steps/patch at that point.
+No change to the deployed model. Mandatory human review stays on, and the "clinically validated" flag stays false.
 
-## Why this is the safe, preferred path
+## Part 2 — Virtualis Note (assistant + saved, signed notes)
 
-- It is the one fix I can drive entirely from the Lovable Cloud side without AWS access or the authorizer source (you skipped pasting it).
-- It is the Supabase-recommended signing mode and also unblocks MCP OAuth (which requires ES256 ID-token signing).
-- Active user sessions are not invalidated; the published app keeps working.
+**Real assistant (replaces the canned ALIS replies)**
+- One live conversation inside the existing ALIS panel. Answers stream in, and you can stop a reply.
+- It runs on Lovable AI from the app's server. No key or prompt ever reaches the browser.
+- It frames answers as decision support. It never files anything or changes acuity by itself.
 
-## Out of scope
+**Note drafting with sign-off**
+- A "Draft note" action on a thread (and at the end of a telehealth visit) produces a SOAP note: Subjective, Objective, Assessment, Plan.
+- The note opens as an editable **Draft**. You can save and come back to it. **Sign** locks it with your name and the time. Signed notes can't be edited. A correction creates an addendum.
+- Only clinicians with access to that thread's hospital can draft, read or sign its notes. The server checks this, using the same hospital isolation as messages.
+- Every draft, save, sign and addendum goes into the existing audit log.
 
-- No app code changes (`acuity.server.ts` is already correct).
-- No AWS changes unless step 2 still shows 403.
-- No changes to RLS, other auth behavior, or the published build.
+**PHI handling (needs your confirmation)**
+Drafting a note means sending thread text to the AI model. Before I enable this on real hospital threads, your workspace must have the AI provider covered for PHI (zero-retention models only, plus your BAA position). Until you confirm that, drafting will run only on synthetic or demo threads and refuse real ones.
 
-## Exact route after fix
+## Technical details
 
-`/model-lab` on virtualischat.com — the "Runtime unreachable" state clears once `/v1/info` returns 200.
+- Migration: a `clinical_notes` table (thread_id, facility_id, author_id, status draft/signed, sections as jsonb, signed_at, parent_note_id for addenda), plus grants, RLS through `has_facility_access`, and a trigger that blocks edits after signing. Writes go only through security-definer RPCs, which write to `audit_log`.
+- Server: `src/lib/note/ai.server.ts` (gateway helpers). `note.functions.ts` holds `draftNote` (streams through Responses using `openai/gpt-6-astra`, strict SOAP schema, low reasoning effort), `saveNote`, `signNote`, `listNotes`, all behind `requireSupabaseAuth` with per-user rate limits. A `/api/alis` streaming route serves the chat.
+- UI: rewire `Alis.jsx` to streaming chat. Add a small NoteEditor used from Thread and Telehealth.
+- Tests: SOAP schema, edits blocked after signing, a cross-hospital user denied, a signed-out user denied, and a real-thread refusal while PHI mode is off. Typecheck, lint and build must all pass. Nothing gets published until you approve.
