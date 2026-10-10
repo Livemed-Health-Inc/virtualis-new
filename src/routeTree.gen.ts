@@ -17,6 +17,7 @@ import { Route as ModelLabRouteImport } from './routes/model-lab'
 import { Route as PhysicianReviewRouteImport } from './routes/physician-review'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
+import { Route as ApiAlisRouteImport } from './routes/api/alis'
 import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.oauth.consent'
 import { Route as ApiPublicDeviceRouteImport } from './routes/api/public/device'
 import { Route as ApiPublicEncounterRouteImport } from './routes/api/public/encounter'
@@ -64,6 +65,11 @@ const Char91DotwellKnownChar93OauthProtectedResourceRoute =
     path: '/.well-known/oauth-protected-resource',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiAlisRoute = ApiAlisRouteImport.update({
+  id: '/api/alis',
+  path: '/api/alis',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DotlovableOauthConsentRoute = DotlovableOauthConsentRouteImport.update({
   id: '/.lovable/oauth/consent',
   path: '/.lovable/oauth/consent',
@@ -99,6 +105,7 @@ export interface FileRoutesByFullPath {
   '/physician-review': typeof PhysicianReviewRoute
   '/reset-password': typeof ResetPasswordRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  '/api/alis': typeof ApiAlisRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/api/public/device': typeof ApiPublicDeviceRoute
   '/api/public/encounter': typeof ApiPublicEncounterRoute
@@ -114,6 +121,7 @@ export interface FileRoutesByTo {
   '/physician-review': typeof PhysicianReviewRoute
   '/reset-password': typeof ResetPasswordRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  '/api/alis': typeof ApiAlisRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/api/public/device': typeof ApiPublicDeviceRoute
   '/api/public/encounter': typeof ApiPublicEncounterRoute
@@ -130,6 +138,7 @@ export interface FileRoutesById {
   '/physician-review': typeof PhysicianReviewRoute
   '/reset-password': typeof ResetPasswordRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  '/api/alis': typeof ApiAlisRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/api/public/device': typeof ApiPublicDeviceRoute
   '/api/public/encounter': typeof ApiPublicEncounterRoute
@@ -147,6 +156,7 @@ export interface FileRouteTypes {
     | '/physician-review'
     | '/reset-password'
     | '/.well-known/oauth-protected-resource'
+    | '/api/alis'
     | '/.lovable/oauth/consent'
     | '/api/public/device'
     | '/api/public/encounter'
@@ -162,6 +172,7 @@ export interface FileRouteTypes {
     | '/physician-review'
     | '/reset-password'
     | '/.well-known/oauth-protected-resource'
+    | '/api/alis'
     | '/.lovable/oauth/consent'
     | '/api/public/device'
     | '/api/public/encounter'
@@ -177,6 +188,7 @@ export interface FileRouteTypes {
     | '/physician-review'
     | '/reset-password'
     | '/.well-known/oauth-protected-resource'
+    | '/api/alis'
     | '/.lovable/oauth/consent'
     | '/api/public/device'
     | '/api/public/encounter'
@@ -193,6 +205,7 @@ export interface RootRouteChildren {
   PhysicianReviewRoute: typeof PhysicianReviewRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  ApiAlisRoute: typeof ApiAlisRoute
   DotlovableOauthConsentRoute: typeof DotlovableOauthConsentRoute
   ApiPublicDeviceRoute: typeof ApiPublicDeviceRoute
   ApiPublicEncounterRoute: typeof ApiPublicEncounterRoute
@@ -258,6 +271,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/alis': {
+      id: '/api/alis'
+      path: '/api/alis'
+      fullPath: '/api/alis'
+      preLoaderRoute: typeof ApiAlisRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/.lovable/oauth/consent': {
       id: '/.lovable/oauth/consent'
       path: '/.lovable/oauth/consent'
@@ -306,6 +326,7 @@ const rootRouteChildren: RootRouteChildren = {
   ResetPasswordRoute: ResetPasswordRoute,
   Char91DotwellKnownChar93OauthProtectedResourceRoute:
     Char91DotwellKnownChar93OauthProtectedResourceRoute,
+  ApiAlisRoute: ApiAlisRoute,
   DotlovableOauthConsentRoute: DotlovableOauthConsentRoute,
   ApiPublicDeviceRoute: ApiPublicDeviceRoute,
   ApiPublicEncounterRoute: ApiPublicEncounterRoute,
