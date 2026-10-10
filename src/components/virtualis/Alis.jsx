@@ -34,7 +34,7 @@ export default function Alis({ compact }) {
   const [msgs, setMsgs] = useState([
     {
       me: false,
-      text: "Hello, Dr. Hussain — I'm ALIS AI™, the clinical assistant inside Virtualis®. Ask me about a workup, draft a consult, or have me summarize a telehealth encounter.",
+      text: "Hello — I'm ALIS AI™, the clinical assistant inside Virtualis®. Ask me about a workup, draft a consult, or have me summarize a telehealth encounter.",
     },
   ]);
   const [draft, setDraft] = useState("");
@@ -169,7 +169,7 @@ export default function Alis({ compact }) {
           {msgs.map((m, i) => (
             <Bubble key={i} m={m} />
           ))}
-          {busy && (
+          {busy && msgs[msgs.length - 1]?.me && (
             <div
               style={{ alignSelf: "flex-start", display: "flex", gap: 8, alignItems: "flex-end" }}
             >
