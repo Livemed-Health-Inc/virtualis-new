@@ -27,7 +27,8 @@ export type AuditAction =
   | "modellab_feedback"
   | "modellab_stage"
   | "review_verdict"
-  | "review_export";
+  | "review_export"
+  | "note_ai_draft";
 
 export type AuditEntity =
   | "thread"
@@ -40,7 +41,8 @@ export type AuditEntity =
   | "profile"
   | "model"
   | "session"
-  | "review_case";
+  | "review_case"
+  | "clinical_note";
 
 export interface AuditEvent {
   action: AuditAction;

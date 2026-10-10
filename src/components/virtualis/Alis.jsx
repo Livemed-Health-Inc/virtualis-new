@@ -1,42 +1,27 @@
 import { useEffect, useRef, useState } from "react";
 import { T, mono, inputStyle, VMark } from "./ui";
+import { supabase } from "@/integrations/supabase/client";
 
-/* Deterministic on-device demo assistant. No network call — the
-   prototype must never leak PHI to a third-party endpoint. */
-const PLAYBOOK = [
-  {
-    k: ["sepsis", "lactate", "culture", "infection"],
-    a: "For suspected sepsis: draw lactate and two sets of blood cultures before antibiotics, start broad-spectrum coverage within the first hour, and give 30 mL/kg crystalloid if hypotensive or lactate ≥ 4. Reassess perfusion at 3 hours. Want me to draft a Critical consult to Infectious Diseases?",
-  },
-  {
-    k: ["chest pain", "troponin", "stemi", "ecg", "cardio"],
-    a: "Chest pain workup: 12-lead within 10 minutes, serial troponins at 0 and 2 hours, and continuous telemetry. Anterior ST elevation with a rising troponin should activate the cath lab. I can page the on-call cardiologist as Critical.",
-  },
-  {
-    k: ["copd", "asthma", "o2", "oxygen", "vent"],
-    a: "For COPD exacerbation: titrate to SpO2 88–92%, bronchodilators q4–6h, systemic steroids for 5 days, and consider NIV if pH < 7.35 with hypercapnia. Spacing nebs is reasonable once the O2 requirement is stable.",
-  },
-  {
-    k: ["discharge", "summary", "co-sign", "note"],
-    a: "I can draft the discharge summary from the thread: presenting complaint, hospital course, medication changes, and follow-up. It will queue for your co-sign — nothing is filed to the chart until you sign it.",
-  },
-  {
-    k: ["telehealth", "video", "visit"],
-    a: "Telehealth visits open a secure, HIPAA-compliant room. I capture the encounter transcript and draft the note in SOAP format for your review at the end of the visit.",
-  },
-  {
-    k: ["acuity", "triage", "route", "glyph"],
-    a: "Acuity Routing™ grades every message: three red bars Critical (5-minute SLA), two amber Urgent (30 minutes), one green Routine (4 hours). Unacknowledged Critical consults auto-escalate to the backup on-call.",
-  },
-];
-
-function reply(text) {
-  const s = text.toLowerCase();
-  const hit = PLAYBOOK.find((p) => p.k.some((k) => s.includes(k)));
-  if (hit) return hit.a;
-  if (s.includes("?"))
-    return "I can help with clinical reference, acuity guidance, consult drafting, and encounter notes. Tell me the presenting problem and I'll outline a workup — the clinical decision stays with you.";
-  return "Noted. Give me the presenting problem, vitals trend, or the specialty you need and I'll suggest an acuity and draft the consult for your review.";
+/* Live assistant: streamed from the app server (Lovable AI). Messages stay in
+   memory only — nothing is written to browser storage. */
+async function ask(history, signal) {
+  const { data } = await supabase.auth.getSession();
+  const res = await fetch("/api/alis", {
+    method: "POST",
+    signal,
+    headers: {
+      "content-type": "application/json",
+      authorization: `Bearer ${data.session?.access_token ?? ""}`,
+    },
+    body: JSON.stringify({
+      messages: history.map((m) => ({ role: m.me ? "user" : "assistant", content: m.text })),
+    }),
+  });
+  if (!res.ok) {
+    const j = await res.json().catch(() => ({}));
+    throw new Error(j.error || "ALIS is unavailable right now.");
+  }
+  return res.body.pipeThrough(new TextDecoderStream()).getReader();
 }
 
 const SUGGESTIONS = [
@@ -49,7 +34,7 @@ export default function Alis({ compact }) {
   const [msgs, setMsgs] = useState([
     {
       me: false,
-      text: "Hello, Dr. Hussain — I'm ALIS AI™, the clinical assistant inside Virtualis®. Ask me about a workup, draft a consult, or have me summarize a telehealth encounter.",
+      text: "Hello — I'm ALIS AI™, the clinical assistant inside Virtualis®. Ask me about a workup, draft a consult, or have me summarize a telehealth encounter.",
     },
   ]);
   const [draft, setDraft] = useState("");
@@ -59,16 +44,29 @@ export default function Alis({ compact }) {
     endRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [msgs, busy]);
 
-  const send = (preset) => {
+  const abort = useRef(null);
+  const send = async (preset) => {
     const text = (preset ?? draft).trim();
     if (!text || busy) return;
+    const history = [...msgs.slice(1).filter((m) => !m.error && m.text), { me: true, text }];
     setMsgs((m) => [...m, { me: true, text }]);
     setDraft("");
     setBusy(true);
-    setTimeout(() => {
-      setMsgs((m) => [...m, { me: false, text: reply(text) }]);
+    abort.current = new AbortController();
+    try {
+      const reader = await ask(history, abort.current.signal);
+      setMsgs((m) => [...m, { me: false, text: "" }]);
+      for (;;) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        setMsgs((m) => [...m.slice(0, -1), { me: false, text: m[m.length - 1].text + value }]);
+      }
+    } catch (e) {
+      if (e.name !== "AbortError")
+        setMsgs((m) => [...m, { me: false, error: true, text: e.message }]);
+    } finally {
       setBusy(false);
-    }, 750);
+    }
   };
 
   const Bubble = ({ m }) => (
@@ -172,7 +170,7 @@ export default function Alis({ compact }) {
           {msgs.map((m, i) => (
             <Bubble key={i} m={m} />
           ))}
-          {busy && (
+          {busy && msgs[msgs.length - 1]?.me && (
             <div
               style={{ alignSelf: "flex-start", display: "flex", gap: 8, alignItems: "flex-end" }}
             >
@@ -252,7 +250,8 @@ export default function Alis({ compact }) {
               style={{ ...inputStyle, borderRadius: 24, flex: 1, minWidth: 0 }}
             />
             <button
-              onClick={() => send()}
+              onClick={() => (busy ? abort.current?.abort() : send())}
+              title={busy ? "Stop" : "Send"}
               style={{
                 all: "unset",
                 cursor: "pointer",
@@ -260,7 +259,7 @@ export default function Alis({ compact }) {
                 height: 44,
                 borderRadius: 22,
                 background:
-                  draft.trim() && !busy ? "linear-gradient(135deg,#2E5CFF,#1E3FCC)" : T.ghost,
+                  busy || draft.trim() ? "linear-gradient(135deg,#2E5CFF,#1E3FCC)" : T.ghost,
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
@@ -278,7 +277,11 @@ export default function Alis({ compact }) {
                 strokeLinecap="round"
                 strokeLinejoin="round"
               >
-                <path d="M12 19 V5 M6 11 L12 5 L18 11" />
+                {busy ? (
+                  <rect x="7" y="7" width="10" height="10" rx="1.5" fill="#fff" />
+                ) : (
+                  <path d="M12 19 V5 M6 11 L12 5 L18 11" />
+                )}
               </svg>
             </button>
           </div>

@@ -1,0 +1,20 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1791649753468,
+      "tag": "0000_clinical_notes",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1791650020390,
+      "tag": "0001_clinical_notes_cleanup",
+      "breakpoints": true
+    }
+  ]
+}
