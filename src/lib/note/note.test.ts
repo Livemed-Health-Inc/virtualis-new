@@ -1,11 +1,21 @@
 import { describe, expect, it } from "vitest";
-import { SOAP_JSON_SCHEMA, canSign, clampSoap, isRealThread, screenLines, soapSchema, transcriptSchema } from "./note";
+import {
+  SOAP_JSON_SCHEMA,
+  canSign,
+  clampSoap,
+  isRealThread,
+  screenLines,
+  soapSchema,
+  transcriptSchema,
+} from "./note";
 
 describe("Virtualis Note contract", () => {
   it("strict SOAP schema: every section required, no extras", () => {
     expect(SOAP_JSON_SCHEMA.required).toEqual(["subjective", "objective", "assessment", "plan"]);
     expect(SOAP_JSON_SCHEMA.additionalProperties).toBe(false);
-    expect(soapSchema.safeParse({ subjective: "", objective: "", assessment: "" }).success).toBe(false);
+    expect(soapSchema.safeParse({ subjective: "", objective: "", assessment: "" }).success).toBe(
+      false,
+    );
   });
 
   it("clamps malformed model output", () => {

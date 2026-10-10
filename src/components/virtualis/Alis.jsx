@@ -62,7 +62,8 @@ export default function Alis({ compact }) {
         setMsgs((m) => [...m.slice(0, -1), { me: false, text: m[m.length - 1].text + value }]);
       }
     } catch (e) {
-      if (e.name !== "AbortError") setMsgs((m) => [...m, { me: false, error: true, text: e.message }]);
+      if (e.name !== "AbortError")
+        setMsgs((m) => [...m, { me: false, error: true, text: e.message }]);
     } finally {
       setBusy(false);
     }
@@ -276,7 +277,11 @@ export default function Alis({ compact }) {
                 strokeLinecap="round"
                 strokeLinejoin="round"
               >
-                {busy ? <rect x="7" y="7" width="10" height="10" rx="1.5" fill="#fff" /> : <path d="M12 19 V5 M6 11 L12 5 L18 11" />}
+                {busy ? (
+                  <rect x="7" y="7" width="10" height="10" rx="1.5" fill="#fff" />
+                ) : (
+                  <path d="M12 19 V5 M6 11 L12 5 L18 11" />
+                )}
               </svg>
             </button>
           </div>

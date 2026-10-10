@@ -9,7 +9,12 @@ const body = z
   .object({
     messages: z
       .array(
-        z.object({ role: z.enum(["user", "assistant"]), content: z.string().trim().min(1).max(4000) }).strict(),
+        z
+          .object({
+            role: z.enum(["user", "assistant"]),
+            content: z.string().trim().min(1).max(4000),
+          })
+          .strict(),
       )
       .min(1)
       .max(40),
@@ -24,10 +29,14 @@ export const Route = createFileRoute("/api/alis")({
       POST: async ({ request }) => {
         const token = request.headers.get("authorization")?.replace(/^Bearer\s+/i, "");
         if (!token) return fail(401, "Sign in required.");
-        const sb = createClient(process.env["SUPABASE_URL"]!, process.env["SUPABASE_PUBLISHABLE_KEY"]!, {
-          auth: { persistSession: false, autoRefreshToken: false },
-          global: { headers: { Authorization: `Bearer ${token}` } },
-        });
+        const sb = createClient(
+          process.env["SUPABASE_URL"]!,
+          process.env["SUPABASE_PUBLISHABLE_KEY"]!,
+          {
+            auth: { persistSession: false, autoRefreshToken: false },
+            global: { headers: { Authorization: `Bearer ${token}` } },
+          },
+        );
         const { data: u } = await sb.auth.getUser(token);
         if (!u.user) return fail(401, "Sign in required.");
         const { data: ready } = await sb.rpc("setup_complete", { _user_id: u.user.id });
@@ -37,11 +46,18 @@ export const Route = createFileRoute("/api/alis")({
         if (!parsed.success) return fail(400, "Message is empty or too long.");
         const { messages } = parsed.data;
         if (screenLines(messages.filter((m) => m.role === "user").map((m) => m.content)).length)
-          return fail(422, "Remove patient identifiers (MRN, phone, SSN, email) before asking ALIS.");
+          return fail(
+            422,
+            "Remove patient identifiers (MRN, phone, SSN, email) before asking ALIS.",
+          );
 
         try {
           const { throttle } = await import("@/lib/modellab/guards");
-          await throttle(u.user.id, "alis_chat", { limit: 60, windowSeconds: 3600, lockSeconds: 300 });
+          await throttle(u.user.id, "alis_chat", {
+            limit: 60,
+            windowSeconds: 3600,
+            lockSeconds: 300,
+          });
         } catch {
           return fail(429, "Too many requests right now. Try again shortly.");
         }

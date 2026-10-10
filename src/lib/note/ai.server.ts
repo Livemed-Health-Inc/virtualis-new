@@ -25,7 +25,7 @@ async function open(instructions: string, input: Input, extra: object, signal?: 
   if (!key) throw new GatewayError(500);
   const res = await fetch(URL, {
     method: "POST",
-    signal,
+    signal: signal ?? null,
     headers: {
       "Content-Type": "application/json",
       "Lovable-API-Key": key,
@@ -50,12 +50,13 @@ async function open(instructions: string, input: Input, extra: object, signal?: 
 
 /** Yields answer-text deltas from the SSE stream. */
 async function* deltas(body: ReadableStream<Uint8Array>) {
-  const reader = body.pipeThrough(new TextDecoderStream()).getReader();
+  const reader = body.getReader();
+  const dec = new TextDecoder();
   let buf = "";
   for (;;) {
     const { done, value } = await reader.read();
     if (done) return;
-    buf += value;
+    buf += dec.decode(value, { stream: true });
     let i;
     while ((i = buf.indexOf("\n")) >= 0) {
       const line = buf.slice(0, i).trim();
@@ -87,7 +88,12 @@ export async function streamText(instructions: string, input: Input, signal?: Ab
   });
 }
 
-export async function completeJson<T>(instructions: string, input: Input, name: string, schema: object) {
+export async function completeJson<T>(
+  instructions: string,
+  input: Input,
+  name: string,
+  schema: object,
+) {
   const body = await open(instructions, input, {
     text: { format: { type: "json_schema", name, strict: true, schema } },
   });

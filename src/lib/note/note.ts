@@ -33,14 +33,16 @@ export const transcriptSchema = z
 export const screenLines = (lines: string[]) => [...new Set(lines.flatMap(detectIdentifiers))];
 
 /** Database threads have UUID ids; demo threads have numeric ids. */
-export const isRealThread = (id: unknown) =>
-  typeof id === "string" && /^[0-9a-f-]{36}$/i.test(id);
+export const isRealThread = (id: unknown) => typeof id === "string" && /^[0-9a-f-]{36}$/i.test(id);
 
 /** Clamp model output to the stored limits. */
 export const clampSoap = (raw: unknown): Soap => {
   const r = (raw ?? {}) as Record<string, unknown>;
   return Object.fromEntries(
-    SECTIONS.map((s) => [s, typeof r[s] === "string" ? (r[s] as string).slice(0, MAX_SECTION) : ""]),
+    SECTIONS.map((s) => [
+      s,
+      typeof r[s] === "string" ? (r[s] as string).slice(0, MAX_SECTION) : "",
+    ]),
   ) as Soap;
 };
 

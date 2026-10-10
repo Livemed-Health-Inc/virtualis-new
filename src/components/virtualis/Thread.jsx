@@ -23,7 +23,16 @@ const initialsOf = (n) =>
     .join("")
     .toUpperCase();
 
-export default function Thread({ t, onBack, onDetail, onVideo, embedded, onSend, related = [], onOpenThread }) {
+export default function Thread({
+  t,
+  onBack,
+  onDetail,
+  onVideo,
+  embedded,
+  onSend,
+  related = [],
+  onOpenThread,
+}) {
   const [draft, setDraft] = useState("");
   const [extra, setExtra] = useState([]);
   const [sheet, setSheet] = useState(null);
@@ -101,7 +110,6 @@ export default function Thread({ t, onBack, onDetail, onVideo, embedded, onSend,
     setAttachOpen(false);
   };
 
-
   return (
     <div
       style={{
@@ -144,7 +152,16 @@ export default function Thread({ t, onBack, onDetail, onVideo, embedded, onSend,
                   color: T.sub,
                 }}
               >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
                   <path d="M19 12H5M12 19l-7-7 7-7" />
                 </svg>
               </button>
@@ -218,7 +235,15 @@ export default function Thread({ t, onBack, onDetail, onVideo, embedded, onSend,
             <button
               onClick={() => setNoteOpen(true)}
               title="Virtualis Note"
-              style={{ all: "unset", cursor: "pointer", fontSize: 12.5, fontWeight: 640, color: T.blueDeep, padding: "8px 10px", flexShrink: 0 }}
+              style={{
+                all: "unset",
+                cursor: "pointer",
+                fontSize: 12.5,
+                fontWeight: 640,
+                color: T.blueDeep,
+                padding: "8px 10px",
+                flexShrink: 0,
+              }}
             >
               Note
             </button>
@@ -391,11 +416,19 @@ export default function Thread({ t, onBack, onDetail, onVideo, embedded, onSend,
             <button
               onClick={() => setNoteOpen(true)}
               title="Virtualis Note"
-              style={{ all: "unset", cursor: "pointer", fontSize: 12.5, fontWeight: 640, color: T.blueDeep, padding: "8px 10px", flexShrink: 0 }}
+              style={{
+                all: "unset",
+                cursor: "pointer",
+                fontSize: 12.5,
+                fontWeight: 640,
+                color: T.blueDeep,
+                padding: "8px 10px",
+                flexShrink: 0,
+              }}
             >
               Note
             </button>
-                        <button
+            <button
               onClick={onVideo}
               title="Start telehealth visit"
               style={{
@@ -555,7 +588,6 @@ export default function Thread({ t, onBack, onDetail, onVideo, embedded, onSend,
         </div>
       )}
 
-
       <div
         ref={scrollRef}
         onScroll={(e) => {
@@ -607,278 +639,280 @@ export default function Thread({ t, onBack, onDetail, onVideo, embedded, onSend,
             const reacts = reactions[i] || [];
             const quoted = replies[i] != null ? msgs[replies[i]] : null;
             return (
-            <div
-              key={i}
-              style={{
-                alignSelf: m.me ? "flex-end" : "flex-start",
-                maxWidth: "min(82%, 560px)",
-                marginTop: grouped ? -(isMobile ? 4 : 6) : 0,
-              }}
-            >
-              {!m.me && !grouped && (
-                <div
-                  style={{ fontSize: 11, color: T.sub, margin: "0 0 3px 13px", fontWeight: 560 }}
-                >
-                  {m.who}
-                </div>
-              )}
-              {quoted && (
-                <div
-                  style={{
-                    borderLeft: "3px solid " + T.blue,
-                    background: m.me ? "rgba(46,92,255,.10)" : "#F3F5F9",
-                    borderRadius: 10,
-                    padding: "5px 9px",
-                    marginBottom: 3,
-                    fontSize: 11.5,
-                    color: T.sub,
-                    maxHeight: 42,
-                    overflow: "hidden",
-                  }}
-                >
-                  <b style={{ color: T.blueDeep }}>{quoted.me ? "You" : quoted.who}</b> ·{" "}
-                  {quoted.text}
-                </div>
-              )}
-              <button
-                onClick={() => setSheet(sheet === i ? null : i)}
-                onDoubleClick={() => react(i, "👍")}
-                style={{ all: "unset", cursor: "pointer", display: "block", textAlign: "left" }}
+              <div
+                key={i}
+                style={{
+                  alignSelf: m.me ? "flex-end" : "flex-start",
+                  maxWidth: "min(82%, 560px)",
+                  marginTop: grouped ? -(isMobile ? 4 : 6) : 0,
+                }}
               >
-                {m.kind === "attachment" ? (
+                {!m.me && !grouped && (
+                  <div
+                    style={{ fontSize: 11, color: T.sub, margin: "0 0 3px 13px", fontWeight: 560 }}
+                  >
+                    {m.who}
+                  </div>
+                )}
+                {quoted && (
                   <div
                     style={{
-                      background: m.me ? "linear-gradient(135deg,#2E5CFF,#1E3FCC)" : "#fff",
-                      border: m.me ? "none" : "1px solid " + T.line,
-                      borderRadius: 18,
-                      padding: 10,
-                      boxShadow: "0 2px 8px rgba(16,24,40,.06)",
+                      borderLeft: "3px solid " + T.blue,
+                      background: m.me ? "rgba(46,92,255,.10)" : "#F3F5F9",
+                      borderRadius: 10,
+                      padding: "5px 9px",
+                      marginBottom: 3,
+                      fontSize: 11.5,
+                      color: T.sub,
+                      maxHeight: 42,
+                      overflow: "hidden",
                     }}
                   >
+                    <b style={{ color: T.blueDeep }}>{quoted.me ? "You" : quoted.who}</b> ·{" "}
+                    {quoted.text}
+                  </div>
+                )}
+                <button
+                  onClick={() => setSheet(sheet === i ? null : i)}
+                  onDoubleClick={() => react(i, "👍")}
+                  style={{ all: "unset", cursor: "pointer", display: "block", textAlign: "left" }}
+                >
+                  {m.kind === "attachment" ? (
                     <div
                       style={{
-                        background: "#F7F8FA",
-                        border: "1px solid " + T.line,
-                        borderRadius: 12,
-                        padding: "22px 16px",
-                        textAlign: "center",
+                        background: m.me ? "linear-gradient(135deg,#2E5CFF,#1E3FCC)" : "#fff",
+                        border: m.me ? "none" : "1px solid " + T.line,
+                        borderRadius: 18,
+                        padding: 10,
+                        boxShadow: "0 2px 8px rgba(16,24,40,.06)",
                       }}
                     >
-                      <svg
-                        width="30"
-                        height="30"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke={T.blue}
-                        strokeWidth="1.8"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
+                      <div
+                        style={{
+                          background: "#F7F8FA",
+                          border: "1px solid " + T.line,
+                          borderRadius: 12,
+                          padding: "22px 16px",
+                          textAlign: "center",
+                        }}
                       >
-                        <path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8Z" />
-                        <path d="M14 3v5h5" />
-                        <path d="M9 14h6M9 17h4" />
-                      </svg>
-                      <div style={{ fontSize: 12.5, fontWeight: 620, color: T.ink, marginTop: 6 }}>
-                        Echocardiogram Report.pdf
+                        <svg
+                          width="30"
+                          height="30"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke={T.blue}
+                          strokeWidth="1.8"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        >
+                          <path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8Z" />
+                          <path d="M14 3v5h5" />
+                          <path d="M9 14h6M9 17h4" />
+                        </svg>
+                        <div
+                          style={{ fontSize: 12.5, fontWeight: 620, color: T.ink, marginTop: 6 }}
+                        >
+                          Echocardiogram Report.pdf
+                        </div>
+                        <div style={{ fontSize: 11, color: T.sub }}>
+                          2-D &amp; M-Mode · Color flow Doppler · 1.2 MB
+                        </div>
                       </div>
-                      <div style={{ fontSize: 11, color: T.sub }}>
-                        2-D &amp; M-Mode · Color flow Doppler · 1.2 MB
+                      <div
+                        style={{
+                          fontSize: 12,
+                          color: m.me ? "rgba(255,255,255,.85)" : T.sub,
+                          marginTop: 7,
+                          padding: "0 3px",
+                        }}
+                      >
+                        {m.text}
                       </div>
                     </div>
+                  ) : m.kind === "consult" ? (
                     <div
                       style={{
-                        fontSize: 12,
-                        color: m.me ? "rgba(255,255,255,.85)" : T.sub,
-                        marginTop: 7,
-                        padding: "0 3px",
+                        background: "#0A0F1E",
+                        border: "1px solid #1C2740",
+                        borderRadius: 18,
+                        padding: "13px 16px",
+                        boxShadow: `0 10px 26px rgba(10,15,30,.35), 0 0 0 1.5px ${ACUITY[t.acuity].color}33`,
+                      }}
+                    >
+                      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                        <span
+                          style={{
+                            width: 6,
+                            height: 6,
+                            borderRadius: 3,
+                            background: ACUITY[t.acuity].color,
+                          }}
+                        />
+                        <span
+                          style={{
+                            fontFamily: mono,
+                            fontSize: 10,
+                            fontWeight: 600,
+                            color: "#8DA2CF",
+                            letterSpacing: 2,
+                          }}
+                        >
+                          LIVE · CONSULT ·{" "}
+                          <span style={{ color: ACUITY[t.acuity].color }}>
+                            {ACUITY[t.acuity].label.toUpperCase()}
+                          </span>
+                        </span>
+                        <span style={{ marginLeft: "auto" }}>
+                          <Glyph level={t.acuity} size={7} gap={1.5} w={3.5} />
+                        </span>
+                      </div>
+                      <div
+                        style={{
+                          fontFamily: mono,
+                          fontSize: 12.5,
+                          color: "#D7DEF0",
+                          lineHeight: 1.6,
+                          marginTop: 11,
+                        }}
+                      >
+                        "{m.text}"
+                      </div>
+                    </div>
+                  ) : (
+                    <div
+                      style={{
+                        background: m.me ? "linear-gradient(135deg,#2E5CFF,#1E3FCC)" : "#fff",
+                        color: m.me ? "#fff" : T.ink,
+                        border: m.me ? "none" : "1px solid " + T.line,
+                        borderRadius: m.me ? "18px 18px 5px 18px" : "18px 18px 18px 5px",
+                        padding: isMobile ? "9px 12px" : "11px 15px",
+                        fontSize: isMobile ? 13.5 : 14.5,
+                        lineHeight: 1.4,
+                        whiteSpace: "pre-wrap",
+                        boxShadow: m.me
+                          ? "0 6px 16px rgba(41,112,255,.22)"
+                          : "0 2px 6px rgba(16,24,40,.04)",
                       }}
                     >
                       {m.text}
                     </div>
-                  </div>
-                ) : m.kind === "consult" ? (
-                  <div
-                    style={{
-                      background: "#0A0F1E",
-                      border: "1px solid #1C2740",
-                      borderRadius: 18,
-                      padding: "13px 16px",
-                      boxShadow: `0 10px 26px rgba(10,15,30,.35), 0 0 0 1.5px ${ACUITY[t.acuity].color}33`,
-                    }}
-                  >
-                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                      <span
-                        style={{
-                          width: 6,
-                          height: 6,
-                          borderRadius: 3,
-                          background: ACUITY[t.acuity].color,
-                        }}
-                      />
-                      <span
-                        style={{
-                          fontFamily: mono,
-                          fontSize: 10,
-                          fontWeight: 600,
-                          color: "#8DA2CF",
-                          letterSpacing: 2,
-                        }}
-                      >
-                        LIVE · CONSULT ·{" "}
-                        <span style={{ color: ACUITY[t.acuity].color }}>
-                          {ACUITY[t.acuity].label.toUpperCase()}
-                        </span>
-                      </span>
-                      <span style={{ marginLeft: "auto" }}>
-                        <Glyph level={t.acuity} size={7} gap={1.5} w={3.5} />
-                      </span>
-                    </div>
-                    <div
-                      style={{
-                        fontFamily: mono,
-                        fontSize: 12.5,
-                        color: "#D7DEF0",
-                        lineHeight: 1.6,
-                        marginTop: 11,
-                      }}
-                    >
-                      "{m.text}"
-                    </div>
-                  </div>
-                ) : (
-                  <div
-                    style={{
-                      background: m.me ? "linear-gradient(135deg,#2E5CFF,#1E3FCC)" : "#fff",
-                      color: m.me ? "#fff" : T.ink,
-                      border: m.me ? "none" : "1px solid " + T.line,
-                      borderRadius: m.me ? "18px 18px 5px 18px" : "18px 18px 18px 5px",
-                      padding: isMobile ? "9px 12px" : "11px 15px",
-                      fontSize: isMobile ? 13.5 : 14.5,
-                      lineHeight: 1.4,
-                      whiteSpace: "pre-wrap",
-                      boxShadow: m.me
-                        ? "0 6px 16px rgba(41,112,255,.22)"
-                        : "0 2px 6px rgba(16,24,40,.04)",
-                    }}
-                  >
-                    {m.text}
-                  </div>
-                )}
-              </button>
+                  )}
+                </button>
 
-              {reacts.length > 0 && (
-                <div
-                  style={{
-                    display: "flex",
-                    gap: 3,
-                    marginTop: -6,
-                    justifyContent: m.me ? "flex-end" : "flex-start",
-                    padding: "0 6px",
-                  }}
-                >
-                  {reacts.map((e) => (
-                    <span
-                      key={e}
-                      style={{
-                        background: "#fff",
-                        border: "1px solid " + T.line,
-                        borderRadius: 12,
-                        padding: "1px 6px",
-                        fontSize: 12,
-                        boxShadow: "0 2px 6px rgba(16,24,40,.08)",
-                      }}
-                    >
-                      {e}
-                    </span>
-                  ))}
-                </div>
-              )}
-
-              <div
-                style={{
-                  fontSize: 10.5,
-                  color: T.faint,
-                  marginTop: 3.5,
-                  textAlign: m.me ? "right" : "left",
-                  padding: "0 7px",
-                }}
-              >
-                {m.t}
-                {m.me && <span style={{ color: T.blue, marginLeft: 4 }}>✓✓</span>}
-              </div>
-
-              {sheet === i && (
-                <div
-                  style={{
-                    background: "#fff",
-                    border: "1px solid " + T.line,
-                    borderRadius: 16,
-                    marginTop: 6,
-                    boxShadow: "0 14px 34px rgba(16,24,40,.14)",
-                    overflow: "hidden",
-                    animation: "rise .2s ease",
-                  }}
-                >
+                {reacts.length > 0 && (
                   <div
                     style={{
                       display: "flex",
-                      gap: 6,
-                      padding: "9px 12px",
-                      borderBottom: "1px solid " + T.line,
-                      flexWrap: "wrap",
+                      gap: 3,
+                      marginTop: -6,
+                      justifyContent: m.me ? "flex-end" : "flex-start",
+                      padding: "0 6px",
                     }}
                   >
-                    {["👍", "❤️", "✅", "❗", "😮", "🙏"].map((e) => (
-                      <button
+                    {reacts.map((e) => (
+                      <span
                         key={e}
+                        style={{
+                          background: "#fff",
+                          border: "1px solid " + T.line,
+                          borderRadius: 12,
+                          padding: "1px 6px",
+                          fontSize: 12,
+                          boxShadow: "0 2px 6px rgba(16,24,40,.08)",
+                        }}
+                      >
+                        {e}
+                      </span>
+                    ))}
+                  </div>
+                )}
+
+                <div
+                  style={{
+                    fontSize: 10.5,
+                    color: T.faint,
+                    marginTop: 3.5,
+                    textAlign: m.me ? "right" : "left",
+                    padding: "0 7px",
+                  }}
+                >
+                  {m.t}
+                  {m.me && <span style={{ color: T.blue, marginLeft: 4 }}>✓✓</span>}
+                </div>
+
+                {sheet === i && (
+                  <div
+                    style={{
+                      background: "#fff",
+                      border: "1px solid " + T.line,
+                      borderRadius: 16,
+                      marginTop: 6,
+                      boxShadow: "0 14px 34px rgba(16,24,40,.14)",
+                      overflow: "hidden",
+                      animation: "rise .2s ease",
+                    }}
+                  >
+                    <div
+                      style={{
+                        display: "flex",
+                        gap: 6,
+                        padding: "9px 12px",
+                        borderBottom: "1px solid " + T.line,
+                        flexWrap: "wrap",
+                      }}
+                    >
+                      {["👍", "❤️", "✅", "❗", "😮", "🙏"].map((e) => (
+                        <button
+                          key={e}
+                          onClick={() => {
+                            react(i, e);
+                            setSheet(null);
+                          }}
+                          style={{
+                            all: "unset",
+                            cursor: "pointer",
+                            fontSize: 17,
+                            lineHeight: 1,
+                            padding: "5px 7px",
+                            borderRadius: 14,
+                          }}
+                        >
+                          {e}
+                        </button>
+                      ))}
+                    </div>
+                    {[
+                      ["Reply", () => setReplyTo(i)],
+                      ["Copy", () => navigator.clipboard?.writeText(m.text || "")],
+                      ["Acknowledge", () => setAckd(true)],
+                      ["Delete for me", () => setDeleted((d) => [...d, i])],
+                    ].map(([label, fn], k, arr) => (
+                      <button
+                        key={label}
                         onClick={() => {
-                          react(i, e);
+                          fn();
                           setSheet(null);
                         }}
                         style={{
                           all: "unset",
+                          boxSizing: "border-box",
                           cursor: "pointer",
-                          fontSize: 17,
-                          lineHeight: 1,
-                          padding: "5px 7px",
-                          borderRadius: 14,
+                          display: "block",
+                          width: "100%",
+                          padding: "11px 16px",
+                          fontSize: 14,
+                          fontWeight: 550,
+                          color: label === "Delete for me" ? T.red : T.ink,
+                          borderBottom: k < arr.length - 1 ? "1px solid " + T.line : "none",
                         }}
                       >
-                        {e}
+                        {label}
                       </button>
                     ))}
                   </div>
-                  {[
-                    ["Reply", () => setReplyTo(i)],
-                    ["Copy", () => navigator.clipboard?.writeText(m.text || "")],
-                    ["Acknowledge", () => setAckd(true)],
-                    ["Delete for me", () => setDeleted((d) => [...d, i])],
-                  ].map(([label, fn], k, arr) => (
-                    <button
-                      key={label}
-                      onClick={() => {
-                        fn();
-                        setSheet(null);
-                      }}
-                      style={{
-                        all: "unset",
-                        boxSizing: "border-box",
-                        cursor: "pointer",
-                        display: "block",
-                        width: "100%",
-                        padding: "11px 16px",
-                        fontSize: 14,
-                        fontWeight: 550,
-                        color: label === "Delete for me" ? T.red : T.ink,
-                        borderBottom: k < arr.length - 1 ? "1px solid " + T.line : "none",
-                      }}
-                    >
-                      {label}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
+                )}
+              </div>
             );
           })}
 
@@ -934,7 +968,16 @@ export default function Thread({ t, onBack, onDetail, onVideo, embedded, onSend,
             zIndex: 8,
           }}
         >
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={T.blueDeep} strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+          <svg
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke={T.blueDeep}
+            strokeWidth="2.4"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
             <path d="M12 5v14M6 13l6 6 6-6" />
           </svg>
         </button>
@@ -956,13 +999,32 @@ export default function Thread({ t, onBack, onDetail, onVideo, embedded, onSend,
                 marginBottom: 6,
               }}
             >
-              <div style={{ flex: 1, minWidth: 0, fontSize: 12, color: T.sub, overflow: "hidden", whiteSpace: "nowrap", textOverflow: "ellipsis" }}>
+              <div
+                style={{
+                  flex: 1,
+                  minWidth: 0,
+                  fontSize: 12,
+                  color: T.sub,
+                  overflow: "hidden",
+                  whiteSpace: "nowrap",
+                  textOverflow: "ellipsis",
+                }}
+              >
                 <b style={{ color: T.blueDeep }}>
                   Replying to {msgs[replyTo].me ? "yourself" : msgs[replyTo].who}
                 </b>{" "}
                 · {msgs[replyTo].text}
               </div>
-              <button onClick={() => setReplyTo(null)} style={{ all: "unset", cursor: "pointer", color: T.sub, fontSize: 16, padding: "0 4px" }}>
+              <button
+                onClick={() => setReplyTo(null)}
+                style={{
+                  all: "unset",
+                  cursor: "pointer",
+                  color: T.sub,
+                  fontSize: 16,
+                  padding: "0 4px",
+                }}
+              >
                 ×
               </button>
             </div>
@@ -1031,7 +1093,15 @@ export default function Thread({ t, onBack, onDetail, onVideo, embedded, onSend,
                 transition: "transform .2s ease",
               }}
             >
-              <svg width={isMobile ? 15 : 17} height={isMobile ? 15 : 17} viewBox="0 0 24 24" fill="none" stroke={attachOpen ? T.blueDeep : T.sub} strokeWidth="2.4" strokeLinecap="round">
+              <svg
+                width={isMobile ? 15 : 17}
+                height={isMobile ? 15 : 17}
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke={attachOpen ? T.blueDeep : T.sub}
+                strokeWidth="2.4"
+                strokeLinecap="round"
+              >
                 <path d="M12 5v14M5 12h14" />
               </svg>
             </button>
@@ -1116,7 +1186,16 @@ export default function Thread({ t, onBack, onDetail, onVideo, embedded, onSend,
                   flexShrink: 0,
                 }}
               >
-                <svg width={isMobile ? 14 : 16} height={isMobile ? 14 : 16} viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+                <svg
+                  width={isMobile ? 14 : 16}
+                  height={isMobile ? 14 : 16}
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="#fff"
+                  strokeWidth="2.4"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
                   <path d="M12 19 V5 M6 11 L12 5 L18 11" />
                 </svg>
               </button>
@@ -1143,7 +1222,16 @@ export default function Thread({ t, onBack, onDetail, onVideo, embedded, onSend,
                   transition: "background .2s ease",
                 }}
               >
-                <svg width={isMobile ? 15 : 17} height={isMobile ? 15 : 17} viewBox="0 0 24 24" fill="none" stroke={recording ? "#fff" : T.sub} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                <svg
+                  width={isMobile ? 15 : 17}
+                  height={isMobile ? 15 : 17}
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke={recording ? "#fff" : T.sub}
+                  strokeWidth="2.2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
                   <rect x="9" y="3" width="6" height="11" rx="3" />
                   <path d="M5 11a7 7 0 0 0 14 0M12 18v3" />
                 </svg>

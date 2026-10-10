@@ -21,14 +21,21 @@ const PHI_REFUSED =
 export const draftNote = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) =>
-    z.object({ threadId: z.union([uuid, z.number()]), lines: transcriptSchema }).strict().parse(d),
+    z
+      .object({ threadId: z.union([uuid, z.number()]), lines: transcriptSchema })
+      .strict()
+      .parse(d),
   )
   .handler(async ({ data, context }) => {
     if (typeof data.threadId === "string" && process.env["NOTE_PHI_ENABLED"] !== "true")
       throw new Error(PHI_REFUSED);
     if (screenLines(data.lines).length)
       throw new Error("The conversation contains possible patient identifiers and was not sent.");
-    await throttle(context.userId, "note_draft", { limit: 20, windowSeconds: 3600, lockSeconds: 600 });
+    await throttle(context.userId, "note_draft", {
+      limit: 20,
+      windowSeconds: 3600,
+      lockSeconds: 600,
+    });
     const { completeJson } = await import("./ai.server");
     const raw = await completeJson<Soap>(
       NOTE_INSTRUCTIONS,
@@ -51,7 +58,9 @@ export const listNotes = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { data: rows, error } = await context.supabase
       .from("clinical_notes")
-      .select("id,parent_note_id,status,subjective,objective,assessment,plan,author_id,signed_at,updated_at")
+      .select(
+        "id,parent_note_id,status,subjective,objective,assessment,plan,author_id,signed_at,updated_at",
+      )
       .eq("thread_id", data.threadId)
       .order("created_at", { ascending: false })
       .limit(50);
@@ -68,7 +77,11 @@ export const saveNote = createServerFn({ method: "POST" })
       .parse(d),
   )
   .handler(async ({ data, context }) => {
-    await throttle(context.userId, "note_save", { limit: 120, windowSeconds: 3600, lockSeconds: 300 });
+    await throttle(context.userId, "note_save", {
+      limit: 120,
+      windowSeconds: 3600,
+      lockSeconds: 300,
+    });
     const { note } = data;
     const { data: id, error } = await context.supabase.rpc("note_save", {
       _id: data.id as string,
