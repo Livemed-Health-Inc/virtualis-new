@@ -37,7 +37,7 @@ export const Route = createFileRoute("/api/alis")({
         if (!parsed.success) return fail(400, "Message is empty or too long.");
         const { messages } = parsed.data;
         if (screenLines(messages.filter((m) => m.role === "user").map((m) => m.content)).length)
-          return fail(422, "Remove patient identifiers (MRN, phone, SSN, email, DOB) before asking ALIS.");
+          return fail(422, "Remove patient identifiers (MRN, phone, SSN, email) before asking ALIS.");
 
         try {
           const { throttle } = await import("@/lib/modellab/guards");
