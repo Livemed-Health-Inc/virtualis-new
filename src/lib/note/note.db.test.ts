@@ -16,7 +16,11 @@ let thread = "";
 
 async function clinician(tag: string, facility: string) {
   const email = `note-${tag}-${Date.now()}@example.test`;
-  const { data } = await service.auth.admin.createUser({ email, password: PASSWORD, email_confirm: true });
+  const { data } = await service.auth.admin.createUser({
+    email,
+    password: PASSWORD,
+    email_confirm: true,
+  });
   const id = data.user!.id;
   users.push(id);
   await service.from("profiles").update({ must_change_password: false }).eq("id", id);
@@ -40,7 +44,15 @@ beforeAll(async () => {
   await clinician("b", "mercy");
   const { data } = await service
     .from("threads")
-    .insert({ name: "Synthetic", context: "Test", facility_id: "saint", patient: "—", room: "—", reason: "", confidence: 0 })
+    .insert({
+      name: "Synthetic",
+      context: "Test",
+      facility_id: "saint",
+      patient: "—",
+      room: "—",
+      reason: "",
+      confidence: 0,
+    })
     .select("id")
     .single();
   thread = data!.id;
@@ -57,7 +69,12 @@ describe.skipIf(!enabled)("clinical notes (live RLS)", () => {
   let note = "";
 
   it("credentialed clinician saves a draft; others cannot see it", async () => {
-    const r = await c["a"]!.rpc("note_save", { _id: null, _thread: thread, _parent: null, ...soap });
+    const r = await c["a"]!.rpc("note_save", {
+      _id: null,
+      _thread: thread,
+      _parent: null,
+      ...soap,
+    });
     expect(r.error).toBeNull();
     note = r.data as string;
     const other = await c["b"]!.from("clinical_notes").select("id").eq("id", note);
@@ -65,22 +82,40 @@ describe.skipIf(!enabled)("clinical notes (live RLS)", () => {
   });
 
   it("cross-facility clinician cannot create, edit or sign", async () => {
-    expect((await c["b"]!.rpc("note_save", { _id: null, _thread: thread, _parent: null, ...soap })).error).not.toBeNull();
-    expect((await c["b"]!.rpc("note_save", { _id: note, _thread: thread, _parent: null, ...soap })).error).not.toBeNull();
+    expect(
+      (await c["b"]!.rpc("note_save", { _id: null, _thread: thread, _parent: null, ...soap }))
+        .error,
+    ).not.toBeNull();
+    expect(
+      (await c["b"]!.rpc("note_save", { _id: note, _thread: thread, _parent: null, ...soap }))
+        .error,
+    ).not.toBeNull();
     expect((await c["b"]!.rpc("note_sign", { _id: note })).error).not.toBeNull();
   });
 
   it("signed-out caller is refused", async () => {
     const anon = createClient(URL_!, ANON!, { auth: { persistSession: false } });
-    expect((await anon.rpc("note_save", { _id: null, _thread: thread, _parent: null, ...soap })).error).not.toBeNull();
+    expect(
+      (await anon.rpc("note_save", { _id: null, _thread: thread, _parent: null, ...soap })).error,
+    ).not.toBeNull();
   });
 
   it("signed notes are immutable; corrections are addenda", async () => {
     expect((await c["a"]!.rpc("note_sign", { _id: note })).error).toBeNull();
-    expect((await c["a"]!.rpc("note_save", { _id: note, _thread: thread, _parent: null, ...soap })).error).not.toBeNull();
-    const add = await c["a"]!.rpc("note_save", { _id: null, _thread: thread, _parent: note, ...soap });
+    expect(
+      (await c["a"]!.rpc("note_save", { _id: note, _thread: thread, _parent: null, ...soap }))
+        .error,
+    ).not.toBeNull();
+    const add = await c["a"]!.rpc("note_save", {
+      _id: null,
+      _thread: thread,
+      _parent: note,
+      ...soap,
+    });
     expect(add.error).toBeNull();
     const audit = await service.from("audit_log").select("action").eq("entity_id", note);
-    expect(audit.data!.map((r) => r.action)).toEqual(expect.arrayContaining(["note_save", "note_sign"]));
+    expect(audit.data!.map((r) => r.action)).toEqual(
+      expect.arrayContaining(["note_save", "note_sign"]),
+    );
   });
 });
