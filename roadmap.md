@@ -111,3 +111,12 @@
         gating are enforced in guarded database routines with append-only audit records;
         practice data is isolated from clinical counts and export. Numeric 1–5 acuity
         wording removed from the Model Lab surfaces touched.
+
+## Virtualis Note + model connection (2026-10)
+
+- [x] ALIS assistant streams live answers (Lovable AI); identifier screening; per-user limit; stop button
+- [x] Clinical notes: SOAP draft → save → sign, immutable after signing, addenda; facility RLS; audit
+- [x] AI note drafting on demo threads; live threads refused until PHI coverage confirmed (NOTE_PHI_ENABLED)
+- [ ] Draft-note action at the end of a telehealth visit (notes reachable from the thread today)
+- [ ] Acuity model: blocked on user — paste AWS Lambda authorizer code for the signing-key fix
+- [ ] Login help: invite-only; existing account uses "Forgot password" (no passwords shared)
