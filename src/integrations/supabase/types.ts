@@ -96,6 +96,76 @@ export type Database = {
           },
         ]
       }
+      clinical_notes: {
+        Row: {
+          assessment: string
+          author_id: string
+          created_at: string
+          facility_id: string
+          id: string
+          objective: string
+          parent_note_id: string | null
+          plan: string
+          signed_at: string | null
+          status: string
+          subjective: string
+          thread_id: string
+          updated_at: string
+        }
+        Insert: {
+          assessment?: string
+          author_id: string
+          created_at?: string
+          facility_id: string
+          id?: string
+          objective?: string
+          parent_note_id?: string | null
+          plan?: string
+          signed_at?: string | null
+          status?: string
+          subjective?: string
+          thread_id: string
+          updated_at?: string
+        }
+        Update: {
+          assessment?: string
+          author_id?: string
+          created_at?: string
+          facility_id?: string
+          id?: string
+          objective?: string
+          parent_note_id?: string | null
+          plan?: string
+          signed_at?: string | null
+          status?: string
+          subjective?: string
+          thread_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "clinical_notes_facility_id_fkey"
+            columns: ["facility_id"]
+            isOneToOne: false
+            referencedRelation: "facilities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "clinical_notes_parent_note_id_fkey"
+            columns: ["parent_note_id"]
+            isOneToOne: false
+            referencedRelation: "clinical_notes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "clinical_notes_thread_id_fkey"
+            columns: ["thread_id"]
+            isOneToOne: false
+            referencedRelation: "threads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       device_enrollments: {
         Row: {
           code_hash: string
@@ -1173,6 +1243,19 @@ export type Database = {
         Returns: boolean
       }
       is_clinical_reviewer: { Args: { _user_id: string }; Returns: boolean }
+      note_save: {
+        Args: {
+          _a: string
+          _id: string
+          _o: string
+          _p: string
+          _parent: string
+          _s: string
+          _thread: string
+        }
+        Returns: string
+      }
+      note_sign: { Args: { _id: string }; Returns: undefined }
       pr_assign_adjudicator: {
         Args: { _item_id: string; _who: string }
         Returns: undefined
