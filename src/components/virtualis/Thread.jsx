@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useMediaQuery } from "./theme";
+import NoteSheet from "./NoteSheet";
 import {
   T,
   mono,
@@ -26,6 +27,7 @@ export default function Thread({ t, onBack, onDetail, onVideo, embedded, onSend,
   const [draft, setDraft] = useState("");
   const [extra, setExtra] = useState([]);
   const [sheet, setSheet] = useState(null);
+  const [noteOpen, setNoteOpen] = useState(false);
   const [ackd, setAckd] = useState(false);
   const endRef = useRef(null);
   const isMobile = useMediaQuery("(max-width: 639px)");
@@ -214,6 +216,14 @@ export default function Thread({ t, onBack, onDetail, onVideo, embedded, onSend,
               </button>
             )}
             <button
+              onClick={() => setNoteOpen(true)}
+              title="Virtualis Note"
+              style={{ all: "unset", cursor: "pointer", fontSize: 12.5, fontWeight: 640, color: T.blueDeep, padding: "8px 10px", flexShrink: 0 }}
+            >
+              Note
+            </button>
+            {noteOpen && <NoteSheet t={t} onClose={() => setNoteOpen(false)} />}
+            <button
               onClick={onVideo}
               title="Video"
               style={{
@@ -379,6 +389,13 @@ export default function Thread({ t, onBack, onDetail, onVideo, embedded, onSend,
               </div>
             </div>
             <button
+              onClick={() => setNoteOpen(true)}
+              title="Virtualis Note"
+              style={{ all: "unset", cursor: "pointer", fontSize: 12.5, fontWeight: 640, color: T.blueDeep, padding: "8px 10px", flexShrink: 0 }}
+            >
+              Note
+            </button>
+                        <button
               onClick={onVideo}
               title="Start telehealth visit"
               style={{
