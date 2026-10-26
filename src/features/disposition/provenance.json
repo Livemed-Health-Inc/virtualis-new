@@ -1,0 +1,28 @@
+{
+  "source": "user upload virtualis-disposition-module.zip (supplied source material; not deployment authority)",
+  "archive_sha256": "c100d3395bb8af8c970b6a10d5aa46b82ced2e07c7d639f12bc2b49df4cbf026",
+  "original_file_sha256": {
+    "README.md": "4f9a01bfc5bbc121ded2ffaeca6faf8c63aca47b8f1e4e6845cc3db671b15f0c",
+    "components/LOSTag.tsx": "f33f8783d03eca53e6107818d4d626eb9ca88d0cc2063812e101e053782646f6",
+    "components/StatusChip.tsx": "54bc88c43de68e8b905704c2172d4e1e079bb468b91f0728ca399f69750d6834",
+    "components/StatusEvidencePanel.tsx": "6851b91b6d5c3faf8f3216034aff30e88464e5833f3c066e4888a7d20d57031d",
+    "engine.ts": "4ffb394a911d02c060910b1a12bfe7dff44e3334b1c9870b42cbea5fb02c9978",
+    "feedback.ts": "dfdbfbf1ac5e185bcabbf0c6c3fe30e9b5360fa70c4f163bb3e3355cb93193d5",
+    "hooks/useDisposition.ts": "2a3090675b0e87b8ca61a3b8fdce279f649e1f90467abd19fc5b84e268fca33c",
+    "index.ts": "2f799ccf69371d6d6c4c590d601b8e87942e2fc507461bd7b1f4e6bb74fa32a0",
+    "los.ts": "699ccc8f9ad203d272b0d708de83d3825b890f452f0ec6d8f02a969a017818c0",
+    "rules.ts": "b20ff474a2a70dd3719a33e2d6a57519844fb5754591eadd47e547c8f1345b27",
+    "types.ts": "72f8c307f81366b4a11fa4df61442d6d5cf3fb87ba91d897dd80fb7619297f6d"
+  },
+  "transformations": [
+    "prettier/eslint formatting",
+    "engine: assessment id/context binding, consult id check, bound-actor check (AUTH_ACTOR), reason required for any non-recommended decision",
+    "hook: resets on patient/thread/consult change, stale/double-resolution lock, host-supplied actor, feedback status surfaced (no assumed success)",
+    "feedback: sink exceptions propagate as rejections",
+    "los: elapsedMidnights requires explicit IANA facility zone; invalid input returns null, never NaN",
+    "UI: score labelled heuristic, not validated accuracy; 'Decide status' for insufficient data; memory-only resolution text; exactOptionalPropertyTypes fixes",
+    "added synthetic/ fixtures + development panel and disposition.test.ts",
+    "rules.ts weights/thresholds and LOS baselines unchanged (placeholders)"
+  ],
+  "status": "internal development only; no external demo before IP clearance; not clinically validated"
+}
