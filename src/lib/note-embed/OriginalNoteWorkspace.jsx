@@ -26,7 +26,8 @@ export default function OriginalNoteWorkspace({ onClose, adapter }) {
     shadow.appendChild(theme);
     setRoot(shadow);
     return () => {
-      shadow.replaceChildren();
+      // React owns the portal children; remove only our cloned style nodes.
+      for (const style of shadow.querySelectorAll("style")) style.remove();
     };
   }, []);
   if (!import.meta.env.DEV) return null;
