@@ -46,6 +46,7 @@ export function StatusChip({ assessment, obligation, onResolve }: StatusChipProp
   if (assessment.recommendation === 'not_applicable') return null;
 
   const style = STYLES[assessment.recommendation];
+  if (!style) return null;
   const Icon = style.icon;
   const resolved = obligation?.state === 'confirmed' || obligation?.state === 'overridden';
   const decided = obligation?.resolution?.decidedStatus;

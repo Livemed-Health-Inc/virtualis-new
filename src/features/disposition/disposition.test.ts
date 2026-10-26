@@ -9,10 +9,11 @@ import {
   registerFeedbackSink,
   resolveDispositionObligation,
   shouldEvaluateDisposition,
+  type DispositionInput,
 } from '.';
 import { SYNTHETIC_FIXTURES, SYNTHETIC_TIME_ZONE } from './synthetic/fixtures';
 
-const [rich, sparse, admitted] = SYNTHETIC_FIXTURES.map((f) => f.input);
+const [rich, sparse, admitted] = SYNTHETIC_FIXTURES.map((f) => f.input) as [DispositionInput, DispositionInput, DispositionInput];
 const setup = (input = rich) => {
   const a = evaluateDisposition(input);
   return { a, o: createDispositionObligation(a)! };

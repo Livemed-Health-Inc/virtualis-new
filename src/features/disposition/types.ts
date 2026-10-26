@@ -146,7 +146,7 @@ export interface DispositionResolution {
   decidedBy: string; // actorId — must be physician/app per authority rules
   decidedByRole: ClinicalRole;
   agreesWithRecommendation: boolean;
-  overrideReason?: string; // required when overriding
+  overrideReason?: string | undefined; // required when overriding
   decidedAt: string;
 }
 
