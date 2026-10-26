@@ -7,7 +7,7 @@
       "source": "src/components/VirtualisNote.tsx",
       "vendored": "VirtualisNote.jsx",
       "source_sha256": "d2a3964265d7128b8828e7b0ec0f07fdb8b2323e58df34b9ff0e029b52fc4990",
-      "vendored_sha256": "db8fd6030353c5593fa2842078c0bfc8d3d27d5fc04dfe7945211bb8c496463f"
+      "vendored_sha256": "36e6b45c8e09048a32a754cc36e19edf431239bcead96278e951bea6da5d6d8a"
     },
     {
       "source": "src/components/virtualis-note/Waveform.tsx",

@@ -7,7 +7,7 @@ import { AppLayout, Disabled as AnalyticsDashboard, Disabled as RadiologyContext
 import { Waveform, NoteSection, Modal, Toast, copyToClipboard, parseNoteSections, } from "./widgets";
 import logo from "./favicon.png";
 const elynLogo = { url: logo };
-import { Button } from "@/components/ui/button";
+import { Button } from "../../../../lib/note-embed/boundary";
 import { cn } from "@/lib/utils";
 import { Menu, X, Mic, MicOff, AlertCircle, ChevronDown, ChevronUp, Stethoscope, Scan, Video, Phone, Plus, Trash2, Clock, FileText, RotateCcw, Sparkles, CheckCircle2, } from "lucide-react";
 import { ENCOUNTER_TYPES, POS_CODES } from "./encounterContext";
@@ -397,7 +397,7 @@ function NoteDisplay({ s, startEditingNote, saveNoteEdits, generateHandoff, desk
     const allSectionsReviewed = Object.keys(s.reviewedSections).length > 0 &&
         Object.values(s.reviewedSections).every((v) => v);
     const hasNote = Boolean(s.generatedNote);
-    const needsReview = hasNote && !s.isNoteReviewed && !s.currentNoteId;
+    const needsReview = false;
     const handleReviewToggle = (title) => {
         s.setReviewedSections((prev) => ({ ...prev, [title]: !prev[title] }));
     };
@@ -423,7 +423,7 @@ function NoteDisplay({ s, startEditingNote, saveNoteEdits, generateHandoff, desk
                     React.createElement(CheckCircle2, { className: "w-3 h-3" }),
                     "Physician Reviewed \u2713")),
                 hasUnsavedEdits && (React.createElement("span", { className: "text-xs text-warning bg-warning/10 px-2 py-0.5 rounded-full animate-pulse" }, "\u25CF Unsaved changes"))),
-            s.generatedNote && (React.createElement("div", { className: "flex gap-1 md:gap-2" }, s.isNoteReviewed && (React.createElement(React.Fragment, null,
+            s.generatedNote && (React.createElement("div", { className: "flex gap-1 md:gap-2" }, s.generatedNote && (React.createElement(React.Fragment, null,
                 React.createElement(Button, { size: "sm", variant: s.isEditingNote ? "default" : desktop ? "outline" : "ghost", onClick: s.isEditingNote ? saveNoteEdits : startEditingNote, className: "h-7 px-3 text-xs" }, s.isEditingNote ? "Keep in memory" : "✏️ Edit"),
                 s.isEditingNote && (React.createElement(Button, { size: "sm", variant: "ghost", onClick: () => s.setIsEditingNote(false), className: "h-7 px-2 text-xs text-muted-foreground" },
                     React.createElement(RotateCcw, { className: "w-3 h-3 mr-1" }),
