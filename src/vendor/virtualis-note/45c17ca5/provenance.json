@@ -1,0 +1,64 @@
+{
+  "project": "eb9d503b-3831-420a-8d8b-d7ea0092bbc2",
+  "commit": "45c17ca5",
+  "license": "No license declaration verified; workspace-authorized reuse only.",
+  "entries": [
+    {
+      "source": "src/components/VirtualisNote.tsx",
+      "vendored": "VirtualisNote.jsx",
+      "source_sha256": "d2a3964265d7128b8828e7b0ec0f07fdb8b2323e58df34b9ff0e029b52fc4990",
+      "vendored_sha256": "e3ebed079ffad2b509c3e14e99c970f70ea6af82c589cbfd37e1a2272830f5a8"
+    },
+    {
+      "source": "src/components/virtualis-note/Waveform.tsx",
+      "vendored": "Waveform.jsx",
+      "source_sha256": "7fc50b4573fef9686dab6c461fce180d4dd3168613aa7948955b87f065401fba",
+      "vendored_sha256": "0297e08e944c174ce466ff26c51643b26df3ba3e26d3f03fde5678df73a7b502"
+    },
+    {
+      "source": "src/components/virtualis-note/NoteSection.tsx",
+      "vendored": "NoteSection.jsx",
+      "source_sha256": "d3e9b6b6941b5ec8b8b32484b6a93c1e7edaf95ce733537f08e6b831e629d420",
+      "vendored_sha256": "39301f95f06d63927b1bef70b0534f816d2c8a06cb45382d52a327128e86866d"
+    },
+    {
+      "source": "src/components/virtualis-note/Modal.tsx",
+      "vendored": "Modal.jsx",
+      "source_sha256": "4f3cd86c494ca7cb254a267f3b4def6cf359568401708dc26993c8c8ce9fe9de",
+      "vendored_sha256": "aa38929f22500e2fa5d3dfd989ccc06caf5b149f81db1839d22a2b1e8fea87fd"
+    },
+    {
+      "source": "src/components/virtualis-note/Toast.tsx",
+      "vendored": "Toast.jsx",
+      "source_sha256": "e00fd2e1b29480fe444996ffb2a894e30a2df437bce93674cf2eb140dc5b2fb8",
+      "vendored_sha256": "041f76b671b1e41bce67b8e436aa98d5c058928d9f51f96d8e8129d93ad0948c"
+    },
+    {
+      "source": "src/components/virtualis-note/utils.ts",
+      "vendored": "utils.js",
+      "source_sha256": "2293ff4a9b4126353554311ee0e8a17f3c92d32e06b52361d7ea71367227a05e",
+      "vendored_sha256": "42ea4b99040a8f3ba9e7fa8692bf9121e22254826e981119b92542218d1a2bd5"
+    },
+    {
+      "source": "src/lib/encounterContext.ts",
+      "vendored": "encounterContext.js",
+      "source_sha256": "c5f605dab3c1f8d9cbd0fa3288370bb66a66e138172e131f22bb1569efa876ac",
+      "vendored_sha256": "803f88205f19a85cf466b2f9115080ae424458d1d2564339fb0da8c0fa94a423"
+    },
+    {
+      "source": "public/favicon.png",
+      "vendored": "favicon.png",
+      "source_sha256": "50ba9c5ace951b0b4935f8e953bd30d8d54c5f20a5687031619d0909db0ddaea"
+    }
+  ],
+  "transformations": [
+    "TypeScript type erasure only for presentation JSX",
+    "Remap routing, state, generation, layout and unavailable service components to host boundary",
+    "Remove direct billing database write; report unavailable",
+    "Use bundled original favicon",
+    "Replace clipboard export with unavailable notice",
+    "Synthetic draft wording and memory-only edit wording; disable AI review representation",
+    "Encounter vocabulary only; exclude modifier/business engines",
+    "Animation props stripped by host presentation boundary"
+  ]
+}

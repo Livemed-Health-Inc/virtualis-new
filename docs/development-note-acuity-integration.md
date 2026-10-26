@@ -2,6 +2,16 @@
 
 ## Exact Virtualis Note
 
+### Implemented bounded source-reused workspace (2026-10-26)
+
+Nue's existing thread Note entry now lazy-loads `src/lib/note-embed/OriginalNoteWorkspace.jsx` in development only. Production continues using the unchanged `NoteSheet.jsx`. The workspace receives no thread props, patient data or session; its adapter is deterministic synthetic fixtures and React memory only. Closing discards the workspace draft and returns to the mounted thread. No iframe or framing changes.
+
+Pinned presentation: `src/vendor/virtualis-note/45c17ca5/VirtualisNote.jsx`, original Waveform/NoteSection/Modal/Toast, parser, encounter vocabulary and bundled original favicon. `provenance.json` records source project, commit, original SHA-256 hashes, vendored hashes and all transformations. Type erasure preserves the original presentation/subcomponents; imports are remapped to a small host boundary, direct billing writes removed, animation reduced to presentation, and synthetic/memory-only wording substituted. This is actual source reuse, not a reconstructed editor or full source app copy. No license declaration was verified; reuse is limited to the user's authorized workspace integration.
+
+Supported: synthetic transcript and note section editing, memory-only retention/discard, note-type and encounter selectors, original desktop/mobile panels, synthetic patient fields, open/return-to-thread. Disabled/unavailable: AI generation/handoff, signing/clinical confirmation, database/patient/billing save, dictation, synchronization, analytics, radiology, navigation/auth changes and clipboard export. Unmapped adapters fail closed. The original generated-note display is explicitly labeled Synthetic Draft and never marked physician-reviewed. Original service hooks, source backend client, app/router/providers and source global CSS are not copied. Shadow-scoped CSS preserves Nue's outer styles; the palette is taken from original Note's tokens and styles remain local to the workspace. No new packages or data stores.
+
+Focused evidence: three synthetic adapter tests; targeted TypeScript-file lint; isolated synthetic Thread browser check opens the reused source, edits and retains a draft only in memory, then closes without runtime errors or external requests. Desktop host message draft and Note-button computed color remain unchanged; mobile open/close also passes. Screenshots inspected at 1280×1800 and 390×844. Automatic validation reports build OK; no manual build/typecheck or broad tests. JSX files are ignored by existing lint configuration. No authenticated/live app flow, database tests/writes or inference. Source inspection finds no fetch, source client, browser storage, timers or clipboard side effects in vendored code; the one retained effect auto-resizes a textarea.
+
 Read-only original source: project `eb9d503b-3831-420a-8d8b-d7ea0092bbc2`, snapshot commit `45c17ca5`. Not the RCM remix. Source is accessible; a portable authenticated Note module is **not** exported.
 
 `src/components/VirtualisNote.tsx` (2,103 lines) imports `useVirtualisNoteState`, `useNoteGeneration`, `AppLayout`, router navigation, sync, billing and completeness-review UI. `src/App.tsx` uses a different router and supplies AuthProvider, FacilityProvider and SyncProvider. State loads patients and clinical notes; generation performs AI and clinical/billing/analytics writes. Copying just the screen would not reproduce the exact application safely. Nue's existing `NoteSheet.jsx` remains unchanged: it is standalone SOAP, **not** full embedded Virtualis Note.
@@ -30,7 +40,7 @@ The pure preparation helper accepts an injected synthetic mock transport in unit
 
 - Current `acuity.server.ts` remains unchanged: it forwards the verified session JWT to AWS. Prior evidence reports valid sessions returning gateway 403 with an HS256/no-kid token against ES256 JWKS; no fresh trust/inference checks were authorized or performed. Confirm active signing algorithm, issuer/audience and authorizer trust with the owners; do not accept unverified tokens or change auth as a workaround.
 - Real consult inference needs an upstream-approved clinical channel/field contract, provider authorization/assignment validation, PHI processing coverage and approved provenance storage in the existing workflow. Current Model Lab administration and review enqueue behavior must remain separate.
-- Exact Note needs the source/export or isolated authenticated development entry contract above. Source availability alone does not prove embedding or live integration.
+- Exact Note clinical services still need the approved host contracts above. Bounded source-reused synthetic embedding is now implemented; live integration is not enabled.
 
 ## Verification scope
 

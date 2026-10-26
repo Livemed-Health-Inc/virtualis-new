@@ -11,3 +11,4 @@
 
 - The bounded consult integration uses a development-gated, read-only authenticated RPC and the existing model contract with mock-only transport; why: preserve facility isolation without invoking admin Model Lab writes or live inference.
 - Exact Virtualis Note integration requires a versioned host-adapter boundary or isolated authenticated development entry, not copying the SOAP sheet or framing production; why: the original screen is coupled to a separate app and denies framing.
+- The pinned original Note presentation under src/vendor uses only the synthetic memory adapter in a lazy development thread workspace with shadow-scoped styles; why: reuse original presentation without importing source auth, services, real thread content or production behavior.

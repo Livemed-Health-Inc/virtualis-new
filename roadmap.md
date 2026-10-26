@@ -2,10 +2,12 @@
 
 ## Bounded development integration (2026-10-26)
 
+- [x] Extract pinned original Note presentation with synthetic memory-only adapter; mount from development thread Note entry and run focused isolation tests.
+
 - [x] Inspect exact original Note source; no portable module exported. Required source/authenticated development contract documented in docs/development-note-acuity-integration.md.
 - [x] Add development-only, facility-authorized consult recommendation preparation; no live inference, writes, or production changes.
 - [x] Run 26 focused synthetic unit mocks, targeted lint, automatic validation and isolated synthetic composer rendering; report evidence, current revision, credits, and blockers.
-- [ ] Enable exact Note integration — blocked on original-owner versioned host-adapter export or approved isolated authenticated development entry.
+- [x] Enable bounded exact-source Note development presentation — synthetic memory-only workspace implemented; clinical service integration remains disabled pending approved host contracts.
 - [ ] Enable/prove real consult model integration — blocked on AWS trust, clinical channel/PHI approval, authoritative provider classification and existing-workflow provenance contract; no live tests authorized.
 
 1. [x] Remove MCP attack surface (routes, well-known, tools, manifest) → 404
