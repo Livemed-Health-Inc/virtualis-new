@@ -1,6 +1,7 @@
-import { useEffect, useRef, useState } from "react";
+import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import { useMediaQuery } from "./theme";
 import NoteSheet from "./NoteSheet";
+const OriginalNoteWorkspace = lazy(() => import("@/lib/note-embed/OriginalNoteWorkspace"));
 import {
   T,
   mono,
@@ -247,7 +248,7 @@ export default function Thread({
             >
               Note
             </button>
-            {noteOpen && <NoteSheet t={t} onClose={() => setNoteOpen(false)} />}
+            {noteOpen && (import.meta.env.DEV ? <Suspense fallback={<div role="status">Opening synthetic Virtualis Note…</div>}><OriginalNoteWorkspace onClose={() => setNoteOpen(false)} /></Suspense> : <NoteSheet t={t} onClose={() => setNoteOpen(false)} />)}
             <button
               onClick={onVideo}
               title="Video"
