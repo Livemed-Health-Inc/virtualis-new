@@ -36,7 +36,7 @@ export {
   recordLOSOutcome,
   type FeedbackSink,
 } from './feedback';
-export { useDisposition, type UseDispositionResult } from './hooks/useDisposition';
+export { useDisposition, type UseDispositionResult, type FeedbackStatus } from './hooks/useDisposition';
 export { StatusChip, type StatusChipProps } from './components/StatusChip';
 export { StatusEvidencePanel, type StatusEvidencePanelProps } from './components/StatusEvidencePanel';
 export { LOSExpectationTag, LOSVarianceChip, type LOSVarianceTagProps } from './components/LOSTag';
