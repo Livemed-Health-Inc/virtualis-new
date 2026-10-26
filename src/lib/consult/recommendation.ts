@@ -4,9 +4,15 @@ import { z } from "zod";
 import { projectDecision, toDecisionRequest, type Decision } from "../modellab/contract";
 import { screenOutbound } from "../modellab/training";
 
-export const consultScopeSchema = z.object({
-  facility: z.string().min(1).max(60).regex(/^[a-zA-Z0-9_-]+$/),
-}).strict();
+export const consultScopeSchema = z
+  .object({
+    facility: z
+      .string()
+      .min(1)
+      .max(60)
+      .regex(/^[a-zA-Z0-9_-]+$/),
+  })
+  .strict();
 
 export const UNAVAILABLE = {
   status: "unavailable" as const,
@@ -14,12 +20,14 @@ export const UNAVAILABLE = {
   clinically_validated: false as const,
   reason: "Live model calls are disabled for this development integration.",
 };
-export type Recommendation = typeof UNAVAILABLE | {
-  status: "recommended";
-  review_required: true;
-  clinically_validated: false;
-  decision: Decision;
-};
+export type Recommendation =
+  | typeof UNAVAILABLE
+  | {
+      status: "recommended";
+      review_required: true;
+      clinically_validated: false;
+      decision: Decision;
+    };
 export const DISPLAY_ACUITY = { low: "Green", medium: "Yellow", high: "Red" } as const;
 
 export interface ScopeAccess {
@@ -51,18 +59,28 @@ export async function prepareRecommendation(
     return UNAVAILABLE;
   try {
     const body = toDecisionRequest({
-      message_id: "synthetic-consult", text: syntheticText,
-      use_case: "specialist_consult", sender_role: "provider", care_setting: "ed",
+      message_id: "synthetic-consult",
+      text: syntheticText,
+      use_case: "specialist_consult",
+      sender_role: "provider",
+      care_setting: "ed",
     });
-    return { status: "recommended", decision: projectDecision(await transport(body), syntheticText),
-      review_required: true, clinically_validated: false };
+    return {
+      status: "recommended",
+      decision: projectDecision(await transport(body), syntheticText),
+      review_required: true,
+      clinically_validated: false,
+    };
   } catch {
     return UNAVAILABLE;
   }
 }
 
 // A result never chooses or routes on behalf of the clinician.
-export function chooseAfterRecommendation(result: Recommendation | null, choice: "low" | "medium" | "high") {
+export function chooseAfterRecommendation(
+  result: Recommendation | null,
+  choice: "low" | "medium" | "high",
+) {
   if (!result) throw new Error("Recommendation must be attempted before selection");
   return { choice, recommendation: result };
 }

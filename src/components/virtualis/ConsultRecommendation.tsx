@@ -11,17 +11,26 @@ export default function ConsultRecommendation({ facility }: { facility: string }
     setPending(true);
     try {
       const result = await getRecommendation({ data: { facility } });
-      setStatus(`Model unavailable · review required. ${result.status === "unavailable" ? result.reason : "Live calls disabled."}`);
+      setStatus(
+        `Model unavailable · review required. ${result.status === "unavailable" ? result.reason : "Live calls disabled."}`,
+      );
     } catch {
-      setStatus("Recommendation unavailable · facility access could not be verified. Review required.");
+      setStatus(
+        "Recommendation unavailable · facility access could not be verified. Review required.",
+      );
     } finally {
       setPending(false);
     }
   };
   return (
-    <section aria-label="Development consult recommendation" className="mt-4 space-y-2 border-y border-border py-3 text-foreground">
+    <section
+      aria-label="Development consult recommendation"
+      className="mt-4 space-y-2 border-y border-border py-3 text-foreground"
+    >
       <h3 className="text-sm font-semibold">AWS Acuity · development only</h3>
-      <p role="status" className="text-sm text-muted-foreground">{status}</p>
+      <p role="status" className="text-sm text-muted-foreground">
+        {status}
+      </p>
       <Button variant="outline" size="sm" onClick={check} disabled={pending}>
         {pending ? "Checking access…" : "Check recommendation access"}
       </Button>
