@@ -35,7 +35,7 @@ export function AnimatePresence({ children }) {
   return <>{children}</>;
 }
 const blocked =
-  /generate|handoff|sign out|practice|profile|save$|update$|reviewed this note|analytics|radiology/i;
+  /generate|handoff|sign out|practice|profile|save$|update$|reviewed this note|analytics|radiology|copy|recording|📋/i;
 export function Button({ children, ...props }) {
   const text = React.Children.toArray(children)
     .filter((c) => typeof c === "string")
