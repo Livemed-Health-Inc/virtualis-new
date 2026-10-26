@@ -36,6 +36,7 @@ import {
 import { useMediaQuery } from "./theme";
 import { SPECIALTIES, SHIFTS, STAFF, ME, credentialedFacilities } from "./data";
 import ConsultRecommendation from "./ConsultRecommendation";
+import { chooseAfterRecommendation, UNAVAILABLE } from "@/lib/consult/recommendation";
 
 /* ── Login ─────────────────────────────────────────────────────── */
 export function Login() {
@@ -972,7 +973,12 @@ export function NewConsult({ onBack, onSend, facilityScope, defaultFacility }) {
                 return (
                   <button
                     key={k}
-                    onClick={() => setAcuity(k)}
+                    onClick={() => {
+                      if (import.meta.env.DEV) {
+                        chooseAfterRecommendation(UNAVAILABLE, ({ critical: "high", urgent: "medium", routine: "low" })[k]);
+                      }
+                      setAcuity(k);
+                    }}
                     style={{
                       all: "unset",
                       boxSizing: "border-box",

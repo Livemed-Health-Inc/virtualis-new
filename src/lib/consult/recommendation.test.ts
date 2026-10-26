@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import { authorizeConsultScope, chooseAfterRecommendation, consultScopeSchema, DISPLAY_ACUITY, prepareRecommendation, UNAVAILABLE, type ScopeAccess } from "./recommendation";
+import type { toDecisionRequest } from "../modellab/contract";
 
 const access = (facilities = ["onsite-a"]): ScopeAccess => ({
   userId: "synthetic-user", setupComplete: async () => true,
@@ -52,7 +53,7 @@ describe("bounded consult recommendation", () => {
     expect(await prepareRecommendation(access(), "onsite-a", "Synthetic chest discomfort", async () => response)).toEqual(UNAVAILABLE);
   });
   it("retains provenance and clamps review safety using the existing contract", async () => {
-    const transport = vi.fn(async () => raw);
+    const transport = vi.fn(async (_body: ReturnType<typeof toDecisionRequest>) => raw);
     const r = await prepareRecommendation(access(), "onsite-a", "Synthetic chest discomfort", transport);
     expect(transport.mock.calls[0]?.[0]).toEqual(expect.objectContaining({ use_case: "specialist_consult" }));
     if (r.status !== "recommended") throw new Error("Expected synthetic recommendation");
