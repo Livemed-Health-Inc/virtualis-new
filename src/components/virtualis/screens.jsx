@@ -35,6 +35,7 @@ import {
 } from "./ui";
 import { useMediaQuery } from "./theme";
 import { SPECIALTIES, SHIFTS, STAFF, ME, credentialedFacilities } from "./data";
+import ConsultRecommendation from "./ConsultRecommendation";
 
 /* ── Login ─────────────────────────────────────────────────────── */
 export function Login() {
@@ -706,7 +707,7 @@ export function NewConsult({ onBack, onSend, facilityScope, defaultFacility }) {
   const [telehealth, setTelehealth] = useState(false);
   const [voice, setVoice] = useState(false);
   const [specQuery, setSpecQuery] = useState("");
-  const suggestion = suggestAcuity(reason);
+  const suggestion = import.meta.env.DEV ? null : suggestAcuity(reason);
   const ready = patient && reason && acuity && spec.length > 0;
   const f = FACILITIES[facility];
   const specs = SPECIALTIES.filter((s) => s.toLowerCase().includes(specQuery.toLowerCase()));
@@ -895,6 +896,7 @@ export function NewConsult({ onBack, onSend, facilityScope, defaultFacility }) {
             />
           </div>
 
+          {import.meta.env.DEV && <ConsultRecommendation key={facility} facility={facility} />}
           <div
             style={{
               background: "#fff",
@@ -906,7 +908,7 @@ export function NewConsult({ onBack, onSend, facilityScope, defaultFacility }) {
           >
             <div style={{ fontSize: 16, fontWeight: 680, color: T.ink }}>Acuity *</div>
             <div style={{ fontSize: 12.5, color: T.sub, marginTop: 3 }}>
-              Three bars Critical · two Urgent · one Routine. The glyph travels with the message.
+              {import.meta.env.DEV ? "Red · Yellow · Green" : "Three bars Critical · two Urgent · one Routine. The glyph travels with the message."}
             </div>
             {suggestion && (
               <div
@@ -995,7 +997,7 @@ export function NewConsult({ onBack, onSend, facilityScope, defaultFacility }) {
                         marginTop: 7,
                       }}
                     >
-                      {a.label}
+                      {import.meta.env.DEV ? ({ critical: "Red", urgent: "Yellow", routine: "Green" })[k] : a.label}
                     </div>
                     <div style={{ fontSize: 10.5, color: T.faint, marginTop: 2 }}>
                       {k === "critical" ? "5 min SLA" : k === "urgent" ? "30 min" : "4 hr"}
