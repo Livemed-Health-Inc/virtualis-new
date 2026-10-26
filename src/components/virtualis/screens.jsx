@@ -37,6 +37,11 @@ import { useMediaQuery } from "./theme";
 import { SPECIALTIES, SHIFTS, STAFF, ME, credentialedFacilities } from "./data";
 import ConsultRecommendation from "./ConsultRecommendation";
 import { chooseAfterRecommendation, UNAVAILABLE } from "@/lib/consult/recommendation";
+import { lazy, Suspense } from "react";
+
+const SyntheticDisposition = import.meta.env.DEV
+  ? lazy(() => import("@/features/disposition/synthetic/SyntheticDispositionPanel"))
+  : () => null;
 
 /* ── Login ─────────────────────────────────────────────────────── */
 export function Login() {
@@ -898,6 +903,11 @@ export function NewConsult({ onBack, onSend, facilityScope, defaultFacility }) {
           </div>
 
           {import.meta.env.DEV && <ConsultRecommendation key={facility} facility={facility} />}
+          {import.meta.env.DEV && (
+            <Suspense fallback={null}>
+              <SyntheticDisposition />
+            </Suspense>
+          )}
           <div
             style={{
               background: "#fff",
