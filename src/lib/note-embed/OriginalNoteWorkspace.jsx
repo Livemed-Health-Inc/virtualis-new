@@ -19,15 +19,45 @@ export default function OriginalNoteWorkspace({ onClose, adapter }) {
     if (!el) return;
     const shadow = el.shadowRoot ?? el.attachShadow({ mode: "open" });
     // Clone loaded local CSS into the shadow, never import source app/global styles.
-    for (const style of document.querySelectorAll("style")) shadow.appendChild(style.cloneNode(true));
-    const theme = document.createElement("style"); theme.textContent = localTheme; shadow.appendChild(theme);
+    for (const style of document.querySelectorAll("style"))
+      shadow.appendChild(style.cloneNode(true));
+    const theme = document.createElement("style");
+    theme.textContent = localTheme;
+    shadow.appendChild(theme);
     setRoot(shadow);
-    return () => { shadow.replaceChildren(); };
+    return () => {
+      shadow.replaceChildren();
+    };
   }, []);
   if (!import.meta.env.DEV) return null;
-  return <div ref={host} aria-label="Original Virtualis Note workspace">{root && createPortal(
-    <div className="note-root" role="dialog" aria-modal="true" aria-label="Synthetic Virtualis Note development">
-      <div className="workspace-bar"><div><strong>Synthetic development integration</strong><div className="text-xs text-muted-foreground">In-memory only · generation, signing, database save, dictation, sync, analytics and exports unavailable</div></div><Button variant="outline" onClick={onClose}>Return to thread</Button></div>
-      <NoteAdapterProvider adapter={adapter === undefined ? synthetic : adapter}><VirtualisNote /></NoteAdapterProvider>
-    </div>, root)}</div>;
+  return (
+    <div ref={host} aria-label="Original Virtualis Note workspace">
+      {root &&
+        createPortal(
+          <div
+            className="note-root"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Synthetic Virtualis Note development"
+          >
+            <div className="workspace-bar">
+              <div>
+                <strong>Synthetic development integration</strong>
+                <div className="text-xs text-muted-foreground">
+                  In-memory only · generation, signing, database save, dictation, sync, analytics
+                  and exports unavailable
+                </div>
+              </div>
+              <Button variant="outline" onClick={onClose}>
+                Return to thread
+              </Button>
+            </div>
+            <NoteAdapterProvider adapter={adapter === undefined ? synthetic : adapter}>
+              <VirtualisNote />
+            </NoteAdapterProvider>
+          </div>,
+          root,
+        )}
+    </div>
+  );
 }

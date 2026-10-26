@@ -1,5 +1,5 @@
 import React from 'react';
-import { motion } from '../../../../lib/note-embed/boundary';
+import { motion } from '../../../lib/note-embed/boundary';
 import { cn } from '@/lib/utils';
 /**
  * Audio waveform visualization component.

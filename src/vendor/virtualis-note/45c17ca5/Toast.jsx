@@ -1,5 +1,5 @@
 import React, { forwardRef } from 'react';
-import { motion } from '../../../../lib/note-embed/boundary';
+import { motion } from '../../../lib/note-embed/boundary';
 /**
  * Simple toast notification component.
  * Uses forwardRef to avoid ref warnings with AnimatePresence.

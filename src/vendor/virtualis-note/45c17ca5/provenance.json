@@ -7,13 +7,13 @@
       "source": "src/components/VirtualisNote.tsx",
       "vendored": "VirtualisNote.jsx",
       "source_sha256": "d2a3964265d7128b8828e7b0ec0f07fdb8b2323e58df34b9ff0e029b52fc4990",
-      "vendored_sha256": "36e6b45c8e09048a32a754cc36e19edf431239bcead96278e951bea6da5d6d8a"
+      "vendored_sha256": "e3ebed079ffad2b509c3e14e99c970f70ea6af82c589cbfd37e1a2272830f5a8"
     },
     {
       "source": "src/components/virtualis-note/Waveform.tsx",
       "vendored": "Waveform.jsx",
       "source_sha256": "7fc50b4573fef9686dab6c461fce180d4dd3168613aa7948955b87f065401fba",
-      "vendored_sha256": "cfe6485abb476e7fa01535ad3d28764bfc43cdc93ace234c5f2f8fade90543ef"
+      "vendored_sha256": "0297e08e944c174ce466ff26c51643b26df3ba3e26d3f03fde5678df73a7b502"
     },
     {
       "source": "src/components/virtualis-note/NoteSection.tsx",
@@ -25,13 +25,13 @@
       "source": "src/components/virtualis-note/Modal.tsx",
       "vendored": "Modal.jsx",
       "source_sha256": "4f3cd86c494ca7cb254a267f3b4def6cf359568401708dc26993c8c8ce9fe9de",
-      "vendored_sha256": "6e538fd3c1aa72f777ba7ecd010d2dd33f73c9d5325df7336b09807689b2ae8a"
+      "vendored_sha256": "aa38929f22500e2fa5d3dfd989ccc06caf5b149f81db1839d22a2b1e8fea87fd"
     },
     {
       "source": "src/components/virtualis-note/Toast.tsx",
       "vendored": "Toast.jsx",
       "source_sha256": "e00fd2e1b29480fe444996ffb2a894e30a2df437bce93674cf2eb140dc5b2fb8",
-      "vendored_sha256": "cae22c642f85eab3807f9ae08195e371ad1eebdece637e45e93bc51a302c68bc"
+      "vendored_sha256": "041f76b671b1e41bce67b8e436aa98d5c058928d9f51f96d8e8129d93ad0948c"
     },
     {
       "source": "src/components/virtualis-note/utils.ts",
