@@ -2,6 +2,8 @@
 
 ## Bounded development integration (2026-10-26)
 
+- [ ] Extract pinned original Note presentation with synthetic memory-only adapter; mount from development thread Note entry and run focused isolation tests.
+
 - [x] Inspect exact original Note source; no portable module exported. Required source/authenticated development contract documented in docs/development-note-acuity-integration.md.
 - [x] Add development-only, facility-authorized consult recommendation preparation; no live inference, writes, or production changes.
 - [x] Run 26 focused synthetic unit mocks, targeted lint, automatic validation and isolated synthetic composer rendering; report evidence, current revision, credits, and blockers.
