@@ -13,7 +13,7 @@ import type {
   DispositionFeedbackEvent,
   DispositionObligation,
   LOSVarianceTag,
-} from './types';
+} from "./types";
 
 export type FeedbackSink = (event: DispositionFeedbackEvent) => Promise<void> | void;
 
@@ -34,8 +34,8 @@ export function recordResolution(
   const r = obligation.resolution;
   if (!r) return Promise.resolve();
   return emit({
-    stream: 'disposition-feedback',
-    kind: r.agreesWithRecommendation ? 'confirm' : 'override',
+    stream: "disposition-feedback",
+    kind: r.agreesWithRecommendation ? "confirm" : "override",
     assessmentId: assessment.assessmentId,
     context: assessment.context,
     payload: {
@@ -53,12 +53,15 @@ export function recordResolution(
 /** Record the eventual payer result for a confirmed status (denied/upheld). */
 export function recordPayerOutcome(
   assessmentId: string,
-  context: DispositionAssessment['context'],
-  outcome: { status: 'paid' | 'denied' | 'downgraded' | 'appealed_upheld' | 'appealed_lost'; notes?: string },
+  context: DispositionAssessment["context"],
+  outcome: {
+    status: "paid" | "denied" | "downgraded" | "appealed_upheld" | "appealed_lost";
+    notes?: string;
+  },
 ): Promise<void> {
   return emit({
-    stream: 'disposition-feedback',
-    kind: 'payer_outcome',
+    stream: "disposition-feedback",
+    kind: "payer_outcome",
     assessmentId,
     context,
     payload: outcome,
@@ -73,8 +76,8 @@ export function recordLOSOutcome(
   actualMidnightsAtDischarge: number,
 ): Promise<void> {
   return emit({
-    stream: 'disposition-feedback',
-    kind: 'los_outcome',
+    stream: "disposition-feedback",
+    kind: "los_outcome",
     assessmentId,
     context: tag.context,
     payload: {

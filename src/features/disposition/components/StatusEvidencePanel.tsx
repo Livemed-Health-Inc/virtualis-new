@@ -7,12 +7,19 @@
  * so the clinician can independently review it; the clinician decides.
  */
 
-import { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Progress } from '@/components/ui/progress';
-import { AlertTriangle, Check, FlaskConical, MessageSquare, Stethoscope, UserCheck } from 'lucide-react';
-import type { DispositionAssessment, DispositionObligation, DispositionResolution } from '../types';
-import type { ResolutionError } from '../engine';
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
+import {
+  AlertTriangle,
+  Check,
+  FlaskConical,
+  MessageSquare,
+  Stethoscope,
+  UserCheck,
+} from "lucide-react";
+import type { DispositionAssessment, DispositionObligation, DispositionResolution } from "../types";
+import type { ResolutionError } from "../engine";
 
 const SOURCE_ICON = {
   vitals: Stethoscope,
@@ -27,25 +34,28 @@ export interface StatusEvidencePanelProps {
   obligation: DispositionObligation | null;
   /** Host supplies the actor; returns an error code when the write is rejected. */
   onResolve: (
-    resolution: Omit<DispositionResolution, 'decidedAt' | 'agreesWithRecommendation'>,
+    resolution: Omit<DispositionResolution, "decidedAt" | "agreesWithRecommendation">,
   ) => ResolutionError | null;
 }
 
-export function StatusEvidencePanel({ assessment, obligation, onResolve }: StatusEvidencePanelProps) {
+export function StatusEvidencePanel({
+  assessment,
+  obligation,
+  onResolve,
+}: StatusEvidencePanelProps) {
   const [overrideMode, setOverrideMode] = useState(false);
-  const [overrideReason, setOverrideReason] = useState('');
+  const [overrideReason, setOverrideReason] = useState("");
   const [error, setError] = useState<ResolutionError | null>(null);
 
-  const resolved = obligation?.state === 'confirmed' || obligation?.state === 'overridden';
+  const resolved = obligation?.state === "confirmed" || obligation?.state === "overridden";
   const recommendedStatus =
-    assessment.recommendation === 'meets_inpatient' ? 'inpatient'
-    : assessment.recommendation === 'meets_observation' ? 'observation'
-    : null;
+    assessment.recommendation === "meets_inpatient"
+      ? "inpatient"
+      : assessment.recommendation === "meets_observation"
+        ? "observation"
+        : null;
 
-  const resolve = (
-    decidedStatus: DispositionResolution['decidedStatus'],
-    reason?: string,
-  ) => {
+  const resolve = (decidedStatus: DispositionResolution["decidedStatus"], reason?: string) => {
     // decidedBy/decidedByRole are injected by the host via onResolve's closure
     // in most integrations; this panel passes through what it knows.
     const err = onResolve({
@@ -64,15 +74,17 @@ export function StatusEvidencePanel({ assessment, obligation, onResolve }: Statu
           Status decision support
         </div>
         <div className="mt-0.5 text-sm font-semibold">
-          {assessment.recommendation === 'meets_inpatient' && 'Meets inpatient considerations'}
-          {assessment.recommendation === 'meets_observation' && 'Meets observation considerations'}
-          {assessment.recommendation === 'insufficient_data' && 'Insufficient data for a recommendation'}
+          {assessment.recommendation === "meets_inpatient" && "Meets inpatient considerations"}
+          {assessment.recommendation === "meets_observation" && "Meets observation considerations"}
+          {assessment.recommendation === "insufficient_data" &&
+            "Insufficient data for a recommendation"}
         </div>
         {assessment.confidence > 0 && (
           <div className="mt-2 flex items-center gap-2">
             <Progress value={assessment.confidence * 100} className="h-1.5" />
             <span className="text-[10px] tabular-nums text-muted-foreground">
-              {Math.round(assessment.confidence * 100)}% heuristic rule score · not validated accuracy
+              {Math.round(assessment.confidence * 100)}% heuristic rule score · not validated
+              accuracy
             </span>
           </div>
         )}
@@ -91,12 +103,12 @@ export function StatusEvidencePanel({ assessment, obligation, onResolve }: Statu
                 {e.label}
                 <span
                   className={`ml-auto rounded-full px-1.5 py-0.5 text-[9px] font-bold uppercase ${
-                    e.supports === 'inpatient'
-                      ? 'bg-red-500/10 text-red-600 dark:text-red-400'
-                      : 'bg-amber-500/10 text-amber-600 dark:text-amber-400'
+                    e.supports === "inpatient"
+                      ? "bg-red-500/10 text-red-600 dark:text-red-400"
+                      : "bg-amber-500/10 text-amber-600 dark:text-amber-400"
                   }`}
                 >
-                  {e.supports === 'inpatient' ? 'IP' : 'Obs'}
+                  {e.supports === "inpatient" ? "IP" : "Obs"}
                 </span>
               </div>
               <p className="mt-1 text-[11px] leading-snug text-muted-foreground">{e.rationale}</p>
@@ -111,8 +123,8 @@ export function StatusEvidencePanel({ assessment, obligation, onResolve }: Statu
       {assessment.missingData.length > 0 && (
         <p className="flex items-start gap-1.5 text-[11px] text-muted-foreground">
           <AlertTriangle className="mt-0.5 h-3 w-3 shrink-0 text-amber-500" aria-hidden />
-          Would sharpen the call: {assessment.missingData.slice(0, 4).join(', ')}
-          {assessment.missingData.length > 4 ? '…' : ''}
+          Would sharpen the call: {assessment.missingData.slice(0, 4).join(", ")}
+          {assessment.missingData.length > 4 ? "…" : ""}
         </p>
       )}
 
@@ -123,8 +135,13 @@ export function StatusEvidencePanel({ assessment, obligation, onResolve }: Statu
               <Check className="mr-1 h-3.5 w-3.5" /> Confirm {recommendedStatus}
             </Button>
           )}
-          <Button size="sm" variant="outline" className="flex-1" onClick={() => setOverrideMode(true)}>
-            {recommendedStatus ? 'Override' : 'Decide status'}
+          <Button
+            size="sm"
+            variant="outline"
+            className="flex-1"
+            onClick={() => setOverrideMode(true)}
+          >
+            {recommendedStatus ? "Override" : "Decide status"}
           </Button>
         </div>
       )}
@@ -139,7 +156,7 @@ export function StatusEvidencePanel({ assessment, obligation, onResolve }: Statu
             aria-label="Override reason"
           />
           <div className="flex flex-wrap gap-2">
-            {(['inpatient', 'observation', 'discharge', 'transfer'] as const)
+            {(["inpatient", "observation", "discharge", "transfer"] as const)
               .filter((s) => s !== recommendedStatus)
               .map((s) => (
                 <Button
@@ -162,20 +179,21 @@ export function StatusEvidencePanel({ assessment, obligation, onResolve }: Statu
 
       {resolved && obligation?.resolution && (
         <p className="rounded-lg bg-emerald-500/10 p-2 text-[11px] font-medium text-emerald-700 dark:text-emerald-400">
-          Status {obligation.resolution.decidedStatus} ·{' '}
-          {obligation.state === 'confirmed' ? 'confirmed' : 'overridden'} — kept in memory only.
+          Status {obligation.resolution.decidedStatus} ·{" "}
+          {obligation.state === "confirmed" ? "confirmed" : "overridden"} — kept in memory only.
         </p>
       )}
 
       {error && (
         <p className="text-[11px] font-semibold text-destructive" role="alert">
-          {error === 'OVERRIDE_REASON_REQUIRED' && 'An override reason is required.'}
-          {error === 'AUTH_ROLE' && 'Only a physician or APP can set patient status.'}
-          {error === 'AUTH_ACTOR' && 'Decision identity does not match the bound clinician.'}
-          {error === 'CTX_ASSESSMENT_MISMATCH' && 'Assessment is stale or does not match this consult.'}
-          {(error === 'CTX_PATIENT_MISMATCH' || error === 'CTX_THREAD_MISMATCH') &&
-            'Context mismatch — this decision does not match the open patient/thread.'}
-          {error === 'ALREADY_RESOLVED' && 'This status decision was already recorded.'}
+          {error === "OVERRIDE_REASON_REQUIRED" && "An override reason is required."}
+          {error === "AUTH_ROLE" && "Only a physician or APP can set patient status."}
+          {error === "AUTH_ACTOR" && "Decision identity does not match the bound clinician."}
+          {error === "CTX_ASSESSMENT_MISMATCH" &&
+            "Assessment is stale or does not match this consult."}
+          {(error === "CTX_PATIENT_MISMATCH" || error === "CTX_THREAD_MISMATCH") &&
+            "Context mismatch — this decision does not match the open patient/thread."}
+          {error === "ALREADY_RESOLVED" && "This status decision was already recorded."}
         </p>
       )}
 

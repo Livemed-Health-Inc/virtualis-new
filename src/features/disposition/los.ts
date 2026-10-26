@@ -22,23 +22,23 @@ import type {
   LOSExpectation,
   LOSVarianceState,
   LOSVarianceTag,
-} from './types';
+} from "./types";
 
-export const LOS_RULE_SET_VERSION = 'vds-los-0.1.0';
+export const LOS_RULE_SET_VERSION = "vds-los-0.1.0";
 
 /** Baseline expected midnights by condition category. PLACEHOLDER VALUES. */
 export const DEFAULT_LOS_BASELINES: Record<string, number> = {
-  'chest-pain-ruleout': 1,
-  'syncope': 1,
-  'nstemi': 3,
-  'chf-exacerbation': 4,
-  'copd-exacerbation': 3,
-  'pneumonia': 3,
-  'sepsis': 5,
-  'cellulitis': 3,
-  'gi-bleed': 3,
-  'aki': 3,
-  'default': 2,
+  "chest-pain-ruleout": 1,
+  syncope: 1,
+  nstemi: 3,
+  "chf-exacerbation": 4,
+  "copd-exacerbation": 3,
+  pneumonia: 3,
+  sepsis: 5,
+  cellulitis: 3,
+  "gi-bleed": 3,
+  aki: 3,
+  default: 2,
 };
 
 export interface LOSModifierConfig {
@@ -58,9 +58,9 @@ export const DEFAULT_LOS_MODIFIERS: LOSModifierConfig = {
 };
 
 export function bandFor(midnights: number): LOSBand {
-  if (midnights < 2) return 'lt_2_midnights';
-  if (midnights <= 3) return '2_3_midnights';
-  return '4_plus_midnights';
+  if (midnights < 2) return "lt_2_midnights";
+  if (midnights <= 3) return "2_3_midnights";
+  return "4_plus_midnights";
 }
 
 /** Set the expected LOS at consult creation. */
@@ -69,16 +69,31 @@ export function estimateLOS(
   baselines: Record<string, number> = DEFAULT_LOS_BASELINES,
   modifiers: LOSModifierConfig = DEFAULT_LOS_MODIFIERS,
 ): LOSExpectation {
-  const category = input.conditionCategory ?? 'default';
-  const baseline = baselines[category] ?? baselines['default'] ?? 2;
+  const category = input.conditionCategory ?? "default";
+  const baseline = baselines[category] ?? baselines["default"] ?? 2;
   const basis: string[] = [`baseline(${category})=${baseline}`];
   let expected = baseline;
 
-  if ((input.age ?? 0) >= 75) { expected += modifiers.ageOver75; basis.push('age ≥ 75'); }
-  if (input.attested?.highRiskComorbidity) { expected += modifiers.highRiskComorbidity; basis.push('high-risk comorbidity'); }
-  if (input.attested?.failedOutpatientTherapy) { expected += modifiers.failedOutpatientTherapy; basis.push('failed outpatient therapy'); }
-  if (input.attested?.alteredMentalStatus) { expected += modifiers.alteredMentalStatus; basis.push('altered mental status'); }
-  if (input.attested?.unableToToleratePo) { expected += modifiers.unableToToleratePo; basis.push('unable to tolerate PO'); }
+  if ((input.age ?? 0) >= 75) {
+    expected += modifiers.ageOver75;
+    basis.push("age ≥ 75");
+  }
+  if (input.attested?.highRiskComorbidity) {
+    expected += modifiers.highRiskComorbidity;
+    basis.push("high-risk comorbidity");
+  }
+  if (input.attested?.failedOutpatientTherapy) {
+    expected += modifiers.failedOutpatientTherapy;
+    basis.push("failed outpatient therapy");
+  }
+  if (input.attested?.alteredMentalStatus) {
+    expected += modifiers.alteredMentalStatus;
+    basis.push("altered mental status");
+  }
+  if (input.attested?.unableToToleratePo) {
+    expected += modifiers.unableToToleratePo;
+    basis.push("unable to tolerate PO");
+  }
 
   return {
     context: input.context,
@@ -93,19 +108,27 @@ export function estimateLOS(
 
 /** Calendar date (y, m, d) of an instant in an explicit IANA facility zone. */
 function facilityDay(d: Date, timeZone: string): number {
-  const parts = new Intl.DateTimeFormat('en-US', {
-    timeZone, year: 'numeric', month: 'numeric', day: 'numeric',
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone,
+    year: "numeric",
+    month: "numeric",
+    day: "numeric",
   }).formatToParts(d);
   const n = (t: string) => Number(parts.find((p) => p.type === t)?.value);
-  return Date.UTC(n('year'), n('month') - 1, n('day')) / 86_400_000;
+  return Date.UTC(n("year"), n("month") - 1, n("day")) / 86_400_000;
 }
 
 /** Facility calendar midnights between admission and now. Never assumes the
  *  browser zone; returns null for invalid dates/zone or now before admission. */
-export function elapsedMidnights(admittedAtIso: string, nowIso: string, timeZone: string): number | null {
+export function elapsedMidnights(
+  admittedAtIso: string,
+  nowIso: string,
+  timeZone: string,
+): number | null {
   const admitted = new Date(admittedAtIso);
   const now = new Date(nowIso);
-  if (Number.isNaN(admitted.getTime()) || Number.isNaN(now.getTime()) || now < admitted) return null;
+  if (Number.isNaN(admitted.getTime()) || Number.isNaN(now.getTime()) || now < admitted)
+    return null;
   try {
     return facilityDay(now, timeZone) - facilityDay(admitted, timeZone);
   } catch {
@@ -138,14 +161,14 @@ export function evaluateLOSVariance(
   const approach = opts.approachWindow ?? 1;
 
   let state: LOSVarianceState;
-  if (elapsed > expectation.expectedMidnights) state = 'exceeding';
-  else if (elapsed >= expectation.expectedMidnights - approach + 1) state = 'approaching';
-  else state = 'on_track';
+  if (elapsed > expectation.expectedMidnights) state = "exceeding";
+  else if (elapsed >= expectation.expectedMidnights - approach + 1) state = "approaching";
+  else state = "on_track";
 
   const message =
-    state === 'on_track'
+    state === "on_track"
       ? `LOS on track: midnight ${elapsed} of ${expectation.expectedMidnights} expected.`
-      : state === 'approaching'
+      : state === "approaching"
         ? `LOS approaching expectation: midnight ${elapsed} of ${expectation.expectedMidnights}. Confirm discharge plan or document the barrier.`
         : `LOS exceeding expectation: midnight ${elapsed} vs ${expectation.expectedMidnights} expected. Document continued-stay necessity or escalate to case management.`;
 
@@ -154,7 +177,7 @@ export function evaluateLOSVariance(
     state,
     expectedMidnights: expectation.expectedMidnights,
     elapsedMidnights: elapsed,
-    tagPhysicianIds: state === 'on_track' ? [] : opts.tagPhysicianIds,
+    tagPhysicianIds: state === "on_track" ? [] : opts.tagPhysicianIds,
     message,
     evaluatedAt: nowIso,
   };

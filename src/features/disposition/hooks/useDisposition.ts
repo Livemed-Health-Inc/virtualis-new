@@ -9,16 +9,16 @@
  * assessment; feedback failures are surfaced rather than assumed successful.
  */
 
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from "react";
 import {
   createDispositionObligation,
   evaluateDisposition,
   resolveDispositionObligation,
   shouldEvaluateDisposition,
   type ResolutionError,
-} from '../engine';
-import { estimateLOS } from '../los';
-import { recordResolution } from '../feedback';
+} from "../engine";
+import { estimateLOS } from "../los";
+import { recordResolution } from "../feedback";
 import type {
   ClinicalRole,
   DispositionAssessment,
@@ -26,9 +26,9 @@ import type {
   DispositionObligation,
   DispositionResolution,
   LOSExpectation,
-} from '../types';
+} from "../types";
 
-export type FeedbackStatus = 'idle' | 'pending' | 'recorded' | 'failed';
+export type FeedbackStatus = "idle" | "pending" | "recorded" | "failed";
 
 export interface UseDispositionResult {
   applicable: boolean;
@@ -38,12 +38,12 @@ export interface UseDispositionResult {
   losExpectation: LOSExpectation | null;
   feedback: FeedbackStatus;
   resolve: (
-    resolution: Omit<DispositionResolution, 'decidedAt' | 'agreesWithRecommendation'>,
+    resolution: Omit<DispositionResolution, "decidedAt" | "agreesWithRecommendation">,
   ) => ResolutionError | null;
 }
 
 const contextKey = (i: DispositionInput | null) =>
-  i ? `${i.context.patientId}|${i.context.threadId}|${i.context.consultId}` : '';
+  i ? `${i.context.patientId}|${i.context.threadId}|${i.context.consultId}` : "";
 
 export function useDisposition(
   input: DispositionInput | null,
@@ -54,14 +54,14 @@ export function useDisposition(
     key: string;
     obligation: DispositionObligation | null;
     feedback: FeedbackStatus;
-  }>({ key: '', obligation: null, feedback: 'idle' });
+  }>({ key: "", obligation: null, feedback: "idle" });
   const lock = useRef<string | null>(null);
 
   // Inputs are re-read only when the bound context changes, never per render.
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const bound = useMemo(() => input, [key]);
   const gate = useMemo(
-    () => (bound ? shouldEvaluateDisposition(bound) : { evaluate: false, reason: 'No input.' }),
+    () => (bound ? shouldEvaluateDisposition(bound) : { evaluate: false, reason: "No input." }),
     [bound],
   );
   const assessment = useMemo(
@@ -76,13 +76,13 @@ export function useDisposition(
     () => (assessment ? createDispositionObligation(assessment) : null),
     [assessment],
   );
-  const current = state.key === key ? state : { key, obligation: fresh, feedback: 'idle' as const };
+  const current = state.key === key ? state : { key, obligation: fresh, feedback: "idle" as const };
 
-  const resolve = useCallback<UseDispositionResult['resolve']>(
+  const resolve = useCallback<UseDispositionResult["resolve"]>(
     (resolution) => {
       const obligation = current.obligation;
-      if (!assessment || !obligation || !bound || !actor) return 'ALREADY_RESOLVED';
-      if (lock.current === obligation.nodeId) return 'ALREADY_RESOLVED';
+      if (!assessment || !obligation || !bound || !actor) return "ALREADY_RESOLVED";
+      if (lock.current === obligation.nodeId) return "ALREADY_RESOLVED";
       const result = resolveDispositionObligation(obligation, assessment, {
         ...resolution,
         decidedBy: actor.id,
@@ -91,10 +91,10 @@ export function useDisposition(
       });
       if (!result.ok) return result.error;
       lock.current = obligation.nodeId;
-      setState({ key, obligation: result.obligation, feedback: 'pending' });
+      setState({ key, obligation: result.obligation, feedback: "pending" });
       recordResolution(assessment, result.obligation).then(
-        () => setState((s) => (s.key === key ? { ...s, feedback: 'recorded' } : s)),
-        () => setState((s) => (s.key === key ? { ...s, feedback: 'failed' } : s)),
+        () => setState((s) => (s.key === key ? { ...s, feedback: "recorded" } : s)),
+        () => setState((s) => (s.key === key ? { ...s, feedback: "failed" } : s)),
       );
       return null;
     },
