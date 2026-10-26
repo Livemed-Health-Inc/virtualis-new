@@ -112,3 +112,13 @@ disposition/
 ├── components/LOSTag.tsx
 └── index.ts        public API
 ```
+
+## Virtualis Nue port status (internal development only)
+
+Mounted only as a synthetic, memory-only panel in the development consult composer
+(`synthetic/SyntheticDispositionPanel.tsx`). Thresholds, weights and LOS baselines are
+**research placeholders**, not tuned or validated. The score is a heuristic rule score,
+not validated model accuracy; rules are not represented as CMS-compliant or as
+medical-necessity approval. The client role/actor check is **not** production
+authorization. No persistence, notifications, notes writes or status/order changes.
+No external demo before IP clearance. See `provenance.json` for source hashes and changes.

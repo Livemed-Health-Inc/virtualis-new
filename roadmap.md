@@ -130,3 +130,9 @@
 - [ ] Draft-note action at the end of a telehealth visit (notes reachable from the thread today)
 - [ ] Acuity model: blocked on user — paste AWS Lambda authorizer code for the signing-key fix
 - [ ] Login help: invite-only; existing account uses "Forgot password" (no passwords shared)
+
+## Disposition module (2026-10, development only)
+
+- [x] Ported supplied module to src/features/disposition with provenance/hashes; narrow fixes (context reset, stale/double resolution, bound actor, feedback failures, facility-zone midnights)
+- [x] Synthetic panel in the development consult composer; memory-only; gates only its own synthetic close
+- [ ] Persistence, real ADT/vitals inputs, notifications, server-side authorization — not connected (needs IP clearance and approved design)
