@@ -234,8 +234,8 @@ export function resolveDispositionObligation(
   if (resolution.decidedByRole !== 'physician' && resolution.decidedByRole !== 'app')
     return { ok: false, error: 'AUTH_ROLE' };
   if (
-    resolution.decidedBy !== resolution.context.actorId ||
-    resolution.decidedByRole !== resolution.context.actorRole
+    resolution.decidedBy !== obligation.context.actorId ||
+    resolution.decidedByRole !== obligation.context.actorRole
   )
     return { ok: false, error: 'AUTH_ACTOR' };
 
