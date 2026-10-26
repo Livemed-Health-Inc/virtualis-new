@@ -1,5 +1,11 @@
 # Roadmap — production hardening (no publish, no destructive data ops)
 
+## Bounded development integration (2026-10-26)
+
+- [ ] Inspect exact original Note source and document a safe portable/authenticated development contract if no module exists.
+- [ ] Add development-only, facility-authorized consult recommendation preparation; no live inference, writes, or production changes.
+- [ ] Run focused synthetic unit mocks and report evidence, current revision, credits, and remaining blockers.
+
 1. [x] Remove MCP attack surface (routes, well-known, tools, manifest) → 404
 2. [x] Server-authoritative forced password completion (`profiles.must_change_password`)
        — BEFORE UPDATE trigger rejects any change from a non-service role; verified by SQL
