@@ -24,7 +24,8 @@ export function registerFeedbackSink(fn: FeedbackSink) {
   sink = fn;
 }
 
-const emit = (event: DispositionFeedbackEvent) => Promise.resolve(sink(event));
+// Rejections propagate so the host can report failure; never assume success.
+const emit = (event: DispositionFeedbackEvent) => Promise.resolve().then(() => sink(event));
 
 export function recordResolution(
   assessment: DispositionAssessment,

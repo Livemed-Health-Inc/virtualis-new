@@ -195,15 +195,22 @@ export function createDispositionObligation(
 export type ResolutionError =
   | 'CTX_PATIENT_MISMATCH'
   | 'CTX_THREAD_MISMATCH'
+  | 'CTX_ASSESSMENT_MISMATCH'
   | 'AUTH_ROLE'
+  | 'AUTH_ACTOR'
   | 'ALREADY_RESOLVED'
   | 'OVERRIDE_REASON_REQUIRED';
 
+const sameContext = (a: DispositionContextRef, b: DispositionContextRef) =>
+  a.patientId === b.patientId && a.threadId === b.threadId && a.consultId === b.consultId;
+
 /**
  * Resolve the obligation. Enforces:
+ *  - assessment ↔ obligation binding (id and context);
  *  - dual-identity context match (patient AND thread);
- *  - physician/APP authority for the status decision;
- *  - mandatory override reason when disagreeing with the recommendation.
+ *  - the deciding actor is the bound physician/APP (client check only — not
+ *    production authorization);
+ *  - mandatory reason whenever the decision is not the recommendation.
  */
 export function resolveDispositionObligation(
   obligation: DispositionObligation,
@@ -213,19 +220,31 @@ export function resolveDispositionObligation(
   },
 ): { ok: true; obligation: DispositionObligation } | { ok: false; error: ResolutionError } {
   if (obligation.state !== 'open') return { ok: false, error: 'ALREADY_RESOLVED' };
+  if (
+    obligation.assessmentId !== assessment.assessmentId ||
+    !sameContext(obligation.context, assessment.context)
+  )
+    return { ok: false, error: 'CTX_ASSESSMENT_MISMATCH' };
   if (resolution.context.patientId !== obligation.context.patientId)
     return { ok: false, error: 'CTX_PATIENT_MISMATCH' };
   if (resolution.context.threadId !== obligation.context.threadId)
     return { ok: false, error: 'CTX_THREAD_MISMATCH' };
+  if (resolution.context.consultId !== obligation.context.consultId)
+    return { ok: false, error: 'CTX_ASSESSMENT_MISMATCH' };
   if (resolution.decidedByRole !== 'physician' && resolution.decidedByRole !== 'app')
     return { ok: false, error: 'AUTH_ROLE' };
+  if (
+    resolution.decidedBy !== resolution.context.actorId ||
+    resolution.decidedByRole !== resolution.context.actorRole
+  )
+    return { ok: false, error: 'AUTH_ACTOR' };
 
   const recommendedStatus =
     assessment.recommendation === 'meets_inpatient' ? 'inpatient'
     : assessment.recommendation === 'meets_observation' ? 'observation'
     : null;
   const agrees = recommendedStatus !== null && resolution.decidedStatus === recommendedStatus;
-  if (!agrees && recommendedStatus !== null && !resolution.overrideReason?.trim())
+  if (!agrees && !resolution.overrideReason?.trim())
     return { ok: false, error: 'OVERRIDE_REASON_REQUIRED' };
 
   return {

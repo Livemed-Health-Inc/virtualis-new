@@ -67,7 +67,7 @@ export function StatusChip({ assessment, obligation, onResolve }: StatusChipProp
             <>
               {style.label}
               {assessment.confidence > 0 && (
-                <span className="opacity-70">{Math.round(assessment.confidence * 100)}%</span>
+                <span className="opacity-70">score {Math.round(assessment.confidence * 100)}%</span>
               )}
             </>
           )}

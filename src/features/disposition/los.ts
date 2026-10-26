@@ -91,14 +91,26 @@ export function estimateLOS(
   };
 }
 
-/** Count midnights elapsed between admission and now (local-time midnights). */
-export function elapsedMidnights(admittedAtIso: string, nowIso?: string): number {
+/** Calendar date (y, m, d) of an instant in an explicit IANA facility zone. */
+function facilityDay(d: Date, timeZone: string): number {
+  const parts = new Intl.DateTimeFormat('en-US', {
+    timeZone, year: 'numeric', month: 'numeric', day: 'numeric',
+  }).formatToParts(d);
+  const n = (t: string) => Number(parts.find((p) => p.type === t)?.value);
+  return Date.UTC(n('year'), n('month') - 1, n('day')) / 86_400_000;
+}
+
+/** Facility calendar midnights between admission and now. Never assumes the
+ *  browser zone; returns null for invalid dates/zone or now before admission. */
+export function elapsedMidnights(admittedAtIso: string, nowIso: string, timeZone: string): number | null {
   const admitted = new Date(admittedAtIso);
-  const now = nowIso ? new Date(nowIso) : new Date();
-  if (Number.isNaN(admitted.getTime()) || now <= admitted) return 0;
-  const a = new Date(admitted); a.setHours(0, 0, 0, 0);
-  const n = new Date(now); n.setHours(0, 0, 0, 0);
-  return Math.max(0, Math.round((n.getTime() - a.getTime()) / 86_400_000));
+  const now = new Date(nowIso);
+  if (Number.isNaN(admitted.getTime()) || Number.isNaN(now.getTime()) || now < admitted) return null;
+  try {
+    return facilityDay(now, timeZone) - facilityDay(admitted, timeZone);
+  } catch {
+    return null; // unsupported/invalid time zone
+  }
 }
 
 export interface VarianceOptions {
@@ -106,6 +118,8 @@ export interface VarianceOptions {
   approachWindow?: number;
   /** Physicians to tag (attending + consultant ids). */
   tagPhysicianIds: string[];
+  /** Explicit facility IANA time zone, e.g. 'America/Chicago'. */
+  timeZone: string;
 }
 
 /**
@@ -117,9 +131,10 @@ export function evaluateLOSVariance(
   admittedAtIso: string,
   opts: VarianceOptions,
   context: DispositionContextRef = expectation.context,
-  nowIso?: string,
-): LOSVarianceTag {
-  const elapsed = elapsedMidnights(admittedAtIso, nowIso);
+  nowIso: string = new Date().toISOString(),
+): LOSVarianceTag | null {
+  const elapsed = elapsedMidnights(admittedAtIso, nowIso, opts.timeZone);
+  if (elapsed === null) return null;
   const approach = opts.approachWindow ?? 1;
 
   let state: LOSVarianceState;
@@ -141,6 +156,6 @@ export function evaluateLOSVariance(
     elapsedMidnights: elapsed,
     tagPhysicianIds: state === 'on_track' ? [] : opts.tagPhysicianIds,
     message,
-    evaluatedAt: nowIso ?? new Date().toISOString(),
+    evaluatedAt: nowIso,
   };
 }

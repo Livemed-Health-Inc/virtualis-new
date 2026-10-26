@@ -72,7 +72,7 @@ export function StatusEvidencePanel({ assessment, obligation, onResolve }: Statu
           <div className="mt-2 flex items-center gap-2">
             <Progress value={assessment.confidence * 100} className="h-1.5" />
             <span className="text-[10px] tabular-nums text-muted-foreground">
-              {Math.round(assessment.confidence * 100)}%
+              {Math.round(assessment.confidence * 100)}% heuristic rule score · not validated accuracy
             </span>
           </div>
         )}
@@ -116,13 +116,15 @@ export function StatusEvidencePanel({ assessment, obligation, onResolve }: Statu
         </p>
       )}
 
-      {!resolved && recommendedStatus && !overrideMode && (
+      {!resolved && !overrideMode && (
         <div className="flex gap-2 pt-1">
-          <Button size="sm" className="flex-1" onClick={() => resolve(recommendedStatus)}>
-            <Check className="mr-1 h-3.5 w-3.5" /> Confirm {recommendedStatus}
-          </Button>
+          {recommendedStatus && (
+            <Button size="sm" className="flex-1" onClick={() => resolve(recommendedStatus)}>
+              <Check className="mr-1 h-3.5 w-3.5" /> Confirm {recommendedStatus}
+            </Button>
+          )}
           <Button size="sm" variant="outline" className="flex-1" onClick={() => setOverrideMode(true)}>
-            Override
+            {recommendedStatus ? 'Override' : 'Decide status'}
           </Button>
         </div>
       )}
@@ -161,8 +163,7 @@ export function StatusEvidencePanel({ assessment, obligation, onResolve }: Statu
       {resolved && obligation?.resolution && (
         <p className="rounded-lg bg-emerald-500/10 p-2 text-[11px] font-medium text-emerald-700 dark:text-emerald-400">
           Status {obligation.resolution.decidedStatus} ·{' '}
-          {obligation.state === 'confirmed' ? 'confirmed' : 'overridden'} — recorded to the audit
-          stream.
+          {obligation.state === 'confirmed' ? 'confirmed' : 'overridden'} — kept in memory only.
         </p>
       )}
 
@@ -170,6 +171,8 @@ export function StatusEvidencePanel({ assessment, obligation, onResolve }: Statu
         <p className="text-[11px] font-semibold text-destructive" role="alert">
           {error === 'OVERRIDE_REASON_REQUIRED' && 'An override reason is required.'}
           {error === 'AUTH_ROLE' && 'Only a physician or APP can set patient status.'}
+          {error === 'AUTH_ACTOR' && 'Decision identity does not match the bound clinician.'}
+          {error === 'CTX_ASSESSMENT_MISMATCH' && 'Assessment is stale or does not match this consult.'}
           {(error === 'CTX_PATIENT_MISMATCH' || error === 'CTX_THREAD_MISMATCH') &&
             'Context mismatch — this decision does not match the open patient/thread.'}
           {error === 'ALREADY_RESOLVED' && 'This status decision was already recorded.'}
