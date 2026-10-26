@@ -123,6 +123,7 @@ export default function Thread({
         background: T.bg,
       }}
     >
+      {noteOpen && (import.meta.env.DEV ? <Suspense fallback={<div role="status">Opening synthetic Virtualis Note…</div>}><OriginalNoteWorkspace onClose={() => setNoteOpen(false)} /></Suspense> : <NoteSheet t={t} onClose={() => setNoteOpen(false)} />)}
       {compactHeader ? (
         <div
           style={{
@@ -248,7 +249,6 @@ export default function Thread({
             >
               Note
             </button>
-            {noteOpen && (import.meta.env.DEV ? <Suspense fallback={<div role="status">Opening synthetic Virtualis Note…</div>}><OriginalNoteWorkspace onClose={() => setNoteOpen(false)} /></Suspense> : <NoteSheet t={t} onClose={() => setNoteOpen(false)} />)}
             <button
               onClick={onVideo}
               title="Video"
