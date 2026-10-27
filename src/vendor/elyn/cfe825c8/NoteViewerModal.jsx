@@ -75,7 +75,7 @@ export default function NoteViewerModal({ isOpen, onClose, note, onToast, onNote
                             else {
                                 setIsEditing(!isEditing);
                             }
-                        }, disabled: isSaving, className: cn("rounded-lg print:hidden h-8 sm:h-9 px-2 sm:px-3 text-xs sm:text-sm", isEditing &&
+                        }, "aria-label": isEditing && hasEdits ? "Keep in memory" : isEditing ? "Done" : "Edit", disabled: isSaving, className: cn("rounded-lg print:hidden h-8 sm:h-9 px-2 sm:px-3 text-xs sm:text-sm", isEditing &&
                             hasEdits &&
                             "bg-primary text-primary-foreground") }, isSaving ? (React.createElement("span", { className: "animate-spin text-xs" }, "\u23F3")) : isEditing && hasEdits ? (React.createElement(React.Fragment, null,
                         React.createElement(Save, { className: "w-3.5 h-3.5 sm:w-4 sm:h-4 sm:mr-1.5" }),

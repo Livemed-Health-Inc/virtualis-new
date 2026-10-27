@@ -4,7 +4,7 @@ import CommandCenterHeader from './CommandCenterHeader';
 import MobileTabs from './MobileTabs';
 export default function CommandCenter() {
     const s = useCommandCenter();
-    return (React.createElement("div", { className: "h-[calc(100dvh-var(--shell-bottom,0px))] bg-background overflow-hidden flex flex-col", style: { paddingTop: 'var(--safe-top, env(safe-area-inset-top, 0px))' } },
+    return (React.createElement("div", { className: "h-full bg-background overflow-hidden flex flex-col", style: { paddingTop: 'var(--safe-top, env(safe-area-inset-top, 0px))' } },
         React.createElement(CommandCenterHeader, { s: s }),
         React.createElement(MobileTabs, { activeTab: s.activeTab, onTabChange: s.setActiveTab }),
         React.createElement("h1", { className: "sr-only" }, "Clinical Command Center"),

@@ -25,7 +25,7 @@
       "source": "src/components/layout/CommandCenter.tsx",
       "vendored": "CommandCenter.jsx",
       "source_sha256": "d52a582bb2a4c0264f9a4ebd4c9f7daff235ae67530d7de16f76f9cfc0505a19",
-      "vendored_sha256": "90d95cfd225c5b14cf2e8c768fd68a0c3e27c2ed279550ac1575fc52c49ff44c"
+      "vendored_sha256": "4edfb96e67cb494158a62a0532c2399d7d45ad86a1b8f3c00e5d82495975f273"
     },
     {
       "source": "src/components/notes/noteSectionColors.ts",
@@ -43,7 +43,7 @@
       "source": "src/components/notes/NoteViewerModal.tsx",
       "vendored": "NoteViewerModal.jsx",
       "source_sha256": "531833245649aa86f9b3a67e2cecdf68f9ed8713dce541544e53ecda56a8ad06",
-      "vendored_sha256": "266c2484d1c11226cd59ea116ce0ea76e6a3dd6e9ad04b9a8e60fb33489938af"
+      "vendored_sha256": "29d60198da87c8e93060fba57aeff535471b69412245951caa502e65bf90efa2"
     },
     {
       "source": "src/index.css",
