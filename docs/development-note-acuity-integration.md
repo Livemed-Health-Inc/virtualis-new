@@ -10,6 +10,8 @@ Existing synthetic adapter and shadow boundary remain; no host patient/session/t
 
 The old vendored module is removed only after selected-source verification and checking no remaining imports. No new routes or packages, remote fonts, persistence, auth/config changes, database work, live AI or publication.
 
+Focused verification actually run: three adapter unit tests (including fail-closed RCM/chat/send and missing adapter), targeted adapter ESLint, and Playwright against an intercepted synthetic Thread harness only. Desktop 1280×1800 and mobile 390×844: Note entry mounts, section editing/Keep in memory, tab retention, explicit unavailable RCM/chat, disabled consequential actions, return preserving host message draft and computed button color, re-open discarding previous workspace draft, zero external requests/page errors. Screenshots: `/tmp/browser/elyn/workspace.png` and `mobile.png`; browser test `/tmp/browser/elyn/check_embed.py`. Automatic validation reports build OK. No live authenticated flow, broad tests, manual build/typecheck, database or model/disposition checks.
+
 ## Superseded original Note investigation (historical only)
 
 ### Implemented bounded source-reused workspace (2026-10-26)

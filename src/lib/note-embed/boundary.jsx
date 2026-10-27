@@ -14,7 +14,7 @@ function useAdapter() {
   return a;
 }
 export function Disabled() {
-  return <span className="text-xs text-muted-foreground">Synthetic facility</span>;
+  return <span className="hidden xl:inline text-xs text-muted-foreground">Synthetic facility</span>;
 }
 // No motion library, timers, global listeners or browser effects on mount.
 const visual = React.forwardRef(function Visual(
