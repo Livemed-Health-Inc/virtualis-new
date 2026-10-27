@@ -24,13 +24,24 @@ async function ask(history, signal) {
   return res.body.pipeThrough(new TextDecoderStream()).getReader();
 }
 
+/* Applies streamed chunks only while the owning panel is still live; cancels otherwise. */
+export async function readStream(reader, isLive, onText) {
+  for (;;) {
+    if (!isLive()) return void reader.cancel().catch(() => {});
+    const { done, value } = await reader.read();
+    if (done) return;
+    if (!isLive()) return void reader.cancel().catch(() => {});
+    onText(value);
+  }
+}
+
 const SUGGESTIONS = [
   "Sepsis bundle timing?",
   "Draft a cardiology consult",
   "How does acuity routing work?",
 ];
 
-export default function Alis({ compact }) {
+export default function Alis({ compact, transport = ask, status }) {
   const [msgs, setMsgs] = useState([
     {
       me: false,
@@ -45,6 +56,14 @@ export default function Alis({ compact }) {
   }, [msgs, busy]);
 
   const abort = useRef(null);
+  const live = useRef(true);
+  useEffect(() => {
+    live.current = true;
+    return () => {
+      live.current = false;
+      abort.current?.abort();
+    };
+  }, []);
   const send = async (preset) => {
     const text = (preset ?? draft).trim();
     if (!text || busy) return;
@@ -54,18 +73,17 @@ export default function Alis({ compact }) {
     setBusy(true);
     abort.current = new AbortController();
     try {
-      const reader = await ask(history, abort.current.signal);
+      const reader = await transport(history, abort.current.signal);
+      if (!live.current) return void reader.cancel?.();
       setMsgs((m) => [...m, { me: false, text: "" }]);
-      for (;;) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        setMsgs((m) => [...m.slice(0, -1), { me: false, text: m[m.length - 1].text + value }]);
-      }
+      await readStream(reader, () => live.current, (v) =>
+        setMsgs((m) => [...m.slice(0, -1), { me: false, text: m[m.length - 1].text + v }]),
+      );
     } catch (e) {
-      if (e.name !== "AbortError")
-        setMsgs((m) => [...m, { me: false, error: true, text: e.message }]);
+      if (live.current && e.name !== "AbortError")
+        setMsgs((m) => [...m, { me: false, error: true, text: e.message || "ALIS is unavailable right now." }]);
     } finally {
-      setBusy(false);
+      if (live.current) setBusy(false);
     }
   };
 
@@ -145,6 +163,11 @@ export default function Alis({ compact }) {
           <div style={{ fontSize: 13, color: T.sub, marginTop: 2 }}>
             Clinical AI assistant · Officially patented
           </div>
+        </div>
+      )}
+      {status && (
+        <div role="status" style={{ padding: "8px 16px", fontSize: 12, color: T.sub, borderBottom: "1px solid " + T.line }}>
+          {status}
         </div>
       )}
       <div
