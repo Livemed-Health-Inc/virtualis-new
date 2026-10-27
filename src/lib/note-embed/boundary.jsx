@@ -14,7 +14,7 @@ function useAdapter() {
   return a;
 }
 export function Disabled() {
-  return <span className="text-xs text-muted-foreground">Unavailable in development</span>;
+  return <span className="text-xs text-muted-foreground">Synthetic facility</span>;
 }
 // No motion library, timers, global listeners or browser effects on mount.
 const visual = React.forwardRef(function Visual(
@@ -39,6 +39,7 @@ export function Button({ children, ...props }) {
   const unavailable = blocked.test(text);
   return (
     <HostButton
+      variant="ghost"
       {...props}
       disabled={props.disabled || unavailable}
       title={unavailable ? "Unavailable in development" : props.title}
