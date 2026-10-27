@@ -28,7 +28,19 @@ describe("original Note development boundary", () => {
   });
   it("allows only memory editing and fails closed for consequential or unknown capabilities", () => {
     expect(capabilityAvailable("draft.edit")).toBe(true);
-    for (const name of ["sign", "save", "generate", "transcribe", "analytics", "sync", "unknown"])
+    expect(capabilityAvailable("workspace.navigate")).toBe(true);
+    for (const name of [
+      "sign",
+      "save",
+      "generate",
+      "transcribe",
+      "analytics",
+      "sync",
+      "rcm",
+      "chat.send",
+      "patient.edit",
+      "unknown",
+    ])
       expect(capabilityAvailable(name)).toBe(false);
   });
 });

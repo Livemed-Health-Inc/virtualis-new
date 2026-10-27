@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState } from "react";
 import { Button as HostButton } from "@/components/ui/button";
 import { assertAdapter } from "./adapter";
-import { parseNoteSections } from "@/vendor/virtualis-note/45c17ca5/utils";
+import NoteViewerModal from "@/vendor/elyn/cfe825c8/NoteViewerModal";
 
 const Context = createContext(null);
 export function NoteAdapterProvider({ adapter, children }) {
@@ -14,14 +14,7 @@ function useAdapter() {
   return a;
 }
 export function Disabled() {
-  return <span className="text-xs text-muted-foreground">Unavailable in development</span>;
-}
-export function AppLayout({ children, className }) {
-  return <main className={`mx-auto max-w-7xl ${className}`}>{children}</main>;
-}
-export function useNavigate() {
-  useAdapter();
-  return () => {};
+  return <span className="hidden xl:inline text-xs text-muted-foreground">Synthetic facility</span>;
 }
 // No motion library, timers, global listeners or browser effects on mount.
 const visual = React.forwardRef(function Visual(
@@ -35,14 +28,18 @@ export function AnimatePresence({ children }) {
   return <>{children}</>;
 }
 const blocked =
-  /generate|handoff|sign out|practice|profile|save$|update$|reviewed this note|analytics|radiology|copy|recording|📋/i;
+  /generate|handoff|sign|practice|profile|save|update|review$|analytics|radiology|copy|recording|dictation|new note|TXT|JSON|print|📋/i;
+function childText(children) {
+  return React.Children.toArray(children).map((c) =>
+    typeof c === "string" ? c : React.isValidElement(c) ? childText(c.props.children) : "",
+  ).join(" ");
+}
 export function Button({ children, ...props }) {
-  const text = React.Children.toArray(children)
-    .filter((c) => typeof c === "string")
-    .join(" ");
+  const text = childText(children);
   const unavailable = blocked.test(text);
   return (
     <HostButton
+      variant="ghost"
       {...props}
       disabled={props.disabled || unavailable}
       title={unavailable ? "Unavailable in development" : props.title}
@@ -52,120 +49,36 @@ export function Button({ children, ...props }) {
     </HostButton>
   );
 }
-export function useVirtualisNoteState() {
+export function useCommandCenter() {
   const a = useAdapter();
-  const [patient, setPatient] = useState({ ...a.patient });
-  const [editableTranscript, setEditableTranscript] = useState(
-    "Synthetic transcript. Type to rehearse draft editing; no service is connected.",
-  );
+  const [activeTab, setActiveTab] = useState("notes");
   const [generatedNote, setGeneratedNote] = useState(a.draft);
-  const [editedNoteSections, setEditedNoteSections] = useState(() =>
-    Object.fromEntries(parseNoteSections(a.draft).map((s) => [s.title, s.content.trim()])),
-  );
-  const [isEditingNote, setIsEditingNote] = useState(false);
-  const [encounterContext, setEncounterContext] = useState({
-    encounterType: "follow_up",
-    isTelehealth: false,
-    placeOfService: "21",
-    referringProvider: "",
-    referringNPI: "",
-  });
-  const [noteType, setNoteType] = useState("Progress");
-  const [activeTab, setActiveTab] = useState("document");
-  const [expandedSection, setExpandedSection] = useState("patient");
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [showPatientModal, setShowPatientModal] = useState(false);
-  const [appendMode, setAppendMode] = useState(true);
   const [toast, showToast] = useState("");
-  const unavailable = () =>
-    showToast("Unavailable in development. Nothing was saved, signed or sent.");
   return {
-    patient,
-    setPatient,
-    editableTranscript,
-    setEditableTranscript,
+    patient: a.patient,
+    patients: [{ ...a.patient, status: "not_seen" }],
     generatedNote,
     setGeneratedNote,
-    editedNoteSections,
-    setEditedNoteSections,
-    isEditingNote,
-    setIsEditingNote,
-    encounterContext,
-    setEncounterContext,
-    noteType,
-    setNoteType,
     activeTab,
     setActiveTab,
-    expandedSection,
-    toggleSection: (id) => setExpandedSection(id === expandedSection ? null : id),
-    mobileMenuOpen,
-    setMobileMenuOpen,
-    showPatientModal,
-    setShowPatientModal,
-    appendMode,
-    setAppendMode,
     toast,
     showToast,
-    documentMode: "clinical",
-    setDocumentMode: unavailable,
-    savedPatients: [],
-    showPatientList: false,
-    setShowPatientList: unavailable,
-    clearPatient: () => setPatient({ ...a.patient }),
-    selectPatient: unavailable,
-    speech: {
-      isSupported: false,
-      isRecording: false,
-      error: null,
-      interim: "",
-      clear: () => {},
-      start: unavailable,
-      stop: unavailable,
-    },
-    isNoteReviewed: false,
-    reviewedSections: {},
-    setReviewedSections: unavailable,
-    currentNoteId: null,
-    isGenerating: false,
-    codes: null,
-    pendingBilling: null,
-    showBillingConfirmation: false,
-    setShowBillingConfirmation: unavailable,
-    completenessPrompt: null,
-    showHandoff: false,
-    setShowHandoff: unavailable,
-    signOut: unavailable,
-    forceSync: unavailable,
-    isPatientClaimsReady: false,
-    todayStats: { notes: 0, rvu: 0, consults: 0, avgTime: "—" },
+    statsCards: [{ label: "Synthetic drafts", value: 1 }, { label: "Signed", value: 0 }],
+    handleRecordPress: () => showToast("Dictation and generation unavailable in development."),
   };
 }
-export function useNoteGeneration(s) {
-  const unavailable = () =>
-    s.showToast("Unavailable in development. Nothing was saved, signed or sent.");
-  return {
-    generateNote: unavailable,
-    generateHandoff: unavailable,
-    savePatient: unavailable,
-    confirmBilling: unavailable,
-    discardBilling: unavailable,
-    confirmReview: unavailable,
-    startEditingNote: () => {
-      s.setEditedNoteSections(
-        Object.fromEntries(
-          parseNoteSections(s.generatedNote).map((v) => [v.title, v.content.trim()]),
-        ),
-      );
-      s.setIsEditingNote(true);
-    },
-    saveNoteEdits: () => {
-      s.setGeneratedNote(
-        Object.entries(s.editedNoteSections)
-          .map(([k, v]) => `## ${k}\n${v}`)
-          .join("\n"),
-      );
-      s.setIsEditingNote(false);
-      s.showToast("Draft retained in memory only — not saved or signed.");
-    },
-  };
+export function SyntheticNote({ s }) {
+  return <NoteViewerModal isOpen note={{ generatedNote: s.generatedNote, noteType: "Synthetic Progress", patientName: s.patient.name, dateGenerated: "2026-10-27 · synthetic fixture" }} onClose={() => s.setActiveTab("patients")} onToast={s.showToast} onNoteUpdated={s.setGeneratedNote} />;
+}
+export function SyntheticPatient({ s }) {
+  return <div className="p-6 space-y-3"><h2 className="text-xl font-semibold">{s.patient.name}</h2><p className="text-muted-foreground">{s.patient.diagnosis}</p><Button onClick={() => s.setActiveTab("notes")}>Open synthetic draft</Button></div>;
+}
+export function UnavailableSection({ title }) {
+  return <section className="p-6"><h2 className="text-xl font-semibold">{title}</h2><p className="mt-2 text-muted-foreground">Unavailable in synthetic development. Nothing is generated, saved, signed or sent.</p></section>;
+}
+export function MemoryText({ content, className }) {
+  return <div className={`${className} whitespace-pre-wrap`}>{content}</div>;
+}
+export function MemoryToast({ message }) {
+  return <div role="status" className="absolute bottom-3 inset-x-3 border border-border bg-card p-3 text-sm">{message}</div>;
 }

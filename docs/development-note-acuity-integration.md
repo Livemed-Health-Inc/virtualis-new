@@ -1,10 +1,22 @@
 # Nue development integration — evidence and boundaries
 
-## Exact Virtualis Note
+## Selected ELYN Note — source preference corrected (2026-10-27)
+
+The user explicitly selected **Note with RCM and chat — newer ELYN interface**, project `d97f7dd0-c38d-41dd-ac88-21c843193184`, commit `cfe825c82d2fc43613538f93b5d027013a5f7c69`. This supersedes the old original-source preference below; it must not be reverted. One read-only snapshot was used; source app untouched.
+
+The existing development thread **Note** entry lazy-loads `src/lib/note-embed/SelectedNoteWorkspace.jsx`. It reuses the selected **CommandCenter, CommandCenterHeader, CommandCenterPillNav, MobileTabs, NoteViewerModal, noteSectionColors and parser**, plus actual bundled wordmark and selected local palette/pill CSS under `src/vendor/elyn/cfe825c8`. Provenance records source and transformed hashes. Header/tab composition and actual Note section editor are retained, not rebuilt as a look-alike.
+
+Existing synthetic adapter and shadow boundary remain; no host patient/session/thread context is passed. Draft editing/Keep in memory and tab navigation work only in React memory. RCM/Billing, prior authorization, chat transport, generation, dictation, database saves, signing, account actions and exports are explicitly unavailable. Source RecordingSheet is not copied: its encounter sessions, autosave, transcription, AI, claim writes and signing are inseparable service behavior outside this bounded pass. AppShell/source routing, source chat and billing engines are not copied; no duplicate Nue chat/database. Full RCM/chat application behavior is not claimed. Production NoteSheet, disposition and acuity are untouched.
+
+The old vendored module is removed only after selected-source verification and checking no remaining imports. No new routes or packages, remote fonts, persistence, auth/config changes, database work, live AI or publication.
+
+Focused verification actually run: three adapter unit tests (including fail-closed RCM/chat/send and missing adapter), targeted adapter ESLint, and Playwright against an intercepted synthetic Thread harness only. Desktop 1280×1800 and mobile 390×844: Note entry mounts, section editing/Keep in memory, tab retention, explicit unavailable RCM/chat, disabled consequential actions, return preserving host message draft and computed button color, re-open discarding previous workspace draft, zero external requests/page errors. Screenshots: `/tmp/browser/elyn/workspace.png` and `mobile.png`; browser test `/tmp/browser/elyn/check_embed.py`. Automatic validation reports build OK. No live authenticated flow, broad tests, manual build/typecheck, database or model/disposition checks.
+
+## Superseded original Note investigation (historical only)
 
 ### Implemented bounded source-reused workspace (2026-10-26)
 
-Nue's existing thread Note entry now lazy-loads `src/lib/note-embed/OriginalNoteWorkspace.jsx` in development only. Production continues using the unchanged `NoteSheet.jsx`. The workspace receives no thread props, patient data or session; its adapter is deterministic synthetic fixtures and React memory only. Closing discards the workspace draft and returns to the mounted thread. No iframe or framing changes.
+Previously Nue's thread Note entry loaded the original-source workspace; this implementation is superseded by the selected ELYN workspace above. Production continues using the unchanged `NoteSheet.jsx`. The workspace receives no thread props, patient data or session; its adapter is deterministic synthetic fixtures and React memory only. Closing discards the workspace draft and returns to the mounted thread. No iframe or framing changes.
 
 Pinned presentation: `src/vendor/virtualis-note/45c17ca5/VirtualisNote.jsx`, original Waveform/NoteSection/Modal/Toast, parser, encounter vocabulary and bundled original favicon. `provenance.json` records source project, commit, original SHA-256 hashes, vendored hashes and all transformations. Type erasure preserves the original presentation/subcomponents; imports are remapped to a small host boundary, direct billing writes removed, animation reduced to presentation, and synthetic/memory-only wording substituted. This is actual source reuse, not a reconstructed editor or full source app copy. No license declaration was verified; reuse is limited to the user's authorized workspace integration.
 
@@ -12,7 +24,7 @@ Supported: synthetic transcript and note section editing, memory-only retention/
 
 Focused evidence: three synthetic adapter tests; targeted TypeScript-file lint; isolated synthetic Thread browser check opens the reused source, edits and retains a draft only in memory, then closes without runtime errors or external requests. Desktop host message draft and Note-button computed color remain unchanged; mobile open/close also passes. Screenshots inspected at 1280×1800 and 390×844. Automatic validation reports build OK; no manual build/typecheck or broad tests. JSX files are ignored by existing lint configuration. No authenticated/live app flow, database tests/writes or inference. Source inspection finds no fetch, source client, browser storage, timers or clipboard side effects in vendored code; the one retained effect auto-resizes a textarea.
 
-Read-only original source: project `eb9d503b-3831-420a-8d8b-d7ea0092bbc2`, snapshot commit `45c17ca5`. Not the RCM remix. Source is accessible; a portable authenticated Note module is **not** exported.
+Historical read-only source: project `eb9d503b-3831-420a-8d8b-d7ea0092bbc2`, snapshot commit `45c17ca5`. No longer the selected source. Source was accessible; a portable authenticated Note module was **not** exported.
 
 `src/components/VirtualisNote.tsx` (2,103 lines) imports `useVirtualisNoteState`, `useNoteGeneration`, `AppLayout`, router navigation, sync, billing and completeness-review UI. `src/App.tsx` uses a different router and supplies AuthProvider, FacilityProvider and SyncProvider. State loads patients and clinical notes; generation performs AI and clinical/billing/analytics writes. Copying just the screen would not reproduce the exact application safely. Nue's existing `NoteSheet.jsx` remains unchanged: it is standalone SOAP, **not** full embedded Virtualis Note.
 

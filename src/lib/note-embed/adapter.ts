@@ -38,5 +38,5 @@ export function assertAdapter(
   }
 }
 export function capabilityAvailable(name: string) {
-  return ["draft.edit", "transcript.edit", "encounter.edit", "patient.edit"].includes(name);
+  return ["draft.edit", "workspace.navigate"].includes(name);
 }

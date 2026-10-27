@@ -1,0 +1,112 @@
+.note-root {--background:hsl(220 25% 98%);--foreground:hsl(222 20% 6%);--card:hsl(0 0% 100%);--card-foreground:hsl(222 20% 6%);--popover:hsl(0 0% 100%);--popover-foreground:hsl(222 20% 6%);--primary:hsl(224 100% 57%);--primary-foreground:hsl(0 0% 100%);--secondary:hsl(222 20% 6%);--secondary-foreground:hsl(0 0% 100%);--muted:hsl(220 20% 96%);--muted-foreground:hsl(222 12% 40%);--accent:hsl(224 100% 57%);--accent-foreground:hsl(0 0% 100%);--destructive:hsl(0 72% 51%);--destructive-foreground:hsl(0 0% 100%);--border:hsl(220 18% 92%);--input:hsl(220 18% 96%);--ring:hsl(224 100% 57%);--radius:1rem;--sidebar-background:hsl(0 0% 100%);--sidebar-foreground:hsl(222 20% 6%);--sidebar-primary:hsl(224 100% 57%);--sidebar-primary-foreground:hsl(0 0% 100%);--sidebar-accent:hsl(220 20% 96%);--sidebar-accent-foreground:hsl(222 20% 6%);--sidebar-border:hsl(220 18% 92%);--sidebar-ring:hsl(224 100% 57%);--vnote-deep:hsl(222 20% 6%);--vnote-navy:hsl(222 20% 12%);--vnote-teal:hsl(224 100% 57%);--vnote-teal-light:hsl(224 90% 70%);--vnote-gold:hsl(224 100% 57%);--vnote-gold-light:hsl(224 90% 70%);--success:hsl(152 69% 40%);--warning:hsl(38 92% 50%);--info:hsl(224 100% 57%);--acuity-critical:hsl(0 72% 51%);--acuity-high:hsl(38 92% 50%);--acuity-moderate:hsl(224 100% 57%);--acuity-low:hsl(152 69% 40%);--glass-bg:hsl(0 0% 100% / 0.75);--glass-border:hsl(220 18% 90%);--glass-highlight:hsl(0 0% 100% / 0.6);--surface:hsl(0 0% 100%);--surface-hover:hsl(220 20% 96%);--surface-active:hsl(220 20% 93%);--glow-primary:hsl(224 100% 57% / 0.15);--glow-secondary:hsl(222 20% 6% / 0.08);--glow-success:hsl(152 69% 45% / 0.1);--glow-warning:hsl(38 92% 50% / 0.15);--shadow-pill:0 10px 30px -12px hsl(222 20% 6% / 0.18), 0 2px 6px hsl(222 20% 6% / 0.06);--shadow-nav:0 20px 50px -20px hsl(222 20% 6% / 0.22), 0 4px 12px hsl(222 20% 6% / 0.06);--hairline:hsl(220 18% 92%); --shell-bottom:0px;}
+  .pill-nav {
+    background: hsl(0 0% 100% / 0.85);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border: 1px solid var(--hairline);
+    border-radius: 9999px;
+    box-shadow: var(--shadow-nav);
+  }
+
+  /* Black pill CTA (livemed "Request a Demo" button) */
+  .pill-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: var(--secondary);
+    color: var(--secondary-foreground);
+    border-radius: 9999px;
+    padding: 0.625rem 1.25rem;
+    font-weight: 600;
+    font-size: 0.875rem;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+    box-shadow: var(--shadow-pill);
+  }
+  .pill-cta:hover { transform: translateY(-1px); opacity: 0.94; }
+  .pill-cta > .pill-arrow {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.5rem; height: 1.5rem;
+    border-radius: 9999px;
+    background: hsl(0 0% 100% / 0.14);
+  }
+
+  /* Ghost pill (transparent, no background, still with arrow) */
+  .pill-ghost {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--foreground);
+    padding: 0.625rem 1rem;
+    font-weight: 600;
+    font-size: 0.875rem;
+    border-radius: 9999px;
+    transition: background 0.2s ease;
+  }
+  .pill-ghost:hover { background: var(--muted); }
+
+  /* Small-caps eyebrow with leading dot */
+  .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.375rem 0.875rem;
+    border-radius: 9999px;
+    border: 1px solid var(--hairline);
+    background: hsl(0 0% 100% / 0.7);
+    color: var(--foreground);
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+  .eyebrow::before {
+    content: "";
+    width: 6px; height: 6px;
+    border-radius: 9999px;
+    background: var(--primary);
+  }
+
+  /* Glass badge with two-line stacked label + icon slot */
+  .glass-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.625rem;
+    padding: 0.5rem 0.875rem 0.5rem 0.5rem;
+    border-radius: 9999px;
+    background: hsl(0 0% 100% / 0.85);
+    border: 1px solid var(--hairline);
+    box-shadow: var(--shadow-pill);
+  }
+  .glass-badge .glass-badge-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem; height: 2rem;
+    border-radius: 9999px;
+    background: color-mix(in srgb, var(--primary) calc(0.1 * 100%), transparent);
+    color: var(--primary);
+  }
+  .glass-badge .glass-badge-meta { line-height: 1.1; }
+  .glass-badge .glass-badge-title {
+    display: block;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted-foreground);
+  }
+  .glass-badge .glass-badge-sub {
+    display: block;
+    font-size: 0.8125rem;
+    font-weight: 700;
+    color: var(--foreground);
+  }
+
+
+.workspace-bar {position:sticky;top:0;z-index:70;padding:12px 20px;display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;background:var(--card);border-bottom:1px solid var(--border);}
+.note-root {height:100dvh;overflow:hidden;background:var(--background);color:var(--foreground);display:flex;flex-direction:column;}
+.note-content {flex:1;min-height:0;}
+* {letter-spacing:0 !important;}
+@media(max-width:699px){.pill-nav img {max-width:110px;} .pill-nav .text-xs {display:none;}}

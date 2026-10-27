@@ -2,6 +2,8 @@
 
 ## Bounded development integration (2026-10-26)
 
+- [x] Switch development Note embed to selected ELYN source cfe825c8; synthetic desktop/mobile edit/return and isolation verified; production, disposition and acuity preserved.
+
 - [x] Extract pinned original Note presentation with synthetic memory-only adapter; mount from development thread Note entry and run focused isolation tests.
 
 - [x] Inspect exact original Note source; no portable module exported. Required source/authenticated development contract documented in docs/development-note-acuity-integration.md.

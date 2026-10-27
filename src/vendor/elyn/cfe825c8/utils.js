@@ -1,7 +1,7 @@
 /**
  * Utility function to copy text to clipboard and show toast feedback.
  */
-export const copyToClipboard = async (_text, setToast) => { setToast("Clipboard export unavailable in development."); };
+export const copyToClipboard = async (_text, setToast) => { setToast('Clipboard export unavailable in development.'); };
 /**
  * Parse a generated clinical note into sections based on common headers.
  */

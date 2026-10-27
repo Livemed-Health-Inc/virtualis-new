@@ -1,0 +1,76 @@
+{
+  "project": "d97f7dd0-c38d-41dd-ac88-21c843193184",
+  "commit": "cfe825c82d2fc43613538f93b5d027013a5f7c69",
+  "license": "No license declaration verified; workspace-authorized internal reuse only.",
+  "entries": [
+    {
+      "source": "src/components/layout/CommandCenterPillNav.tsx",
+      "vendored": "CommandCenterPillNav.jsx",
+      "source_sha256": "d018ea3745825ad2b673da7764abd2a7e123a15b8c51662476b83cd76544394f",
+      "vendored_sha256": "8e67a8c3167a28f619218df847926d0180031b0eb6ace74d4c17f037387c5d2f"
+    },
+    {
+      "source": "src/components/layout/MobileTabs.tsx",
+      "vendored": "MobileTabs.jsx",
+      "source_sha256": "950401280f66b26b00e37323b32a043b8511a5b0fc0ed7435607d8368809b5e6",
+      "vendored_sha256": "a1d494fcfe3999b374e3fe379c9565672aae81123f6bf3fc65686767ef942d57"
+    },
+    {
+      "source": "src/components/layout/CommandCenterHeader.tsx",
+      "vendored": "CommandCenterHeader.jsx",
+      "source_sha256": "c3ed5dcc962f76102e577f0896483f3e5f0c5a6155e7f7b1171669556a55d9fe",
+      "vendored_sha256": "ea4a0dcef848aca42e47856d88b1403422ca481211bd8ea73a03d00d7f65a0e7"
+    },
+    {
+      "source": "src/components/layout/CommandCenter.tsx",
+      "vendored": "CommandCenter.jsx",
+      "source_sha256": "d52a582bb2a4c0264f9a4ebd4c9f7daff235ae67530d7de16f76f9cfc0505a19",
+      "vendored_sha256": "4edfb96e67cb494158a62a0532c2399d7d45ad86a1b8f3c00e5d82495975f273"
+    },
+    {
+      "source": "src/components/notes/noteSectionColors.ts",
+      "vendored": "noteSectionColors.js",
+      "source_sha256": "e63b38b56e04bd2ff569ef9326634f64476eda0f5125115f4605931aac22ad61",
+      "vendored_sha256": "2395ec4d332e290e5a22cb4ba80a44e454cffaa9119034090de1cac0195b373f"
+    },
+    {
+      "source": "src/components/virtualis-note/utils.ts",
+      "vendored": "utils.js",
+      "source_sha256": "2293ff4a9b4126353554311ee0e8a17f3c92d32e06b52361d7ea71367227a05e",
+      "vendored_sha256": "fa0b94e673bb7fe1c37578f492d7d1cb26d5d61ded429a68aa21f8181712ade7"
+    },
+    {
+      "source": "src/components/notes/NoteViewerModal.tsx",
+      "vendored": "NoteViewerModal.jsx",
+      "source_sha256": "531833245649aa86f9b3a67e2cecdf68f9ed8713dce541544e53ecda56a8ad06",
+      "vendored_sha256": "29d60198da87c8e93060fba57aeff535471b69412245951caa502e65bf90efa2"
+    },
+    {
+      "source": "src/index.css",
+      "vendored": "theme.css",
+      "source_sha256": "68367f6ecb2b352102aa0bb527cc4b0bfdf25359ed9df7c3df8185d3c5c6c9bf",
+      "vendored_sha256": "0172002ec3348dfa05a406cbed92bb33d7a413900f65eecf409c17249f375e67"
+    },
+    {
+      "source": "public/logo-wordmark.png",
+      "vendored": "logo-wordmark.png",
+      "source_sha256": "9b9a19a0c3ec85273fb1a32b953626d6b94cc60fd45c363c1fc2754d6f99430c",
+      "vendored_sha256": "9b9a19a0c3ec85273fb1a32b953626d6b94cc60fd45c363c1fc2754d6f99430c"
+    }
+  ],
+  "transformations": [
+    "Type erasure only for retained presentation JSX",
+    "CommandCenter retains header/tab composition; service tabs explicitly unavailable, synthetic NoteViewerModal substituted for service-backed NotesHistory",
+    "Header navigation uses memory tab state; facility/account/RCM services unavailable",
+    "NoteViewerModal retains header, section editing, footer and disabled action presentation; service hooks, billing inference, collaboration, writes, exports, clipboard, timers and PHI effects excluded",
+    "Save renamed Keep in memory; synthetic wording replaces AI/compliance claims",
+    "Only selected local tokens/pill CSS injected into shadow root; no remote fonts/global CSS",
+    "Host button and static motion boundary; real bundled wordmark reused"
+  ],
+  "not_reused": [
+    "AppShell routing/auth",
+    "RecordingSheet service-heavy capture/generation/autosave/signing",
+    "Source chat transport",
+    "RCM billing/prior-auth engines"
+  ]
+}
