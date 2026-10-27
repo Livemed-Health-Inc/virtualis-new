@@ -1,6 +1,7 @@
 import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import { useMediaQuery } from "./theme";
 import NoteSheet from "./NoteSheet";
+const Alis = lazy(() => import("./Alis"));
 const SelectedNoteWorkspace = lazy(() => import("@/lib/note-embed/SelectedNoteWorkspace"));
 import {
   T,
@@ -38,6 +39,8 @@ export default function Thread({
   const [extra, setExtra] = useState([]);
   const [sheet, setSheet] = useState(null);
   const [noteOpen, setNoteOpen] = useState(false);
+  const [alisOpen, setAlisOpen] = useState(false);
+  useEffect(() => setAlisOpen(false), [t.id]);
   const [ackd, setAckd] = useState(false);
   const endRef = useRef(null);
   const isMobile = useMediaQuery("(max-width: 639px)");
@@ -123,6 +126,24 @@ export default function Thread({
         background: T.bg,
       }}
     >
+      {alisOpen && import.meta.env.DEV && (
+        <div
+          role="dialog"
+          aria-label="ALIS assistant"
+          onKeyDown={(e) => e.key === "Escape" && setAlisOpen(false)}
+          style={{ position: "fixed", inset: "0 0 0 auto", width: "min(100vw, 440px)", zIndex: 60, background: T.bg, borderLeft: "1px solid " + T.line, boxShadow: "-12px 0 32px rgba(16,24,40,.14)", display: "flex", flexDirection: "column" }}
+        >
+          <div style={{ display: "flex", alignItems: "center", padding: "10px 14px", borderBottom: "1px solid " + T.line }}>
+            <b style={{ flex: 1, fontSize: 14, color: T.ink }}>ALIS · in chat (development)</b>
+            <button autoFocus onClick={() => setAlisOpen(false)} style={{ all: "unset", cursor: "pointer", fontSize: 12.5, fontWeight: 640, color: T.blueDeep, padding: "6px 8px" }}>
+              Return to thread
+            </button>
+          </div>
+          <Suspense fallback={<div role="status">Opening ALIS…</div>}>
+            <Alis key={t.id} compact status="No chart selected · read-only · this thread is not sent to ALIS and nothing is written to the chart." />
+          </Suspense>
+        </div>
+      )}
       {noteOpen && import.meta.env.DEV && <Suspense fallback={<div role="status">Opening synthetic ELYN Note…</div>}><SelectedNoteWorkspace onClose={() => setNoteOpen(false)} /></Suspense>}
       {compactHeader ? (
         <div
@@ -232,6 +253,16 @@ export default function Thread({
                 >
                   +{related.length}
                 </span>
+              </button>
+            )}
+            {import.meta.env.DEV && (
+              <button
+                onClick={() => setAlisOpen(true)}
+                aria-haspopup="dialog"
+                aria-expanded={alisOpen}
+                style={{ all: "unset", cursor: "pointer", fontSize: 12.5, fontWeight: 640, color: T.blueDeep, padding: "8px 10px", flexShrink: 0 }}
+              >
+                Open ALIS
               </button>
             )}
             <button
@@ -415,6 +446,16 @@ export default function Thread({
                 </span>
               </div>
             </div>
+            {import.meta.env.DEV && (
+              <button
+                onClick={() => setAlisOpen(true)}
+                aria-haspopup="dialog"
+                aria-expanded={alisOpen}
+                style={{ all: "unset", cursor: "pointer", fontSize: 12.5, fontWeight: 640, color: T.blueDeep, padding: "8px 10px", flexShrink: 0 }}
+              >
+                Open ALIS
+              </button>
+            )}
             <button
               onClick={() => setNoteOpen(true)}
               title="Virtualis Note"
