@@ -1,7 +1,7 @@
 import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import { useMediaQuery } from "./theme";
 import NoteSheet from "./NoteSheet";
-const OriginalNoteWorkspace = lazy(() => import("@/lib/note-embed/OriginalNoteWorkspace"));
+const SelectedNoteWorkspace = lazy(() => import("@/lib/note-embed/SelectedNoteWorkspace"));
 import {
   T,
   mono,
@@ -123,7 +123,7 @@ export default function Thread({
         background: T.bg,
       }}
     >
-      {noteOpen && import.meta.env.DEV && <Suspense fallback={<div role="status">Opening synthetic Virtualis Note…</div>}><OriginalNoteWorkspace onClose={() => setNoteOpen(false)} /></Suspense>}
+      {noteOpen && import.meta.env.DEV && <Suspense fallback={<div role="status">Opening synthetic ELYN Note…</div>}><SelectedNoteWorkspace onClose={() => setNoteOpen(false)} /></Suspense>}
       {compactHeader ? (
         <div
           style={{
